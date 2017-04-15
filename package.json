@@ -1,0 +1,19 @@
+{
+  "name": "purplebot",
+  "version": "1.0.0",
+  "description": "IRC Bot for PPD",
+  "main": "src/index.js",
+  "author": "Sumant Manne <sumant.manne@gmail.com> (https://github.com/dpyro)",
+  "license": "MIT",
+  "scripts": {
+    "start": "node src/index.js",
+    "lint": "./node_modules/eslint/bin/eslint.js src/"
+  },
+  "dependencies": {
+    "irc": "^0.5.2"
+  },
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "standard": "^10.0.1"
+  }
+}
