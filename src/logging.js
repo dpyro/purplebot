@@ -25,6 +25,23 @@ function writeln (stream, data) {
 }
 
 /**
+ * Adds an exception-catching wrapped listener to an event emitter
+ *
+ * @param {event.EventEmitter} emitter
+ * @param {string} event
+ * @param {function(): void} callback
+ */
+function addSafeListener (emitter, event, callback) {
+  emitter.addListener(event, (...args) => {
+    try {
+      callback.apply(emitter, args)
+    } catch (e) {
+      console.error(e)
+    }
+  })
+}
+
+/**
  * Attach logging listeners to a client.
  *
  * @param {irc.Client} client
@@ -43,36 +60,54 @@ function attachLogging (client, output) {
     stream = output
   }
 
-  client.addListener('invite', (channel, from, message) => {
+  addSafeListener(client, 'invite', (channel, from, message) => {
     writeln(stream, `INVITE ${from} → ${channel} ${fromMessage(message)}`)
   })
 
-  client.addListener('join', (channel, who) => {
+  addSafeListener(client, 'join', (channel, who) => {
     writeln(stream, `JOINED ${channel}: ${who}`)
   })
 
-  client.addListener('kick', (channel, who, by, reason) => {
+  addSafeListener(client, 'kick', (channel, who, by, reason) => {
     writeln(stream, `KICKED ${channel}: ${join(who, by, reason)}`)
   })
 
-  client.addListener('motd', (motd) => {
+  addSafeListener(client, 'motd', (motd) => {
     writeln(stream, `MOTD ${motd}`)
   })
 
-  client.addListener('names', (channel, names) => {
-    writeln(stream, `NAMES ${channel}: ${names}`)
+  addSafeListener(client, 'names', (channel, names) => {
+    const strs = []
+    for (let [name, mode] in names) {
+      strs.push(`${mode}${name}`)
+    }
+    const nameString = strs.join(' ')
+
+    writeln(stream, `NAMES ${channel}: ${nameString}`)
   })
 
-  client.addListener('notice', (nick, to, text, message) => {
+  addSafeListener(client, 'notice', (nick, to, text, message) => {
     writeln(stream, `NOTICE ${to}: ${text}`)
   })
 
-  client.addListener('part', (channel, who, reason) => {
+  addSafeListener(client, 'part', (channel, who, reason) => {
     writeln(stream, `PARTED ${channel}: ${join(who, reason)}`)
   })
 
-  client.addListener('pm', (nick, message) => {
+  addSafeListener(client, 'pm', (nick, message) => {
     writeln(stream, `PM ${nick}: ${fromMessage(message)}`)
+  })
+
+  addSafeListener(client, 'quit', (nick, reason, channels, message) => {
+    writeln(stream, `QUIT ${nick}: ${message.command}`)
+  })
+
+  addSafeListener(client, 'registered', (message) => {
+    writeln(stream, `REGISTERED: ${message.command}`)
+  })
+
+  addSafeListener(client, 'topic', (channel, topic, nick, message) => {
+    writeln(stream, `TOPIC ${channel}: (${nick}) ${topic}`)
   })
 }
 
