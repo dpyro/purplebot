@@ -103,7 +103,7 @@ function attachLogging (client, output) {
   })
 
   addSafeListener(client, 'registered', (message) => {
-    writeln(stream, `REGISTERED: ${message.command}`)
+    writeln(stream, 'REGISTERED')
   })
 
   addSafeListener(client, 'topic', (channel, topic, nick, message) => {

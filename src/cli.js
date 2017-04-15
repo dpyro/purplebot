@@ -1,5 +1,27 @@
 const readline = require('readline')
 
+const commands = new Map()
+commands.set('quit', () => {
+  process.exit(0)
+})
+commands.set('reconnect', () => {
+
+})
+
+function completer (line, callback) {
+  let results = []
+
+  if (line.length === 0) {
+    results = [...commands.keys()]
+  } else {
+    results = [...commands.keys()].filter((key) => {
+      return key.startsWith(line)
+    })
+  }
+
+  callback(null, [results, line])
+}
+
 /**
  * Create an active bound readline interface using `stdin` and `stdout`.
  *
@@ -9,7 +31,8 @@ const readline = require('readline')
 function createReadlineInterface (callback) {
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
+    completer: completer
   })
 
   // More events at: https://nodejs.org/api/readline.html#readline_class_interface

@@ -15,7 +15,7 @@ class PurpleBot {
       autoConnect: false,
       autoRejoin: true,
       floodProtection: true,
-      debug: true
+      debug: false
     }
     this.client = new irc.Client(
       this.server,
