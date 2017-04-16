@@ -3,6 +3,8 @@ const logging = require('./logging')
 
 const irc = require('irc')
 
+
+
 class PurpleBot {
   constructor (options) {
     const nick = options.nick || 'PurpleBot'
@@ -26,7 +28,9 @@ class PurpleBot {
 
     this.configureClient()
 
-    this.cli = cli(command)
+    const commands = this.configureCommands()
+
+    this.cli = cli(commands)
   }
 
   configureClient () {
@@ -43,6 +47,19 @@ class PurpleBot {
     this.client.addListener('names', (channel, nicks) => {
       this.nicks[channel] = nicks
     })
+  }
+
+  configureCommands () {
+    const commands = new Map()
+    commands.set('quit', () => {
+      process.exit(0)
+    })
+    commands.set('reconnect', () => {
+      this.client.disconnect('Reconnecting', () => {
+        this.client.connect(2)
+      })
+    })
+    return commands
   }
 
   enable () {

@@ -10,7 +10,8 @@
     "lint": "./node_modules/eslint/bin/eslint.js src/"
   },
   "dependencies": {
-    "irc": "^0.5.2"
+    "irc": "^0.5.2",
+    "lodash": "^4.17.4"
   },
   "devDependencies": {
     "eslint": "^3.19.0",

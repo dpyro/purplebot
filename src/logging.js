@@ -1,21 +1,21 @@
 const fs = require('fs')
+const _ = require('lodash')
+
+/**
+ * Join the provided arguments with a space
+ *
+ * @param {...string} args
+ * @returns {!string}
+ */
+function join (...args) {
+  return _.compact(args).join(' ')
+}
 
 /**
  * Return current timestamp
  *
- * @returns {string}
+ * @returns {!string}
  */
-
-function join (...args) {
-  return args
-    .filter((arg) => { return arg != null })
-    .join(' ')
-}
-
-function fromMessage (message) {
-  return message.args.join(' ')
-}
-
 function timestamp () {
   return new Date().toUTCString()
 }
@@ -27,12 +27,12 @@ function writeln (stream, data) {
 /**
  * Adds an exception-catching wrapped listener to an event emitter
  *
- * @param {event.EventEmitter} emitter
- * @param {string} event
- * @param {function(): void} callback
+ * @param {!event.EventEmitter} emitter
+ * @param {any} eventName
+ * @param {function(...any): void} callback
  */
-function addSafeListener (emitter, event, callback) {
-  emitter.addListener(event, (...args) => {
+function addSafeListener (emitter, eventName, callback) {
+  emitter.addListener(eventName, (...args) => {
     try {
       callback.apply(emitter, args)
     } catch (e) {
@@ -44,24 +44,19 @@ function addSafeListener (emitter, event, callback) {
 /**
  * Attach logging listeners to a client.
  *
- * @param {irc.Client} client
- * @param {(string|Buffer|stream.Writable)} output File path, buffer, or writeable stream
+ * @param {!irc.Client} client
+ * @param {!(string|Buffer|stream.Writable)} output File path, buffer, or writeable stream
  */
 function attachLogging (client, output) {
-  console.assert(client)
-  console.assert(output)
-
   let stream
   if (typeof output === 'string' || output instanceof Buffer) {
-    stream = fs.createWriteStream(output, {
-      flags: 'a'
-    })
+    stream = fs.createWriteStream(output, { flags: 'a' })
   } else {
     stream = output
   }
 
   addSafeListener(client, 'invite', (channel, from, message) => {
-    writeln(stream, `INVITE ${from} → ${channel} ${fromMessage(message)}`)
+    writeln(stream, `INVITE ${from} → ${channel}`)
   })
 
   addSafeListener(client, 'join', (channel, who) => {
@@ -95,11 +90,11 @@ function attachLogging (client, output) {
   })
 
   addSafeListener(client, 'pm', (nick, message) => {
-    writeln(stream, `PM ${nick}: ${fromMessage(message)}`)
+    writeln(stream, `PM ${nick}: ${message.args.join(' ')}`)
   })
 
   addSafeListener(client, 'quit', (nick, reason, channels, message) => {
-    writeln(stream, `QUIT ${nick}: ${message.command}`)
+    writeln(stream, `QUIT ${nick}: ${reason}`)
   })
 
   addSafeListener(client, 'registered', (message) => {
