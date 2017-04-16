@@ -1,9 +1,32 @@
+const irc = require('irc')
+
 const cli = require('./cli')
 const logging = require('./logging')
 
-const irc = require('irc')
+/**
+ * Builds a command callback map for a client.
+ *
+ * @param {irc.Client} client
+ * @returns {Map<string, function(): void>} command callback map
+ */
+function createCommands (client) {
+  const commands = new Map()
 
+  commands.set('connect', (...args) => {
+    client.connect(1)
+  })
 
+  commands.set('disconnect', (...args) => {
+    const reason = args.shift() || 'Disconnecting'
+    client.disconnect(reason)
+  })
+
+  commands.set('quit', (...args) => {
+    process.exit(0)
+  })
+
+  return commands
+}
 
 class PurpleBot {
   constructor (options) {
@@ -28,7 +51,7 @@ class PurpleBot {
 
     this.configureClient()
 
-    const commands = this.configureCommands()
+    const commands = createCommands(this.client)
 
     this.cli = cli(commands)
   }
@@ -49,19 +72,6 @@ class PurpleBot {
     })
   }
 
-  configureCommands () {
-    const commands = new Map()
-    commands.set('quit', () => {
-      process.exit(0)
-    })
-    commands.set('reconnect', () => {
-      this.client.disconnect('Reconnecting', () => {
-        this.client.connect(2)
-      })
-    })
-    return commands
-  }
-
   enable () {
     this.client.connect()
   }
@@ -69,10 +79,6 @@ class PurpleBot {
   disable () {
     this.client.disconnect()
   }
-}
-
-function command (line) {
-  console.log(`got ${line}`)
 }
 
 const options = {

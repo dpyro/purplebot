@@ -24,12 +24,14 @@ function completer (commands, line, callback) {
  * Create an active bound readline interface using `stdin` and `stdout`.
  *
  * @param {!Map<string, function(...string): void>} commands mapping of command names to callbacks
+ * @param {stream.Readable} input
+ * @param {stream.Writable} output
  * @returns {readline.ReadLine} the active configured interface
  */
-function createReadlineInterface (commands) {
+function createReadlineInterface (commands, input = process.stdin, output = process.stdout) {
   const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
+    input: input,
+    output: output,
     completer: (line, callback) => {
       completer(commands, line, callback)
     }
@@ -37,9 +39,13 @@ function createReadlineInterface (commands) {
 
   // More events at: https://nodejs.org/api/readline.html#readline_class_interface
   rl.on('line', (line) => {
-    const callback = commands.get(line)
-    if (callback != null) {
-      callback()
+    const params = line.split(' ')
+    const command = params.shift()
+    if (command != null) {
+      const callback = commands.get(command)
+      if (callback != null) {
+        callback(params)
+      }
     }
 
     rl.prompt()
