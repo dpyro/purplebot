@@ -36,7 +36,7 @@ class PurpleBot {
       userName: nick,
       realName: nick,
       channels: options.channels || [],
-      showErrors: true,
+      showErrors: false,
       autoConnect: false,
       autoRejoin: true,
       floodProtection: true,

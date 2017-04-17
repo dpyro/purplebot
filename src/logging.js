@@ -2,16 +2,6 @@ const fs = require('fs')
 const _ = require('lodash')
 
 /**
- * Join the provided arguments with a space
- *
- * @param {...string} args
- * @returns {!string}
- */
-function join (...args) {
-  return _.compact(args).join(' ')
-}
-
-/**
  * Return current timestamp
  *
  * @returns {!string}
@@ -28,6 +18,18 @@ function timestamp () {
 function getLoggers () {
   const loggers = new Map()
 
+  loggers.set('action', (from, to, text, message) => {
+    return `ACTION ${from} → ${to}: ${text}`
+  })
+  loggers.set('ctcp-notice', (from, to, text, message) => {
+    return `CTCP NOTICE ${from} → ${to}: ${text}`
+  })
+  loggers.set('ctcp-privmsg', (from, to, text, message) => {
+    return `CTCP PRIVMSG ${from} → ${to}: ${text}`
+  })
+  loggers.set('ctcp-version', (from, to, message) => {
+    return `CTCP VERSION ${from} → ${to}`
+  })
   loggers.set('invite', (channel, from, message) => {
     return `INVITE ${from} → ${channel}`
   })
@@ -39,6 +41,12 @@ function getLoggers () {
   })
   loggers.set('kill', (nick, reason, channels, message) => {
     return `KILL ${nick} → ${channels.join(' ')}: ${reason}`
+  })
+  loggers.set('+mode', (channel, by, mode, argument, message) => {
+    return _.filter([`MODE ${by} → +${mode} ${channel}`, argument]).join(' ')
+  })
+  loggers.set('-mode', (channel, by, mode, argument, message) => {
+    return _.filter([`MODE ${by} → -${mode} ${channel}`, argument]).join(' ')
   })
   loggers.set('motd', (motd) => {
     return `MOTD ${motd}`
@@ -58,8 +66,8 @@ function getLoggers () {
   loggers.set('part', (channel, who, reason) => {
     return `PART ${channel} → ${who}: ${reason}`
   })
-  loggers.set('pm', (nick, message) => {
-    return `PM ${nick}: ${message.args.join(' ')}`
+  loggers.set('pm', (nick, text, message) => {
+    return `PM ${nick}: ${text}`
   })
   loggers.set('quit', (nick, reason, channels, message) => {
     return `QUIT ${nick}: ${reason}`

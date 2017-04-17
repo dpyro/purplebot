@@ -25,19 +25,22 @@ function eventTests () {
 
   const map = new Map()
 
+  map.set('action', [nick, selfNick, text])
+  map.set('ctcp-notice', [nick, selfNick, text])
+  map.set('ctcp-privmsg', [nick, selfNick, text])
+  map.set('ctcp-version', [nick, selfNick])
   map.set('invite', [channel, nick])
   map.set('join', [channel, nick])
   map.set('kick', [channel, nick, selfNick, text])
   map.set('kill', [nick, text, [channel]])
   map.set('msg', [nick, channel, text])
+  map.set('+mode', [channel, nick, 'k', text])
+  map.set('-mode', [channel, nick, 'k', text])
 
-  const names = {
-    'Q': '@',
-    nick: ''
-  }
+  const names = { 'Q': '@', nick: '' }
   map.set('names', [channel, names])
   map.set('notice', [nick, selfNick, text])
-  // map.set('pm', [nick])
+  map.set('pm', [nick, text])
   map.set('quit', [nick, text])
   map.set('part', [channel, nick, text])
   map.set('registered', null)
