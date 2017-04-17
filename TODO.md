@@ -17,3 +17,5 @@
   - remove
   - search
   - random
+- web
+  - url snarfer
