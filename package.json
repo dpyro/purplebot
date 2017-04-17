@@ -6,6 +6,7 @@
   "author": "Sumant Manne <sumant.manne@gmail.com> (https://github.com/dpyro)",
   "license": "MIT",
   "scripts": {
+    "clean": "rm -r *.log*",
     "start": "node src/index.js",
     "test": "./node_modules/mocha/bin/mocha",
     "lint": "./node_modules/eslint/bin/eslint.js **/*.js"
