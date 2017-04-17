@@ -31,14 +31,20 @@ function getLoggers () {
   loggers.set('invite', (channel, from, message) => {
     return `INVITE ${from} → ${channel}`
   })
-  loggers.set('join', (channel, who) => {
-    return `JOIN ${channel}: ${who}`
+  loggers.set('join', (channel, who, message) => {
+    return `JOIN ${who} → ${channel}`
   })
   loggers.set('kick', (channel, who, by, reason) => {
-    return `KICK ${channel}: ${join(who, by, reason)}`
+    return `KICK ${by} → ${channel}: ${who} ${reason}`
+  })
+  loggers.set('kill', (nick, reason, channels, message) => {
+    return `KILL ${nick} → ${channels.join(' ')}: ${reason}`
   })
   loggers.set('motd', (motd) => {
     return `MOTD ${motd}`
+  })
+  loggers.set('msg', (nick, to, text, message) => {
+    return `MSG ${nick} → ${to}: ${text}`
   })
   loggers.set('names', (channel, names) => {
     const strs = []
@@ -49,10 +55,10 @@ function getLoggers () {
     return `NAMES ${channel}: ${nameString}`
   })
   loggers.set('notice', (nick, to, text, message) => {
-    return `NOTICE ${to}: ${text}`
+    return `NOTICE ${nick} → ${to}: ${text}`
   })
   loggers.set('part', (channel, who, reason) => {
-    return `PART ${channel}: ${join(who, reason)}`
+    return `PART ${channel} → ${who}: ${reason}`
   })
   loggers.set('pm', (nick, message) => {
     return `PM ${nick}: ${message.args.join(' ')}`
@@ -63,8 +69,11 @@ function getLoggers () {
   loggers.set('registered', (message) => {
     return `REGISTERED`
   })
+  loggers.set('selfMessage', (to, text) => {
+    return `MSG ${to}: ${text}`
+  })
   loggers.set('topic', (channel, topic, nick, message) => {
-    return `TOPIC ${channel}: (${nick}) ${topic}`
+    return `TOPIC ${nick} → ${channel}: ${topic}`
   })
 
   return loggers

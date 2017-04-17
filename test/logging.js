@@ -14,17 +14,27 @@ function setupLogging () {
 }
 
 /**
- * @returns {Map<string, any>}
+ * @returns {Map<string, Array<string>>}
  */
 function eventTests () {
   const channel = '#test'
   const nick = 'SomeNick'
+  const selfNick = 'selfNick'
+  const text = 'This is a message'
 
   const map = new Map()
 
   map.set('invite', [channel, nick])
+  map.set('join', [channel, nick])
+  map.set('kick', [channel, nick, selfNick, text])
+  map.set('kill', [nick, text, [channel]])
+  map.set('msg', [nick, channel, text])
+  map.set('notice', [nick, selfNick, text])
   // map.set('pm', [nick])
+  map.set('quit', [nick, text])
+  map.set('part', [channel, nick, text])
   map.set('registered', null)
+  map.set('selfMessage', [nick, text])
   map.set('topic', [channel, 'the new topic', nick])
 
   return map
@@ -38,7 +48,7 @@ describe('logging', function () {
   })
 
   eventTests().forEach(function (args, eventName) {
-    it(`outputs important data on ${eventName}`, function () {
+    it(`outputs data on ${eventName}`, function () {
       const [emitter, output] = setupLogging()
 
       expect(output.size()).to.equal(0)
@@ -49,8 +59,6 @@ describe('logging', function () {
       expect(output.size()).to.above(0)
 
       const line = output.getContentsAsString()
-
-      expect(line.toLowerCase()).to.include(eventName.toLowerCase())
 
       for (const arg of safeArgs) {
         expect(line).to.include(arg)
