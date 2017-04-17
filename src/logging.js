@@ -20,8 +20,54 @@ function timestamp () {
   return new Date().toUTCString()
 }
 
-function writeln (stream, data) {
-  stream.write(`[${timestamp()}] ${data}\n`)
+/**
+ * Builds and returns logger functions
+ *
+ * @returns {Map<string, function(...args): string>} map of logger functions
+ */
+function getLoggers () {
+  const loggers = new Map()
+
+  loggers.set('invite', (channel, from, message) => {
+    return `INVITE ${from} → ${channel}`
+  })
+  loggers.set('join', (channel, who) => {
+    return `JOIN ${channel}: ${who}`
+  })
+  loggers.set('kick', (channel, who, by, reason) => {
+    return `KICK ${channel}: ${join(who, by, reason)}`
+  })
+  loggers.set('motd', (motd) => {
+    return `MOTD ${motd}`
+  })
+  loggers.set('names', (channel, names) => {
+    const strs = []
+    for (let [name, mode] in names) {
+      strs.push(`${mode}${name}`)
+    }
+    const nameString = strs.join(' ')
+    return `NAMES ${channel}: ${nameString}`
+  })
+  loggers.set('notice', (nick, to, text, message) => {
+    return `NOTICE ${to}: ${text}`
+  })
+  loggers.set('part', (channel, who, reason) => {
+    return `PART ${channel}: ${join(who, reason)}`
+  })
+  loggers.set('pm', (nick, message) => {
+    return `PM ${nick}: ${message.args.join(' ')}`
+  })
+  loggers.set('quit', (nick, reason, channels, message) => {
+    return `QUIT ${nick}: ${reason}`
+  })
+  loggers.set('registered', (message) => {
+    return `REGISTERED`
+  })
+  loggers.set('topic', (channel, topic, nick, message) => {
+    return `TOPIC ${channel}: (${nick}) ${topic}`
+  })
+
+  return loggers
 }
 
 /**
@@ -44,10 +90,10 @@ function addSafeListener (emitter, eventName, callback) {
 /**
  * Attach logging listeners to a client.
  *
- * @param {!irc.Client} client
- * @param {!(string|Buffer|stream.Writable)} output File path, buffer, or writeable stream
+ * @param {!EventEmitter} emitter the client
+ * @param {!(string|Buffer|stream.Writable)} output file path, buffer, or writeable stream
  */
-function attachLogging (client, output) {
+function attachLogging (emitter, output) {
   let stream
   if (typeof output === 'string' || output instanceof Buffer) {
     stream = fs.createWriteStream(output, { flags: 'a' })
@@ -55,55 +101,14 @@ function attachLogging (client, output) {
     stream = output
   }
 
-  addSafeListener(client, 'invite', (channel, from, message) => {
-    writeln(stream, `INVITE ${from} → ${channel}`)
-  })
-
-  addSafeListener(client, 'join', (channel, who) => {
-    writeln(stream, `JOINED ${channel}: ${who}`)
-  })
-
-  addSafeListener(client, 'kick', (channel, who, by, reason) => {
-    writeln(stream, `KICKED ${channel}: ${join(who, by, reason)}`)
-  })
-
-  addSafeListener(client, 'motd', (motd) => {
-    writeln(stream, `MOTD ${motd}`)
-  })
-
-  addSafeListener(client, 'names', (channel, names) => {
-    const strs = []
-    for (let [name, mode] in names) {
-      strs.push(`${mode}${name}`)
-    }
-    const nameString = strs.join(' ')
-
-    writeln(stream, `NAMES ${channel}: ${nameString}`)
-  })
-
-  addSafeListener(client, 'notice', (nick, to, text, message) => {
-    writeln(stream, `NOTICE ${to}: ${text}`)
-  })
-
-  addSafeListener(client, 'part', (channel, who, reason) => {
-    writeln(stream, `PARTED ${channel}: ${join(who, reason)}`)
-  })
-
-  addSafeListener(client, 'pm', (nick, message) => {
-    writeln(stream, `PM ${nick}: ${message.args.join(' ')}`)
-  })
-
-  addSafeListener(client, 'quit', (nick, reason, channels, message) => {
-    writeln(stream, `QUIT ${nick}: ${reason}`)
-  })
-
-  addSafeListener(client, 'registered', (message) => {
-    writeln(stream, 'REGISTERED')
-  })
-
-  addSafeListener(client, 'topic', (channel, topic, nick, message) => {
-    writeln(stream, `TOPIC ${channel}: (${nick}) ${topic}`)
-  })
+  const loggers = getLoggers()
+  for (let [eventName, callback] of loggers) {
+    addSafeListener(emitter, eventName, (...args) => {
+      const data = callback.apply(null, args)
+      const line = `[${timestamp()}] ${data}\n`
+      stream.write(line)
+    })
+  }
 }
 
 module.exports = attachLogging
