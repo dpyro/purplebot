@@ -1,6 +1,7 @@
 const EventEmitter = require('events')
 const expect = require('chai').expect
 const streamBuffers = require('stream-buffers')
+const _ = require('lodash')
 
 const logging = require('../src/logging')
 
@@ -37,6 +38,18 @@ function eventTests () {
   map.set('selfMessage', [nick, text])
   map.set('topic', [channel, 'the new topic', nick])
 
+  const info = {
+    'nick': nick,
+    'user': 'username',
+    'host': 'hostname',
+    'realname': 'Mr. No-one',
+    'channels': [channel, '@#test2'],
+    'server': 'irc.example.com',
+    'serverinfo': 'An example IRC server',
+    'operator': 'is an IRC Operator'
+  }
+  map.set('whois', [info])
+
   return map
 }
 
@@ -60,9 +73,11 @@ describe('logging', function () {
 
       const line = output.getContentsAsString()
 
-      for (const arg of safeArgs) {
-        expect(line).to.include(arg)
-      }
+      _.flatMapDeep(safeArgs, (arg) => {
+        return (typeof arg !== 'string') ? _.values(arg) : arg
+      }).forEach((arg) => {
+        expect(line).to.have.string(arg)
+      })
     })
   }, this)
 })

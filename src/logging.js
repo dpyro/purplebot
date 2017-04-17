@@ -44,7 +44,7 @@ function getLoggers () {
     return `MOTD ${motd}`
   })
   loggers.set('msg', (nick, to, text, message) => {
-    return `MSG ${nick} → ${to}: ${text}`
+    return `${nick} → ${to}: ${text}`
   })
   loggers.set('names', (channel, names) => {
     const strs = []
@@ -74,6 +74,18 @@ function getLoggers () {
   })
   loggers.set('topic', (channel, topic, nick, message) => {
     return `TOPIC ${nick} → ${channel}: ${topic}`
+  })
+  loggers.set('whois', (info) => {
+    return [
+      `WHOIS ${info.nick}`,
+      `\tuser: ${info.user}`,
+      `\thost: ${info.host}`,
+      `\treal: ${info.realname}`,
+      `\tchan: ${info.channels.join(' ')}`,
+      `\tserv: ${info.server}`,
+      `\tinfo: ${info.serverinfo}`,
+      `\toper: ${info.operator}`
+    ].join('\n')
   })
 
   return loggers
