@@ -1,5 +1,7 @@
 # Todo
 
+- autologin
+- logging
 - karma
   - .karma
   - .karma set
@@ -15,4 +17,3 @@
   - remove
   - search
   - random
-- logging
