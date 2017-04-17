@@ -47,11 +47,9 @@ function getLoggers () {
     return `${nick} → ${to}: ${text}`
   })
   loggers.set('names', (channel, names) => {
-    const strs = []
-    for (let [name, mode] in names) {
-      strs.push(`${mode}${name}`)
-    }
-    const nameString = strs.join(' ')
+    const nameString = _.toPairs(names).map(([name, mode]) => {
+      return `${mode}${name}`
+    }).join(' ')
     return `NAMES ${channel}: ${nameString}`
   })
   loggers.set('notice', (nick, to, text, message) => {
@@ -76,16 +74,14 @@ function getLoggers () {
     return `TOPIC ${nick} → ${channel}: ${topic}`
   })
   loggers.set('whois', (info) => {
-    return [
-      `WHOIS ${info.nick}`,
-      `\tuser: ${info.user}`,
-      `\thost: ${info.host}`,
-      `\treal: ${info.realname}`,
-      `\tchan: ${info.channels.join(' ')}`,
-      `\tserv: ${info.server}`,
-      `\tinfo: ${info.serverinfo}`,
-      `\toper: ${info.operator}`
-    ].join('\n')
+    const output = _.toPairs(info).map(([key, value]) => {
+      if (_.isArray(value)) {
+        value = value.join(' ')
+      }
+      return `\t${key}: ${value}`
+    }).join('\n')
+
+    return `WHOIS\n${output}`
   })
 
   return loggers

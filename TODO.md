@@ -10,3 +10,9 @@
   - .info
   - .forget
   - thing?
+- quotes
+  - add
+  - remove
+  - search
+  - random
+- logging

@@ -30,6 +30,12 @@ function eventTests () {
   map.set('kick', [channel, nick, selfNick, text])
   map.set('kill', [nick, text, [channel]])
   map.set('msg', [nick, channel, text])
+
+  const names = {
+    'Q': '@',
+    nick: ''
+  }
+  map.set('names', [channel, names])
   map.set('notice', [nick, selfNick, text])
   // map.set('pm', [nick])
   map.set('quit', [nick, text])
