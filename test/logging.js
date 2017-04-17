@@ -23,7 +23,7 @@ function eventTests () {
   const map = new Map()
 
   map.set('invite', [channel, nick])
-  //map.set('pm', [nick])
+  // map.set('pm', [nick])
   map.set('registered', null)
   map.set('topic', [channel, 'the new topic', nick])
 

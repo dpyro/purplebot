@@ -8,7 +8,7 @@
   "scripts": {
     "start": "node src/index.js",
     "test": "./node_modules/mocha/bin/mocha",
-    "lint": "./node_modules/eslint/bin/eslint.js src/"
+    "lint": "./node_modules/eslint/bin/eslint.js **/*.js"
   },
   "dependencies": {
     "irc": "^0.5.2",
