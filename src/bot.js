@@ -1,7 +1,6 @@
-const cli = require('./cli')
+const Cli = require('./cli')
 const irc = require('irc')
 
-const commands = require('./commands')
 const logging = require('./logging')
 
 class PurpleBot {
@@ -12,11 +11,11 @@ class PurpleBot {
       userName: nick,
       realName: nick,
       channels: options.channels || [],
-      showErrors: false,
+      showErrors: options.debug || false,
       autoConnect: false,
       autoRejoin: true,
       floodProtection: true,
-      debug: false
+      debug: options.debug || false
     }
     this.client = new irc.Client(
       this.server,
@@ -25,10 +24,6 @@ class PurpleBot {
     )
     this.nicks = {}
 
-    this.configureClient()
-  }
-
-  configureClient () {
     logging(this.client, `${this.server}.log`)
 
     this.client.addListener('error', (message) => {
@@ -43,7 +38,7 @@ class PurpleBot {
       this.nicks[channel] = nicks
     })
 
-    this.cli = cli(commands(this.client))
+    this.cli = new Cli()
   }
 
   enable () {

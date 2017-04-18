@@ -1,64 +1,79 @@
 const readline = require('readline')
 
-/**
- * Asynchronous `readline` completer
- *
- * @param {string} line
- * @param {!function(...any): void} callback
- */
-function completer (commands, line, callback) {
-  let results = []
+class Cli {
+  /**
+   * Creates an active Console instance.
+   *
+   * @param {stream.Readable} [input=process.stdin]
+   * @param {stream.Writable} [output=process.stdout]
+   *
+   * @memberOf Console
+   */
+  constructor (input = process.stdin, output = process.stdout) {
+    this.commands = new Map()
 
-  if (line.length === 0) {
-    results = [...commands.keys()]
-  } else {
-    results = [...commands.keys()].filter((key) => {
-      return key.startsWith(line)
+    this.readline = readline.createInterface({
+      input: input,
+      output: output,
+      completer: this.completer.bind(this)
     })
+
+    // More events at: https://nodejs.org/api/readline.html#readline_class_interface
+    this.readline.on('line', function (line) {
+      const params = line.split(' ')
+      const command = params.shift()
+      if (command != null) {
+        const callback = this.commands.get(command)
+        if (callback != null) {
+          callback(params)
+        }
+      }
+
+      this.readline.prompt()
+    }.bind(this))
+
+    this.commands.set('quit', (...args) => {
+      console.log('')
+      process.exit(0)
+    })
+
+    this.readline.prompt()
   }
 
-  callback(null, [results, line])
-}
+  /**
+   * Readline completer function
+   *
+   * @param {string} line
+   * @param {Function} callback
+   *
+   * @memberOf Console
+   */
+  completer (line, callback) {
+    let results = []
 
-/**
- * Create an active bound readline interface using `stdin` and `stdout`.
- *
- * @param {!Map<string, function(...string): void>} commands mapping of command names to callbacks
- * @param {stream.Readable} input
- * @param {stream.Writable} output
- * @returns {readline.ReadLine} the active configured interface
- */
-function createReadlineInterface (commands, input = process.stdin, output = process.stdout) {
-  const rl = readline.createInterface({
-    input: input,
-    output: output,
-    completer: (line, callback) => {
-      completer(commands, line, callback)
-    }
-  })
-
-  // More events at: https://nodejs.org/api/readline.html#readline_class_interface
-  rl.on('line', (line) => {
-    const params = line.split(' ')
-    const command = params.shift()
-    if (command != null) {
-      const callback = commands.get(command)
-      if (callback != null) {
-        callback(params)
-      }
+    if (line.length === 0) {
+      results = [...this.commands.keys()]
+    } else {
+      results = [...this.commands.keys()].filter((key) => {
+        return key.startsWith(line)
+      })
     }
 
-    rl.prompt()
-  })
+    callback(null, [results, line])
+  }
 
-  rl.on('close', () => {
-    console.log('')
-    process.exit(0)
-  })
-
-  rl.prompt()
-
-  return rl
+  /**
+   * Assign commands from a command mapping to callbacks
+   *
+   * @param {Map<string, function(...string): void>} commandMap
+   *
+   * @memberOf Cli
+   */
+  setCommands (commandMap) {
+    for (const [command, callback] of commandMap) {
+      this.commands.set(command, callback)
+    }
+  }
 }
 
-module.exports = createReadlineInterface
+module.exports = Cli

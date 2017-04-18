@@ -1,6 +1,6 @@
 const streamBuffers = require('stream-buffers')
 
-const cli = require('../src/cli')
+const Cli = require('../src/cli')
 
 function setupConsole (done) {
   const commands = new Map()
@@ -9,18 +9,19 @@ function setupConsole (done) {
   const input = new streamBuffers.ReadableStreamBuffer()
   const output = new streamBuffers.WritableStreamBuffer()
 
-  const console = cli(commands, input, output)
+  const cli = new Cli(input, output)
+  cli.setCommands(commands)
 
-  return [console, input, output]
+  return [cli, input, output]
 }
 
 describe('cli', function () {
   it('runs command callback', function (done) {
-    const [console, input] = setupConsole(done)
+    const [cli, input] = setupConsole(done)
 
     input.put('test\n')
     input.put(null)
 
-    return console
+    return cli
   })
 })

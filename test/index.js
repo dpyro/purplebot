@@ -3,7 +3,7 @@ const exec = require('child_process').exec
 
 describe('index', function () {
   it('npm start can print --help', function () {
-    this.slow(2000)
+    this.slow(2500)
 
     return new Promise(function (resolve) {
       exec('npm start -- --help', (error, stdout, stderr) => {
