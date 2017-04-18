@@ -1,9 +1,10 @@
+const EventEmitter = require('events')
 const streamBuffers = require('stream-buffers')
 
 const Cli = require('../src/cli')
 
 function setupConsole (done) {
-  const target = {}
+  const target = new EventEmitter()
   target.commands = new Map()
   target.commands.set('test', () => { done() })
 

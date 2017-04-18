@@ -4,10 +4,11 @@ const irc = require('irc')
 const Cli = require('./cli')
 const logging = require('./logging')
 
-class PurpleBot {
+class PurpleBot extends EventEmitter {
   constructor (options) {
-    options = options || {}
+    super()
 
+    options = options || {}
     const nick = options.nick || 'PurpleBot'
 
     this.server = options.server || 'localhost'
@@ -72,23 +73,49 @@ class PurpleBot {
   }
 
   setupOutputHooks () {
-    this.emitter = new EventEmitter()
-
-    const forwardMap = new Map()
-    forwardMap.set('registered', 'connected')
-    forwardMap.set('quit', 'disconnected')
-    forwardMap.set('join', 'join')
-    forwardMap.set('part', 'part')
-
-    for (const [from, to] of forwardMap) {
-      this.client.on(from, function (...args) {
-        this.emitter.emit(to, ...args)
-      }.bind(this))
-    }
+    this.forwardClientEvent('join')
+    this.forwardClientEvent('part')
   }
 
-  connect () { this.client.connect() }
-  disconnect () { this.client.disconnect() }
+  /**
+   * Enable an event forward from `this.client` -> `this`.
+   *
+   * @param {any} from event name to listen for in client
+   * @param {any} [to=from] name for forwarding the client event
+   *
+   * @memberOf PurpleBot
+   */
+  forwardClientEvent (from, to = from) {
+    this.client.on(from, (...args) => {
+      this.emit(to, ...args)
+    })
+  }
+
+  /**
+   * Connect to the IRC server.
+   *
+   * @param {number=} retryCount
+   *
+   * @memberOf PurpleBot
+   */
+  connect (retryCount) {
+    this.client.connect(retryCount, () => {
+      this.emit('connected')
+    })
+  }
+
+  /**
+   * Disconnect from the IRC server.
+   *
+   * @param {string=} message
+   *
+   * @memberOf PurpleBot
+   */
+  disconnect (message) {
+    this.client.disconnect(message, () => {
+      this.emit('disconnected')
+    })
+  }
 
   /**
    * Joins the bot to an IRC channel.

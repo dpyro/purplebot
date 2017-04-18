@@ -13,7 +13,7 @@ class Cli {
   /**
    * Creates an active Console instance.
    *
-   * @param {any} target
+   * @param {events?} target
    * @param {stream.Readable} [input=process.stdin]
    * @param {stream.Writable} [output=process.stdout]
    *
@@ -28,7 +28,7 @@ class Cli {
       completer: this.completer.bind(this)
     })
 
-    if (this.target.emitter != null) {
+    if (this.target != null) {
       this.attachListeners()
     }
 
@@ -39,7 +39,7 @@ class Cli {
       if (command != null) {
         const callback = this.target.commands.get(command) || Cli.globalCommands.get(command)
         if (callback != null) {
-          callback(params)
+          callback.apply(null, params)
         }
       }
 
@@ -49,14 +49,20 @@ class Cli {
     this.readline.prompt()
   }
 
+  /**
+   * Attach listeners to `this.target`.
+   *
+   * @memberOf Cli
+   * @private
+   */
   attachListeners () {
-    const attach = (event) => {
-      this.target.emitter.on(event, (...args) => {
+    const attach = function (event) {
+      this.target.on(event, (...args) => {
         this.output.clearLine()
         this.readline.write(`* ${event}\n`)
         this.readline.prompt()
       })
-    }
+    }.bind(this)
 
     attach('connected')
     attach('disconnected')
