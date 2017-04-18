@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const PurpleBot = require('./bot.js')
+const Cli = require('./cli')
 
 if (require.main === module) {
   const yargs = require('yargs')
@@ -36,5 +37,7 @@ if (require.main === module) {
     channels: argv.channels,
     debug: argv.v
   })
-  bot.enable()
+
+  const cli = new Cli(bot)
+  bot.connect()
 }

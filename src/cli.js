@@ -1,43 +1,67 @@
 const readline = require('readline')
 
 class Cli {
+  static get globalCommands () {
+    const map = new Map()
+    map.set('quit', (...args) => {
+      console.log('')
+      process.exit(0)
+    })
+    return map
+  }
+
   /**
    * Creates an active Console instance.
    *
+   * @param {any} target
    * @param {stream.Readable} [input=process.stdin]
    * @param {stream.Writable} [output=process.stdout]
    *
    * @memberOf Console
    */
-  constructor (input = process.stdin, output = process.stdout) {
-    this.commands = new Map()
-
+  constructor (target, input = process.stdin, output = process.stdout) {
+    this.target = target
+    this.output = output
     this.readline = readline.createInterface({
       input: input,
       output: output,
       completer: this.completer.bind(this)
     })
 
+    if (this.target.emitter != null) {
+      this.attachListeners()
+    }
+
     // More events at: https://nodejs.org/api/readline.html#readline_class_interface
-    this.readline.on('line', function (line) {
+    this.readline.on('line', (line) => {
       const params = line.split(' ')
       const command = params.shift()
       if (command != null) {
-        const callback = this.commands.get(command)
+        const callback = this.target.commands.get(command) || Cli.globalCommands.get(command)
         if (callback != null) {
           callback(params)
         }
       }
 
       this.readline.prompt()
-    }.bind(this))
-
-    this.commands.set('quit', (...args) => {
-      console.log('')
-      process.exit(0)
     })
 
     this.readline.prompt()
+  }
+
+  attachListeners () {
+    const attach = (event) => {
+      this.target.emitter.on(event, (...args) => {
+        this.output.clearLine()
+        this.readline.write(`* ${event}\n`)
+        this.readline.prompt()
+      })
+    }
+
+    attach('connected')
+    attach('disconnected')
+    attach('join')
+    attach('part')
   }
 
   /**
@@ -52,27 +76,14 @@ class Cli {
     let results = []
 
     if (line.length === 0) {
-      results = [...this.commands.keys()]
+      results = [...this.target.commands.keys(), ...Cli.globalCommands.keys()]
     } else {
-      results = [...this.commands.keys()].filter((key) => {
+      results = [...this.target.commands.keys(), ...Cli.globalCommands.keys()].filter((key) => {
         return key.startsWith(line)
       })
     }
 
     callback(null, [results, line])
-  }
-
-  /**
-   * Assign commands from a command mapping to callbacks
-   *
-   * @param {Map<string, function(...string): void>} commandMap
-   *
-   * @memberOf Cli
-   */
-  setCommands (commandMap) {
-    for (const [command, callback] of commandMap) {
-      this.commands.set(command, callback)
-    }
   }
 }
 
