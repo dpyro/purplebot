@@ -3,7 +3,7 @@ const expect = require('chai').expect
 const streamBuffers = require('stream-buffers')
 const _ = require('lodash')
 
-const logging = require('../src/logging')
+const logging = require('../plugins/logging')
 
 function setupLogging () {
   const emitter = new EventEmitter()

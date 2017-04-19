@@ -1,7 +1,9 @@
 const EventEmitter = require('events')
+const fs = require('fs')
 const irc = require('irc')
+const path = require('path')
 
-const logging = require('./logging')
+const logging = require('../plugins/logging')
 
 class PurpleBot extends EventEmitter {
   constructor (options) {
@@ -28,14 +30,31 @@ class PurpleBot extends EventEmitter {
     )
     this.nicks = new Map()
 
-    logging(this.client, `${this.server}.log`)
+    logging(this.client)
 
     this.client.on('names', (channel, nicks) => {
       this.nicks.set(channel, nicks)
     })
 
+    this.setupPlugins()
     this.setupCommandHooks()
     this.setupOutputHooks()
+  }
+
+  setupPlugins () {
+    const pluginsDir = 'plugins'
+
+    fs.readdir(pluginsDir, (err, files) => {
+      if (err) {
+        throw err
+      }
+
+      for (const file of files) {
+        const requirePath = `${path.join('../', pluginsDir, file)}`
+        const plugin = require(requirePath)
+        plugin(this)
+      }
+    })
   }
 
   setupCommandHooks () {

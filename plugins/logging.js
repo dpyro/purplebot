@@ -76,7 +76,7 @@ function getLoggers () {
     return `REGISTERED`
   })
   loggers.set('selfMessage', (to, text) => {
-    return `MSG ${to}: ${text}`
+    return `${to} ← ${text}`
   })
   loggers.set('topic', (channel, topic, nick, message) => {
     return `TOPIC ${nick} → ${channel}: ${topic}`
@@ -99,11 +99,11 @@ function getLoggers () {
  * Adds an exception-catching wrapped listener to an event emitter
  *
  * @param {!event.EventEmitter} emitter
- * @param {any} eventName
- * @param {function(...any): void} callback
+ * @param {!any} eventName
+ * @param {!function(...any): void} callback
  */
-function addSafeListener (emitter, eventName, callback) {
-  emitter.addListener(eventName, (...args) => {
+function onSafe (emitter, eventName, callback) {
+  emitter.on(eventName, (...args) => {
     try {
       callback.apply(emitter, args)
     } catch (e) {
@@ -118,7 +118,7 @@ function addSafeListener (emitter, eventName, callback) {
  * @param {!EventEmitter} emitter the client
  * @param {!(string|Buffer|stream.Writable)} output file path, buffer, or writeable stream
  */
-function attachLogging (emitter, output) {
+function run (emitter, output) {
   let stream
   if (typeof output === 'string' || output instanceof Buffer) {
     stream = fs.createWriteStream(output, { flags: 'a' })
@@ -128,7 +128,7 @@ function attachLogging (emitter, output) {
 
   const loggers = getLoggers()
   for (let [eventName, callback] of loggers) {
-    addSafeListener(emitter, eventName, (...args) => {
+    onSafe(emitter, eventName, (...args) => {
       const data = callback.apply(null, args)
       const line = `[${timestamp()}] ${data}\n`
       stream.write(line)
@@ -136,4 +136,4 @@ function attachLogging (emitter, output) {
   }
 }
 
-module.exports = attachLogging
+module.exports = run
