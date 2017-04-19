@@ -1,7 +1,6 @@
 const EventEmitter = require('events')
 const irc = require('irc')
 
-const Cli = require('./cli')
 const logging = require('./logging')
 
 class PurpleBot extends EventEmitter {
@@ -73,6 +72,7 @@ class PurpleBot extends EventEmitter {
   }
 
   setupOutputHooks () {
+    this.forwardClientEvent('error')
     this.forwardClientEvent('join')
     this.forwardClientEvent('part')
   }
@@ -137,7 +137,7 @@ class PurpleBot extends EventEmitter {
    * @memberOf PurpleBot
    */
   part (channel, message) {
-    this.client.part(channel, message, function () {
+    this.client.part(channel, message, () => {
       this.nicks.delete(channel)
     })
   }

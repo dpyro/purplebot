@@ -1,5 +1,10 @@
 const readline = require('readline')
 
+/**
+ * Encapulates a readline interface.
+ *
+ * @class Cli
+ */
 class Cli {
   static get globalCommands () {
     const map = new Map()
@@ -11,7 +16,7 @@ class Cli {
   }
 
   /**
-   * Creates an active Console instance.
+   * Creates an active `Cli` instance.
    *
    * @param {events?} target
    * @param {stream.Readable} [input=process.stdin]
@@ -21,11 +26,13 @@ class Cli {
    */
   constructor (target, input = process.stdin, output = process.stdout) {
     this.target = target
+    this.input = input
     this.output = output
     this.readline = readline.createInterface({
       input: input,
       output: output,
-      completer: this.completer.bind(this)
+      completer: this.completer.bind(this),
+      prompt: ''
     })
 
     if (this.target != null) {
@@ -35,6 +42,7 @@ class Cli {
     // More events at: https://nodejs.org/api/readline.html#readline_class_interface
     this.readline.on('line', (line) => {
       const params = line.split(' ')
+
       const command = params.shift()
       if (command != null) {
         const callback = this.target.commands.get(command) || Cli.globalCommands.get(command)
@@ -42,11 +50,7 @@ class Cli {
           callback.apply(null, params)
         }
       }
-
-      this.readline.prompt()
     })
-
-    this.readline.prompt()
   }
 
   /**
@@ -56,13 +60,17 @@ class Cli {
    * @private
    */
   attachListeners () {
-    const attach = function (event) {
+    this.target.on('error', (message) => {
+      this.readline.clearLine(this.readline, -1)
+      this.readline.write(`${message.command}\n`)
+    })
+
+    const attach = (event) => {
       this.target.on(event, (...args) => {
         this.output.clearLine()
         this.readline.write(`* ${event}\n`)
-        this.readline.prompt()
       })
-    }.bind(this)
+    }
 
     attach('connected')
     attach('disconnected')

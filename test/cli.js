@@ -6,7 +6,10 @@ const Cli = require('../src/cli')
 function setupConsole (done) {
   const target = new EventEmitter()
   target.commands = new Map()
-  target.commands.set('test', () => { done() })
+
+  if (done != null) {
+    target.commands.set('test', () => { done() })
+  }
 
   const input = new streamBuffers.ReadableStreamBuffer()
   const output = new streamBuffers.WritableStreamBuffer()
