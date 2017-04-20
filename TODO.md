@@ -12,6 +12,7 @@
   - .info
   - .forget
   - thing?
+  - save images
 - quotes
   - add
   - remove
