@@ -24,46 +24,46 @@ function eventTests () {
   const selfNick = 'selfNick'
   const text = 'This is a message'
 
-  const map = new Map()
+  const emits = [
+    ['connect', server],
+    ['disconnect', server],
+    ['disconnect', server, text],
+    ['action', nick, selfNick, text],
+    ['ctcp-notice', nick, selfNick, text],
+    ['ctcp-privmsg', nick, selfNick, text],
+    ['ctcp-version', nick, selfNick],
+    ['invite', channel, nick],
+    ['join', channel, nick],
+    ['kick', channel, nick, selfNick, text],
+    ['kill', nick, text, [channel, `${channel}2`]],
+    ['msg', nick, channel, text],
+    ['+mode', channel, nick, 'm'],
+    ['+mode', channel, nick, 'k', text],
+    ['-mode', channel, nick, 'm'],
+    ['-mode', channel, nick, 'k', text],
+    ['names', channel, { 'Q': '@', nick: '' }],
+    ['nick', nick, 'NewNick', [channel]],
+    ['notice', selfNick, text],
+    ['notice', nick, selfNick, text],
+    ['pm', nick, text],
+    ['quit', nick, text],
+    ['part', channel, nick, text],
+    ['registered'],
+    ['selfMessage', nick, text],
+    ['topic', channel, 'the new topic', nick],
+    ['whois', {
+      'nick': nick,
+      'user': 'username',
+      'host': 'hostname',
+      'realname': 'Mr. No-one',
+      'channels': [channel, '@#test2'],
+      'server': 'irc.example.com',
+      'serverinfo': 'An example IRC server',
+      'operator': 'is an IRC Operator'
+    }]
+  ]
 
-  map.set('connect', [server])
-  map.set('disconnect', [server, text])
-
-  map.set('action', [nick, selfNick, text])
-  map.set('ctcp-notice', [nick, selfNick, text])
-  map.set('ctcp-privmsg', [nick, selfNick, text])
-  map.set('ctcp-version', [nick, selfNick])
-  map.set('invite', [channel, nick])
-  map.set('join', [channel, nick])
-  map.set('kick', [channel, nick, selfNick, text])
-  map.set('kill', [nick, text, [channel]])
-  map.set('msg', [nick, channel, text])
-  map.set('+mode', [channel, nick, 'k', text])
-  map.set('-mode', [channel, nick, 'k', text])
-
-  const names = { 'Q': '@', nick: '' }
-  map.set('names', [channel, names])
-  map.set('notice', [nick, selfNick, text])
-  map.set('pm', [nick, text])
-  map.set('quit', [nick, text])
-  map.set('part', [channel, nick, text])
-  map.set('registered', null)
-  map.set('selfMessage', [nick, text])
-  map.set('topic', [channel, 'the new topic', nick])
-
-  const info = {
-    'nick': nick,
-    'user': 'username',
-    'host': 'hostname',
-    'realname': 'Mr. No-one',
-    'channels': [channel, '@#test2'],
-    'server': 'irc.example.com',
-    'serverinfo': 'An example IRC server',
-    'operator': 'is an IRC Operator'
-  }
-  map.set('whois', [info])
-
-  return map
+  return emits
 }
 
 describe('logging', function () {
@@ -73,24 +73,24 @@ describe('logging', function () {
     expect(emitter.eventNames()).to.not.be.empty
   })
 
-  eventTests().forEach(function (args, eventName) {
-    it(`outputs data on ${eventName}`, function () {
+  const tests = eventTests()
+  for (const [event, ...args] of tests) {
+    it(`outputs data on ${event}: ${(args && args.length) || 0}`, function () {
       const [emitter, output] = setupLogging()
 
       expect(output.size()).to.equal(0)
 
-      const safeArgs = args || []
-      emitter.emit(eventName, ...safeArgs)
+      emitter.emit(event, ...args)
 
       expect(output.size()).to.above(0)
 
       const line = output.getContentsAsString()
 
-      _.flatMapDeep(safeArgs, (arg) => {
+      _.flatMapDeep(args, (arg) => {
         return (typeof arg !== 'string') ? _.values(arg) : arg
       }).forEach((arg) => {
         expect(line).to.have.string(arg)
       })
     })
-  }, this)
+  }
 })

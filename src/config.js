@@ -2,7 +2,7 @@ const fs = require('fs-extra')
 const os = require('os')
 const path = require('path')
 
-// TODO: fs.watchFile
+// TODO: intercept SIGHUP
 // TODO: symbolize '.purplebot'
 class Config {
   static path (...args) {

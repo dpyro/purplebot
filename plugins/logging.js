@@ -70,8 +70,12 @@ function getLoggers () {
     }).join(' ')
     return `NAMES ${channel}: ${nameString}`
   })
+  loggers.set('nick', (oldnick, newnick, channels, message) => {
+    return `NICK ${oldnick} → ${newnick} on ${channels.join(' ')}`
+  })
   loggers.set('notice', (nick, to, text, message) => {
-    return `NOTICE ${nick} → ${to}: ${text}`
+    const nickString = (nick != null) ? `${nick} → ` : ''
+    return `NOTICE ${nickString}${to}: ${text}`
   })
   loggers.set('part', (channel, who, reason) => {
     return `PART ${channel} → ${who}: ${reason}`

@@ -43,6 +43,16 @@ class PurpleBot extends EventEmitter {
     this.client.on('names', (channel, nicks) => {
       this.nicks.set(channel, nicks)
     })
+    this.client.on('nick', (oldnick, newnick, channels, message) => {
+      for (const channel of channels) {
+        const channelNicks = this.nicks && this.nicks.get(channel)
+        if (channelNicks != null) {
+          let mode = channelNicks.get(oldnick) || ''
+          channelNicks.delete(oldnick)
+          channelNicks.set(newnick, mode)
+        }
+      }
+    })
 
     this.setupPlugins()
     this.setupCommandHooks()
