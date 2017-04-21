@@ -5,6 +5,10 @@ const path = require('path')
 // TODO: fs.watchFile
 // TODO: symbolize '.purplebot'
 class Config {
+  static path (...args) {
+    return path.join(os.homedir(), '.purplebot', ...args)
+  }
+
   /**
    * Creates an instance of Config.
    * @param {string?} name
@@ -12,7 +16,7 @@ class Config {
    * @memberOf Config
    */
   constructor (name) {
-    this.configPath = (!name) ? path.join(os.homedir(), '.purplebot', name) : name
+    this.configPath = (!name) ? path.join(Config.dir, name) : name
     this.json = null
     this.sync()
   }

@@ -18,12 +18,16 @@ function setupLogging () {
  * @returns {Map<string, Array<string>>}
  */
 function eventTests () {
+  const server = 'example.com'
   const channel = '#test'
   const nick = 'SomeNick'
   const selfNick = 'selfNick'
   const text = 'This is a message'
 
   const map = new Map()
+
+  map.set('connect', [server])
+  map.set('disconnect', [server, text])
 
   map.set('action', [nick, selfNick, text])
   map.set('ctcp-notice', [nick, selfNick, text])

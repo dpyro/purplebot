@@ -1,5 +1,7 @@
-const fs = require('fs')
+const fs = require('fs-extra')
 const _ = require('lodash')
+
+const Config = require('../src/config')
 
 /**
  * Return current timestamp
@@ -17,6 +19,14 @@ function timestamp () {
  */
 function getLoggers () {
   const loggers = new Map()
+
+  loggers.set('connect', (server) => {
+    return `CONNECT ${server}`
+  })
+  loggers.set('disconnect', (server, message) => {
+    const msg = (message) ? `: ${message}` : ''
+    return `DISCONNECT ${server}${msg}`
+  })
 
   loggers.set('action', (from, to, text, message) => {
     return `ACTION ${from} → ${to}: ${text}`
@@ -115,20 +125,23 @@ function onSafe (emitter, eventName, callback) {
 /**
  * Attach logging listeners to a client.
  *
- * @param {!EventEmitter} emitter the client
- * @param {!(string|Buffer|stream.Writable)} output file path, buffer, or writeable stream
+ * @param {!PurpleBot} bot the client
+ * @param {Buffer|stream.Writable} output optional buffer or writeable stream
  */
-function run (emitter, output) {
+function run (bot, output) {
+  // TODO: set output to server name
   let stream
-  if (typeof output === 'string' || output instanceof Buffer) {
-    stream = fs.createWriteStream(output, { flags: 'a' })
-  } else {
+  if (output != null) {
     stream = output
+  } else {
+    const filePath = Config.path(`${bot.server}.log`)
+    fs.ensureFileSync(filePath)
+    stream = fs.createWriteStream(filePath, { flags: 'a' })
   }
 
   const loggers = getLoggers()
   for (let [eventName, callback] of loggers) {
-    onSafe(emitter, eventName, (...args) => {
+    onSafe(bot, eventName, (...args) => {
       const data = callback.apply(null, args)
       const line = `[${timestamp()}] ${data}\n`
       stream.write(line)

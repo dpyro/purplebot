@@ -31,8 +31,12 @@ class PurpleBot extends EventEmitter {
     this.nicks = new Map()
 
     this.plugins = getPlugins((plugins) => {
-      for (const plugin of this.plugins) {
-        plugin(this)
+      for (const plugin of plugins) {
+        try {
+          plugin(this)
+        } catch (error) {
+          console.error(error)
+        }
       }
     })
 
@@ -127,7 +131,7 @@ class PurpleBot extends EventEmitter {
    */
   connect (retryCount) {
     this.client.connect(retryCount, () => {
-      this.emit('connected')
+      this.emit('connect', this.server)
     })
   }
 
@@ -140,7 +144,7 @@ class PurpleBot extends EventEmitter {
    */
   disconnect (message) {
     this.client.disconnect(message, () => {
-      this.emit('disconnected')
+      this.emit('disconnect', this.server, message)
     })
   }
 
