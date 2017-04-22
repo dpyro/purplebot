@@ -38,6 +38,7 @@ if (require.main === module) {
     debug: argv.v
   })
 
+  // eslint-disable-next-line no-unused-vars
   const cli = new Cli(bot)
   bot.connect()
 }
