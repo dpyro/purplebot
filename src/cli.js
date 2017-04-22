@@ -1,4 +1,5 @@
 const readline = require('readline')
+const _ = require('lodash')
 
 /**
  * Encapulates a readline interface.
@@ -68,14 +69,16 @@ class Cli {
     const attach = (event) => {
       this.target.on(event, (...args) => {
         this.output.clearLine()
-        this.readline.write(`* ${event}\n`)
+        this.readline.write(`* ${_.capitalize(event)}ed\n`)
       })
     }
 
-    attach('connected')
-    attach('disconnected')
+    attach('connect')
+    attach('disconnect')
     attach('join')
+    attach('names')
     attach('part')
+    attach('topic')
   }
 
   /**

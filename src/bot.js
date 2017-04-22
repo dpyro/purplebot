@@ -114,8 +114,22 @@ class PurpleBot extends EventEmitter {
 
   setupOutputHooks () {
     this.forwardClientEvent('error')
+
+    this.forwardClientEvent('action')
+    this.forwardClientEvent('invite')
     this.forwardClientEvent('join')
+    this.forwardClientEvent('kill')
+    this.forwardClientEvent('+mode')
+    this.forwardClientEvent('-mode')
+    this.forwardClientEvent('motd')
+    this.forwardClientEvent('names')
+    this.forwardClientEvent('notice')
     this.forwardClientEvent('part')
+    this.forwardClientEvent('pm')
+    this.forwardClientEvent('quit')
+    this.forwardClientEvent('registered', 'register')
+    this.forwardClientEvent('selfMessage', 'self')
+    this.forwardClientEvent('topic')
   }
 
   /**
