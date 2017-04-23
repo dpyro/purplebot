@@ -4,24 +4,40 @@
  */
 
 const EventEmitter = require('events')
+const fs = require('fs')
 const net = require('net')
+const os = require('os')
+const path = require('path')
+
+function tmpSocket () {
+  const sockPath = path.join(os.tmpdir(), 'mock_ircd.sock')
+  // delete socket from previous run
+  try {
+    fs.unlinkSync(sockPath)
+  } catch (e) {
+    // pass
+  }
+  return sockPath
+}
 
 class MockIrcd extends EventEmitter {
-  constructor (encoding = 'utf-8') {
+  constructor (callback) {
     super()
 
     this.incoming = []
     this.outgoing = []
 
     this.server = net.createServer((conn) => {
-      console.log('connect:')
-
       conn.on('data', (data) => {
-        const str = data.toString(encoding)
-
-        console.log(`data: ${str}`)
-
+        const str = data.toString('utf-8')
         const msg = str.split('\r\n')
+
+        if (callback != null) {
+          for (const line of msg) {
+            callback(line)
+          }
+        }
+
         this.incoming = this.incoming.concat(msg)
       })
 
@@ -35,19 +51,8 @@ class MockIrcd extends EventEmitter {
       })
     })
 
-    this.server.on('error', (error) => {
-      if (error.code === 'EADDRINUSE') {
-        console.error(`MockIrcd: port in use, retrying...`)
-        this.server.close()
-        this.server.listen()
-      }
-    })
-
-    this.server.listen()
-  }
-
-  get port () {
-    return this.server.port
+    this.socket = tmpSocket()
+    this.server.listen(this.socket)
   }
 
   send (data) {

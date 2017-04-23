@@ -14,6 +14,7 @@ class PurpleBot extends EventEmitter {
 
     this.server = options.server || 'localhost'
     const clientOptions = {
+      socket: options.socket || false,
       userName: nick,
       realName: nick,
       channels: options.channels || [],

@@ -12,7 +12,7 @@
     "lint": "./node_modules/eslint/bin/eslint.js **/*.js"
   },
   "dependencies": {
-    "irc": "^0.5.2",
+    "irc": "dpyro/node-irc",
     "lodash": "^4.17.4",
     "sqlite3": "^3.1.8",
     "yargs": "^7.1.0"

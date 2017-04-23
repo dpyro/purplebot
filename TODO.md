@@ -21,3 +21,7 @@
 - web
   - url snarfer
 - permissions
+
+## Testing
+
+- add socket support to `node-irc`.
