@@ -3,9 +3,11 @@ node_js:
   - "node"
   - "7"
   - "6"
-  - "5"
-  - "4"
 
 notifications:
   email: false
-  irc: "irc.quakenet.org#PPDBot"
+  irc:
+    channels:
+      - "irc.quakenet.org#PPDBot"
+    template:
+      - "%{repository_slug} (%{commit_subject}): %{message}"
