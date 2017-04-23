@@ -149,13 +149,16 @@ class PurpleBot extends EventEmitter {
   /**
    * Connect to the IRC server.
    *
-   * @param {number=} retryCount
+   * @param {function(): void} callback
    *
    * @memberOf PurpleBot
    */
-  connect (retryCount) {
-    this.client.connect(retryCount, () => {
+  connect (callback) {
+    this.client.connect(null, () => {
       this.emit('connect', this.server)
+      if (callback != null) {
+        callback()
+      }
     })
   }
 

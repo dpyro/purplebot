@@ -1,3 +1,4 @@
+const expect = require('chai').expect
 const EventEmitter = require('events')
 const streamBuffers = require('stream-buffers')
 
@@ -15,6 +16,10 @@ function setupConsole (done) {
   const output = new streamBuffers.WritableStreamBuffer()
 
   const cli = new Cli(target, input, output)
+
+  expect(cli).to.exist
+  expect(input).to.exist
+  expect(output).to.exist
 
   return [cli, input, output]
 }
