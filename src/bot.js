@@ -169,9 +169,12 @@ class PurpleBot extends EventEmitter {
    *
    * @memberOf PurpleBot
    */
-  disconnect (message) {
+  disconnect (message, callback) {
     this.client.disconnect(message, () => {
       this.emit('disconnect', this.server, message)
+      if (callback != null) {
+        callback()
+      }
     })
   }
 
