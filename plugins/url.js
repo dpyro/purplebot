@@ -21,7 +21,8 @@ function run (bot) {
 
   bot.on('url', (nick, to, link) => {
     JSDOM.fromURL(link).then((dom) => {
-      const title = dom.title
+      const title = dom.window.document.title
+
       bot.say(to, `${link}: ${title}`)
     }, (reason) => {
       console.error(`plugin.url: Failed to get title for ${link}: ${reason}`)
