@@ -10,6 +10,7 @@ responses.set(/user \w+ \d \* \w+/i, (ircd) => {
 
 describe('mock ircd', function () {
   this.timeout(6000)
+  this.slow(6000)
 
   function botWithMock () {
     function callback (data) {

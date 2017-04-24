@@ -5,6 +5,13 @@ const path = require('path')
 
 const getPlugins = require('./plugins')
 
+class ChannelInfo {
+  constructor () {
+    this.nicks = new Map()
+    this.topic = ''
+  }
+}
+
 class PurpleBot extends EventEmitter {
   constructor (options) {
     super()
@@ -29,35 +36,90 @@ class PurpleBot extends EventEmitter {
       nick,
       clientOptions
     )
-    this.nicks = new Map()
+    this.channels = new Map()
 
-    this.plugins = getPlugins((plugins) => {
-      for (const plugin of plugins) {
-        try {
-          plugin(this)
-        } catch (error) {
-          console.error(error)
-        }
+    this.plugins = getPlugins()
+    for (const plugin of this.plugins) {
+      try {
+        plugin(this)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    this.client.on('join', (channel, nick, message) => {
+      this.getChannelInfo(channel).set(nick, '')
+    })
+
+    this.client.on('kick', (channel, nick, by, reason, message) => {
+      this.deleteNick(nick, [channel])
+    })
+
+    this.client.on('kill', (nick, reason, channels, message) => {
+      this.deleteNick(nick, channels)
+    })
+
+    this.client.on('+mode', (channel, by, mode, argument, message) => {
+      const info = this.getChannelInfo(channel)
+      if (info.nicks.has(argument)) {
+        info.nicks.set(argument, mode)
+      }
+    })
+
+    this.client.on('-mode', (channel, by, mode, argument, message) => {
+      const info = this.getChannelInfo(channel)
+      if (info.nicks.has(argument)) {
+        const currentMode = info.nicks.get(argument)
+        info.nicks.set(argument, mode.replace(currentMode, ''))
       }
     })
 
     this.client.on('names', (channel, nicks) => {
-      this.nicks.set(channel, nicks)
+      this.getChannelInfo(channel).nicks = nicks
     })
+
     this.client.on('nick', (oldnick, newnick, channels, message) => {
       for (const channel of channels) {
-        const channelNicks = this.nicks && this.nicks.get(channel)
-        if (channelNicks != null) {
-          let mode = channelNicks.get(oldnick) || ''
-          channelNicks.delete(oldnick)
-          channelNicks.set(newnick, mode)
-        }
+        const info = this.getChannelInfo(channel)
+        const mode = info.nicks.get(oldnick) || ''
+        info.nicks.delete(oldnick)
+        info.nicks.set(newnick, mode)
       }
+    })
+
+    this.client.on('part', (channel, nick, reason, message) => {
+      this.deleteNick(nick, [channel])
+    })
+
+    this.client.on('quit', (nick, reason, channels, message) => {
+      this.deleteNick(nick, channels)
+    })
+
+    this.client.on('topic', (channel, topic, nick, message) => {
+      this.getChannelInfo(channel).topic = topic
     })
 
     this.setupPlugins()
     this.setupCommandHooks()
     this.setupOutputHooks()
+  }
+
+  getChannelInfo (channel) {
+    let result = this.channels.get(channel)
+    if (result == null) {
+      result = new ChannelInfo()
+      this.channels.set(channel, result)
+    }
+    return result
+  }
+
+  deleteNick (nick, channels) {
+    for (const channel of channels) {
+      const info = this.getChannelInfo(channel)
+      if (info != null) {
+        info.nicks.delete(nick)
+      }
+    }
   }
 
   setupPlugins () {
@@ -120,6 +182,8 @@ class PurpleBot extends EventEmitter {
     this.forwardClientEvent('invite')
     this.forwardClientEvent('join')
     this.forwardClientEvent('kill')
+    this.forwardClientEvent('message')
+    this.forwardClientEvent('message#')
     this.forwardClientEvent('+mode')
     this.forwardClientEvent('-mode')
     this.forwardClientEvent('motd')
@@ -214,6 +278,17 @@ class PurpleBot extends EventEmitter {
    */
   say (target, message) {
     this.client.say(target, message)
+  }
+
+  /**
+   * String representation
+   *
+   * @returns {string}
+   *
+   * @memberOf PurpleBot
+   */
+  toString () {
+    return `[PurpleBot: ${this.server}]`
   }
 }
 

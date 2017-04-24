@@ -66,7 +66,7 @@ function eventTests () {
   return emits
 }
 
-describe('logging', function () {
+describe('plugin: logging', function () {
   it('attaches logging', function () {
     const [emitter] = setupLogging()
 
