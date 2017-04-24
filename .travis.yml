@@ -9,5 +9,6 @@ notifications:
   irc:
     channels:
       - "irc.quakenet.org#PPDBot"
+      - "irc.quakenet.org#ppdstem"
     template:
       - "%{repository_slug} (%{commit_subject}): %{message}"

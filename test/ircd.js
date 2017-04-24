@@ -40,7 +40,7 @@ describe('mock ircd', function () {
   })
 
   it('connect', (done) => {
-    const [bot, ircd] = botWithMock()
+    const [bot] = botWithMock()
 
     bot.on('connect', () => { done() })
 
@@ -48,7 +48,7 @@ describe('mock ircd', function () {
   })
 
   it('disconnect', (done) => {
-    const [bot, ircd] = botWithMock()
+    const [bot] = botWithMock()
 
     bot.on('disconnect', () => { done() })
 
@@ -58,7 +58,7 @@ describe('mock ircd', function () {
   })
 
   it('register', (done) => {
-    const [bot, ircd] = botWithMock()
+    const [bot] = botWithMock()
 
     bot.on('register', () => { done() })
 
