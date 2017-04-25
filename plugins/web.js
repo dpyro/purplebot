@@ -5,6 +5,14 @@ const request = require('request')
 // http://stackoverflow.com/a/17773849/1440740
 const matcher = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/
 
+const imageExts = [
+  'gif',
+  'jpg',
+  'png',
+  'webm',
+  'webp'
+]
+
 function run (bot) {
   bot.on('message#', (nick, to, text, message) => {
     const result = matcher.exec(text)
@@ -25,16 +33,24 @@ function run (bot) {
           const dom = new JSDOM(body)
           const title = dom.window.document.title
           // TODO: log found link
-          bot.say(to, `${link}: ${title}`)
+          bot.emit('title', to, link, title)
         } else {
           const ext = mime.extension(type)
-          if (ext === 'png' || ext === 'jpg' || ext === 'gif' || ext === 'webm') {
+          if (imageExts.includes(ext)) {
             // TODO: save image or somesuch
-            bot.emit('image', ext, response)
+            bot.emit('web.image', to, link, ext, body)
           }
         }
       }
     })
+  })
+
+  bot.on('title', (channel, link, title) => {
+    bot.say(channel, `${link}: ${title}`)
+  })
+
+  bot.on('web.image', (channel, link, ext, body) => {
+
   })
 }
 

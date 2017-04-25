@@ -8,10 +8,6 @@ describe('plugin: web', function () {
   let bot, scope
   const channel = '#test'
 
-  function emitUrl (link) {
-    expect(bot.client.emit('message#', 'someone', channel, link)).is.true
-  }
-
   before(function () {
     scope = nock('http://example.local/')
       .get('/error')
@@ -42,10 +38,14 @@ describe('plugin: web', function () {
     expect(nock.isDone()).to.be.true
   })
 
+  function emitUrl (link) {
+    expect(bot.client.emit('message#', 'someone', channel, link)).is.true
+  }
+
   function validateResult (done) {
-    bot.on('self', (to, text) => {
+    bot.on('self', (target, text) => {
       try {
-        expect(to).to.equal(channel)
+        expect(target).to.equal(channel)
         expect(text.toLowerCase()).to.have.string('valid title')
         done()
       } catch (e) {

@@ -1,7 +1,5 @@
 const EventEmitter = require('events')
-const fs = require('fs')
 const irc = require('irc')
-const path = require('path')
 
 const getPlugins = require('./plugins')
 
@@ -99,7 +97,6 @@ class PurpleBot extends EventEmitter {
       this.getChannelInfo(channel).topic = topic
     })
 
-    this.setupPlugins()
     this.setupCommandHooks()
     this.setupOutputHooks()
   }
@@ -120,26 +117,6 @@ class PurpleBot extends EventEmitter {
         info.nicks.delete(nick)
       }
     }
-  }
-
-  setupPlugins () {
-    const pluginsDir = 'plugins'
-
-    fs.readdir(pluginsDir, (err, files) => {
-      if (err) {
-        throw err
-      }
-
-      for (const file of files) {
-        try {
-          const requirePath = `${path.join('../', pluginsDir, file)}`
-          const plugin = require(requirePath)
-          plugin(this)
-        } catch (error) {
-          console.error(error)
-        }
-      }
-    })
   }
 
   setupCommandHooks () {
