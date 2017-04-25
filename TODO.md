@@ -20,6 +20,7 @@
   - random
 - web
   - url snarfer
+  - log links
 - permissions
 
 ## Testing

@@ -11,4 +11,5 @@ notifications:
       - "irc.quakenet.org#PPDBot"
       - "irc.quakenet.org#ppdstem"
     template:
-      - "%{repository_slug} (%{commit_subject}): %{message}"
+      - "%{repository_slug}: (%{commit_subject})"
+      - "%{message}"
