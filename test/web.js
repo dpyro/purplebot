@@ -46,7 +46,7 @@ describe('plugin: web', function () {
     bot.on('self', (to, text) => {
       try {
         expect(to).to.equal(channel)
-        expect(text.toLowerCase()).to.have.string('valid')
+        expect(text.toLowerCase()).to.have.string('valid title')
         done()
       } catch (e) {
         done(e)
@@ -119,5 +119,4 @@ describe('plugin: web', function () {
 
     emitUrl('https://example.local/valid')
   })
-
 })
