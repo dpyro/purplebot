@@ -57,6 +57,24 @@ class PurpleBot extends EventEmitter {
       this.deleteNick(nick, channels)
     })
 
+    this.client.on('message', (nick, to, text, message) => {
+      const trimmedText = text.trim()
+      if (trimmedText.startsWith('.') && trimmedText.substring(1, 2) !== '.') {
+        // TODO: accept quoted arguments
+        const words = trimmedText.split(' ')
+        const filteredWords = words.filter((element, index, arr) => {
+          return element != null && element !== ''
+        })
+
+        if (filteredWords.length >= 1) {
+          const command = filteredWords.shift().substring(1)
+          const args = filteredWords
+
+          this.emit('command', nick, command, ...args)
+        }
+      }
+    })
+
     this.client.on('+mode', (channel, by, mode, argument, message) => {
       const info = this.getChannelInfo(channel)
       if (info.nicks.has(argument)) {
