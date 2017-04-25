@@ -8,7 +8,6 @@ function run (bot) {
     const result = matcher.exec(text)
     if (result != null) {
       const link = result[0]
-      // TODO: log found link
       bot.emit('web', nick, to, link)
     }
   })
@@ -16,6 +15,7 @@ function run (bot) {
   bot.on('web', (nick, to, link) => {
     JSDOM.fromURL(link).then((dom) => {
       const title = dom.window.document.title
+      // TODO: log found link
 
       bot.say(to, `${link}: ${title}`)
     }, (reason) => {

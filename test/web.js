@@ -14,15 +14,21 @@ describe('plugin: web', function () {
 
   before(function () {
     scope = nock('http://example.local/')
-              .get('/valid')
-              .twice()
-              .replyWithFile(200, path.join(__dirname, '/fixtures/valid.html'))
-              .get('/error')
-              .replyWithError('Mocked generic error')
-              .get('/redirect')
-              .reply(307, 'Redirected', {'Location': '/valid'})
-              .get('/redirect/error')
-              .reply(307, 'Redirected', {'Location': '/error'})
+      .get('/error')
+      .replyWithError('Mocked generic error')
+      .get('/valid')
+      .twice()
+      .replyWithFile(200, path.join(__dirname, '/fixtures/valid.html'))
+      .get('/valid4')
+      .replyWithFile(200, path.join(__dirname, '/fixtures/valid4.html'))
+      .get('/redirect')
+      .reply(307, 'Redirected', {'Location': '/valid'})
+      .get('/redirect/error')
+      .reply(307, 'Redirected', {'Location': '/error'})
+      .get('/error')
+      .replyWithError('Mocked generic error')
+      .get('/image')
+      .replyWithFile(200, path.join(__dirname, '/fixtures/pixel.png'), {'Content-Type': 'image/png'})
 
     expect(scope).to.exist
   })
@@ -33,14 +39,14 @@ describe('plugin: web', function () {
   })
 
   after(function () {
-    expect(scope.isDone()).to.be.true
+    expect(nock.isDone()).to.be.true
   })
 
   function validateResult (done) {
     bot.on('self', (to, text) => {
       try {
         expect(to).to.equal(channel)
-        expect(text.toLowerCase()).to.have.string('valid html title')
+        expect(text.toLowerCase()).to.have.string('valid')
         done()
       } catch (e) {
         done(e)
@@ -48,30 +54,40 @@ describe('plugin: web', function () {
     })
   }
 
-  function validateNoResult () {
-    bot.on('self', (to, text, message) => {
-      throw new Error(`Expected no emit for event self: ${text}`)
+  function expectNoEvent (bot, event, done, test) {
+    let error
+
+    bot.on(event, (nick, to, link) => {
+      error = new Error(`Expected no emit for event ${event}`)
     })
+
+    test()
+
+    done(error)
   }
 
-  it('obtains title for valid link', function (done) {
+  it('does not emit on invalid link', function (done) {
+    expectNoEvent(bot, 'web', done, () => {
+      emitUrl('http://:example.local/valid')
+    })
+  })
+
+  it('title for valid link', function (done) {
     validateResult(done)
 
     emitUrl('http://example.local/valid')
   })
 
-  it('does not emit on invalid link', function () {
-    bot.on('web', (nick, to, link) => {
-      throw new Error(`Expected no emit for event web: ${link}`)
-    })
+  it('title for valid link (html4)', function (done) {
+    validateResult(done)
 
-    emitUrl('http://:example.local/valid')
+    emitUrl('http://example.local/valid4')
   })
 
-  it('ignores erroneous replies', function () {
-    validateNoResult()
-
-    emitUrl('http://example.local/error')
+  it('ignores erroneous replies', function (done) {
+    expectNoEvent(bot, 'self', done, () => {
+      emitUrl('http://example.local/error')
+    })
   })
 
   it('follows redirect', function (done) {
@@ -80,9 +96,28 @@ describe('plugin: web', function () {
     emitUrl('http://example.local/redirect')
   })
 
-  it('ignores erroneous redirect', function () {
-    validateNoResult()
-
-    emitUrl('http://example.local/redirect/error')
+  it('ignores erroneous redirect', function (done) {
+    expectNoEvent(bot, 'self', done, () => {
+      emitUrl('http://example.local/redirect/error')
+    })
   })
+
+  it('image', function (done) {
+    expectNoEvent(bot, 'self', done, () => {
+      emitUrl('http://example.local/image')
+    })
+  })
+
+  it('ignores timeout')
+
+  it('https', function (done) {
+    nock('https://example.local/')
+      .get('/valid')
+      .replyWithFile(200, path.join(__dirname, '/fixtures/valid.html'))
+
+    validateResult(done)
+
+    emitUrl('https://example.local/valid')
+  })
+
 })
