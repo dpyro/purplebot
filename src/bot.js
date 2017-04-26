@@ -68,9 +68,10 @@ class PurpleBot extends EventEmitter {
 
         if (filteredWords.length >= 1) {
           const command = filteredWords.shift().substring(1)
-          const args = filteredWords
-
-          this.emit('command', nick, command, ...args)
+          if (command !== '') {
+            const args = filteredWords
+            this.emit('command', nick, command, ...args)
+          }
         }
       }
     })
