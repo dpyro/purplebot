@@ -21,6 +21,7 @@
 - [ ] web
   - [x] url snarfer
   - [ ] log links
+- [ ] heralds
 - [ ] permissions
 
 ## Testing

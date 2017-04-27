@@ -22,6 +22,21 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Mocha Tests - mockircd",
+            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "-u",
+                "tdd",
+                "--timeout",
+                "999999",
+                "--colors",
+                "${workspaceRoot}/test/ircd.js"
+            ],
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Mocha Tests - web",
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "args": [

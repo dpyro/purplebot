@@ -3,28 +3,41 @@ const expect = require('chai').expect
 const MockIrcd = require('./mock/ircd')
 const PurpleBot = require('../src/bot')
 
+const nick = 'testnick'
+const channel = '#test'
+const topic = 'hello world!'
+const nicks = ['client1', 'someone']
+
 const responses = new Map()
-responses.set(/user \w+ \d \* \w+/i, (ircd) => {
-  ircd.send(':localhost 001 testbot :Welcome to the MockIrcd Chat Network testbot\r\n')
+responses.set(/USER (\w+) \d \* \w+/, (ircd, user) => {
+  ircd.register()
+})
+responses.set(/JOIN (#\w+)/, (ircd, channel) => {
+  ircd.join(channel, topic, nicks)
+})
+responses.set(/PART (#\w+)(?: :(\w+))?/, (ircd, channel, message) => {
+  ircd.part(channel, message)
 })
 
 describe('mock ircd', function () {
-  this.timeout(6000)
-  this.slow(6000)
+  this.timeout(8000)
+  this.slow(3000)
 
-  function botWithMock () {
-    function callback (data) {
+  let ircd, bot
+
+  beforeEach(function () {
+    ircd = new MockIrcd(nick, (data) => {
       for (const [regex, action] of responses) {
-        if (data.match(regex)) {
-          action(ircd)
+        const results = regex.exec(data)
+        if (results != null) {
+          const args = results.slice(1)
+          action(ircd, ...args)
           break
         }
       }
-    }
-
-    const ircd = new MockIrcd(callback)
+    })
     const socket = ircd.socket
-    const bot = new PurpleBot({
+    bot = new PurpleBot({
       server: socket,
       socket: true
     })
@@ -33,35 +46,43 @@ describe('mock ircd', function () {
     expect(ircd).to.exist
 
     return [bot, ircd]
-  }
-
-  it('setup', () => {
-    botWithMock()
   })
 
-  it('connect', (done) => {
-    const [bot] = botWithMock()
-
-    bot.on('connect', () => { done() })
-
-    bot.connect()
-  })
-
-  it('disconnect', (done) => {
-    const [bot] = botWithMock()
-
-    bot.on('disconnect', () => { done() })
-
+  it('connect & disconnect', (done) => {
     bot.connect(() => {
-      bot.disconnect()
+      bot.disconnect(null, done)
     })
   })
 
-  it('register', (done) => {
-    const [bot] = botWithMock()
+  it('connect & join * part', function (done) {
+    this.timeout(10000)
 
-    bot.on('register', () => { done() })
+    let gotTopic = false
+    let gotNames = false
 
-    bot.connect()
+    bot.on('topic', (channel, topic, nick, message) => {
+      expect(bot.client.chans[channel].topic).to.equal(topic)
+      gotTopic = true
+    })
+
+    bot.on('names', (channel, nicks) => {
+      expect(nicks).to.not.be.empty
+      gotNames = true
+    })
+
+    bot.connect(() => {
+      expect(bot.nick).to.equal(nick)
+      bot.join(channel, () => {
+        bot.part(channel, () => {
+          let error
+          if (!gotTopic) {
+            error = new Error('Did not get topic')
+          } else if (!gotNames) {
+            error = new Error('Did not get names')
+          }
+          done(error)
+        })
+      })
+    })
   })
 })

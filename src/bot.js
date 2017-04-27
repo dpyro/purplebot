@@ -34,7 +34,6 @@ class PurpleBot extends EventEmitter {
       nick,
       clientOptions
     )
-    this.channels = new Map()
 
     this.plugins = getPlugins()
     for (const plugin of this.plugins) {
@@ -44,18 +43,6 @@ class PurpleBot extends EventEmitter {
         console.error(error)
       }
     }
-
-    this.client.on('join', (channel, nick, message) => {
-      this.getChannelInfo(channel).set(nick, '')
-    })
-
-    this.client.on('kick', (channel, nick, by, reason, message) => {
-      this.deleteNick(nick, [channel])
-    })
-
-    this.client.on('kill', (nick, reason, channels, message) => {
-      this.deleteNick(nick, channels)
-    })
 
     this.client.on('message', (nick, to, text, message) => {
       const trimmedText = text.trim()
@@ -76,66 +63,8 @@ class PurpleBot extends EventEmitter {
       }
     })
 
-    this.client.on('+mode', (channel, by, mode, argument, message) => {
-      const info = this.getChannelInfo(channel)
-      if (info.nicks.has(argument)) {
-        info.nicks.set(argument, mode)
-      }
-    })
-
-    this.client.on('-mode', (channel, by, mode, argument, message) => {
-      const info = this.getChannelInfo(channel)
-      if (info.nicks.has(argument)) {
-        const currentMode = info.nicks.get(argument)
-        info.nicks.set(argument, mode.replace(currentMode, ''))
-      }
-    })
-
-    this.client.on('names', (channel, nicks) => {
-      this.getChannelInfo(channel).nicks = nicks
-    })
-
-    this.client.on('nick', (oldnick, newnick, channels, message) => {
-      for (const channel of channels) {
-        const info = this.getChannelInfo(channel)
-        const mode = info.nicks.get(oldnick) || ''
-        info.nicks.delete(oldnick)
-        info.nicks.set(newnick, mode)
-      }
-    })
-
-    this.client.on('part', (channel, nick, reason, message) => {
-      this.deleteNick(nick, [channel])
-    })
-
-    this.client.on('quit', (nick, reason, channels, message) => {
-      this.deleteNick(nick, channels)
-    })
-
-    this.client.on('topic', (channel, topic, nick, message) => {
-      this.getChannelInfo(channel).topic = topic
-    })
-
     this.setupCommandHooks()
     this.setupOutputHooks()
-  }
-
-  getChannelInfo (channel) {
-    let result = this.channels.get(channel)
-    if (result == null) {
-      result = new ChannelInfo()
-      this.channels.set(channel, result)
-    }
-    return result
-  }
-
-  deleteNick (nick, channels) {
-    for (const channel of channels) {
-      const info = this.getChannelInfo(channel)
-      if (info != null) {
-        info.nicks.delete(nick)
-      }
-    }
   }
 
   setupCommandHooks () {
@@ -215,7 +144,7 @@ class PurpleBot extends EventEmitter {
    * @memberOf PurpleBot
    */
   connect (callback) {
-    this.client.connect(null, () => {
+    this.client.connect(() => {
       this.emit('connect', this.server)
       if (callback != null) {
         callback()
@@ -243,11 +172,12 @@ class PurpleBot extends EventEmitter {
    * Joins the bot to an IRC channel.
    *
    * @param {string} channel
+   * @param {function(): void} callback
    *
    * @memberOf PurpleBot
    */
-  join (channel) {
-    this.client.join(channel)
+  join (channel, callback) {
+    this.client.join(channel, callback)
   }
 
   /**
@@ -255,12 +185,16 @@ class PurpleBot extends EventEmitter {
    *
    * @param {string} channel
    * @param {string=} message
+   * @param {function(): void} callback
    *
    * @memberOf PurpleBot
    */
-  part (channel, message) {
+  part (channel, message, callback) {
     this.client.part(channel, message, () => {
       this.nicks.delete(channel)
+      if (callback != null) {
+        callback()
+      }
     })
   }
 
@@ -285,6 +219,28 @@ class PurpleBot extends EventEmitter {
    */
   toString () {
     return `[PurpleBot: ${this.server}]`
+  }
+
+  /**
+   * Current nick of the bot.
+   *
+   * @readonly {string}
+   *
+   * @memberOf PurpleBot
+   */
+  get nick () {
+    return this.client.nick
+  }
+
+  /**
+   * Updated channel info from the client.
+   *
+   * @readonly {any}
+   *
+   * @memberOf PurpleBot
+   */
+  get chans () {
+    return this.client.chans
   }
 }
 
