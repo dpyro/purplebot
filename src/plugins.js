@@ -2,12 +2,12 @@ const fs = require('fs')
 const path = require('path')
 
 /**
- * Asynchronously fetch available plugins.
+ * Synchronously fetch the available plugins.
  *
  * @param {function(Array<any>): void} callback that accepts a list of plugin modules
- * @returns {Array<any>} valid plugins
+ * @returns {Array} valid plugins
  */
-function getPlugins () {
+function getPlugins (bot) {
   const pluginsDir = 'plugins'
   const plugins = []
 
@@ -16,9 +16,13 @@ function getPlugins () {
     try {
       const requirePath = `${path.join('../', pluginsDir, file)}`
       const plugin = require(requirePath)
-      if (plugin != null && plugin instanceof Function) {
-        plugins.push(plugin)
+      let result
+      try {
+        result = plugin(bot)
+      } catch (error) {
+        result = file
       }
+      plugins.push(result)
     } catch (error) {
       console.error(error)
     }

@@ -4,18 +4,35 @@ const _ = require('lodash')
 const Config = require('../src/config')
 
 /**
- * Return current timestamp
+ * Adds an exception-catching wrapped listener to an event emitter
  *
- * @returns {!string}
+ * @param {event.EventEmitter} emitter
+ * @param {any} eventName
+ * @param {function(...any): void} callback
+ */
+function onSafe (emitter, eventName, callback) {
+  emitter.on(eventName, (...args) => {
+    try {
+      callback.apply(emitter, args)
+    } catch (e) {
+      console.error(e)
+    }
+  })
+}
+
+/**
+ * Return the current timestamp.
+ *
+ * @returns {string}
  */
 function timestamp () {
   return new Date().toUTCString()
 }
 
 /**
- * Builds and returns logger functions
+ * Builds and returns logger functions.
  *
- * @returns {Map<string, function(...args): string>} map of logger functions
+ * @returns {Map<string, function(...args): void>} map of logger functions
  */
 function getLoggers () {
   const loggers = new Map()
@@ -109,48 +126,49 @@ function getLoggers () {
   return loggers
 }
 
-/**
- * Adds an exception-catching wrapped listener to an event emitter
- *
- * @param {!event.EventEmitter} emitter
- * @param {!any} eventName
- * @param {!function(...any): void} callback
- */
-function onSafe (emitter, eventName, callback) {
-  emitter.on(eventName, (...args) => {
-    try {
-      callback.apply(emitter, args)
-    } catch (e) {
-      console.error(e)
+class LoggingPlugin {
+  /**
+   * Function to create and return a new `LoggingPlugin` instance.
+   *
+   * @static
+   * @param {any} bot
+   * @param {any} output
+   * @returns
+   *
+   * @memberOf LoggingPlugin
+   */
+  static init (bot, output) {
+    return new LoggingPlugin(bot, output)
+  }
+
+  /**
+   * Creates an attached instance of `LoggingPlugin`.
+   *
+   * @param {PurpleBot} bot
+   * @param {Buffer|stream.Writeable} output optional buffer or writeable stream
+   *
+   * @memberOf LoggingPlugin
+   */
+  constructor (bot, output) {
+    // TODO: set output to server name
+    let stream
+    if (output != null) {
+      stream = output
+    } else {
+      const filePath = Config.path(`${bot.server}.log`)
+      fs.ensureFileSync(filePath)
+      stream = fs.createWriteStream(filePath, { flags: 'a' })
     }
-  })
-}
 
-/**
- * Attach logging listeners to a client.
- *
- * @param {!PurpleBot} bot the client
- * @param {Buffer|stream.Writable} output optional buffer or writeable stream
- */
-function run (bot, output) {
-  // TODO: set output to server name
-  let stream
-  if (output != null) {
-    stream = output
-  } else {
-    const filePath = Config.path(`${bot.server}.log`)
-    fs.ensureFileSync(filePath)
-    stream = fs.createWriteStream(filePath, { flags: 'a' })
-  }
-
-  const loggers = getLoggers()
-  for (let [eventName, callback] of loggers) {
-    onSafe(bot, eventName, (...args) => {
-      const data = callback.apply(null, args)
-      const line = `[${timestamp()}] ${data}\n`
-      stream.write(line)
-    })
+    const loggers = getLoggers()
+    for (let [eventName, callback] of loggers) {
+      onSafe(bot, eventName, (...args) => {
+        const data = callback.apply(null, args)
+        const line = `[${timestamp()}] ${data}\n`
+        stream.write(line)
+      })
+    }
   }
 }
 
-module.exports = run
+module.exports = LoggingPlugin.init

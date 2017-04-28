@@ -4,6 +4,12 @@ const streamBuffers = require('stream-buffers')
 
 const Cli = require('../src/cli')
 
+/**
+ *
+ *
+ * @param {any} done
+ * @returns {Cli, stream.Readable, stream.Writeable} Cli, input, output
+ */
 function setupConsole (done) {
   const target = new EventEmitter()
   target.commands = new Map()

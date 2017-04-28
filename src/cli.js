@@ -19,9 +19,9 @@ class Cli {
   /**
    * Creates an active `Cli` instance.
    *
-   * @param {events?} target
-   * @param {stream.Readable} [input=process.stdin]
-   * @param {stream.Writable} [output=process.stdout]
+   * @param {EventEmitter} target
+   * @param {?stream.Readable} [input=process.stdin]
+   * @param {?stream.Writable} [output=process.stdout]
    *
    * @memberOf Console
    */
@@ -37,7 +37,7 @@ class Cli {
     })
 
     if (this.target != null) {
-      this.attachListeners()
+      this._attachListeners()
     }
 
     // More events at: https://nodejs.org/api/readline.html#readline_class_interface
@@ -60,7 +60,7 @@ class Cli {
    * @memberOf Cli
    * @private
    */
-  attachListeners () {
+  _attachListeners () {
     this.target.on('error', (message) => {
       this.readline.clearLine(this.readline, -1)
       this.readline.write(`${message.command}\n`)

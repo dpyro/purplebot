@@ -3,7 +3,20 @@ const irc = require('irc')
 
 const getPlugins = require('./plugins')
 
+/**
+ * Configurable bot that wraps `node-irc`.
+ *
+ * @class PurpleBot
+ * @extends {EventEmitter}
+ */
 class PurpleBot extends EventEmitter {
+  /**
+   * Creates an instance of PurpleBot.
+   *
+   * @param {{nick: string, server: string, channels: Array<string>, debug: boolean}} options
+   *
+   * @memberOf PurpleBot
+   */
   constructor (options) {
     super()
 
@@ -28,14 +41,7 @@ class PurpleBot extends EventEmitter {
       clientOptions
     )
 
-    this.plugins = getPlugins()
-    for (const plugin of this.plugins) {
-      try {
-        plugin(this)
-      } catch (error) {
-        console.error(error)
-      }
-    }
+    this.plugins = getPlugins(this)
 
     this.client.on('message', (nick, to, text, message) => {
       const trimmedText = text.trim()
@@ -60,6 +66,12 @@ class PurpleBot extends EventEmitter {
     this._setupOutputHooks()
   }
 
+  /**
+   * Creates and populates `this.commands`.
+   *
+   * @memberOf PurpleBot
+   * @private
+   */
   _setupCommandHooks () {
     this.commands = new Map()
 
@@ -93,6 +105,12 @@ class PurpleBot extends EventEmitter {
     })
   }
 
+  /**
+   * Applies event forwarding.
+   *
+   * @memberOf PurpleBot
+   * @private
+   */
   _setupOutputHooks () {
     this.forwardClientEvent('error')
 
@@ -118,10 +136,11 @@ class PurpleBot extends EventEmitter {
   /**
    * Enable an event forward from `this.client` -> `this`.
    *
-   * @param {any} from event name to listen for in client
-   * @param {any} [to=from] name for forwarding the client event
+   * @param {string} from event name to listen for in client
+   * @param {string} [to=from] name for forwarding the client event
    *
    * @memberOf PurpleBot
+   * @private
    */
   forwardClientEvent (from, to = from) {
     this.client.on(from, (...args) => {
@@ -148,7 +167,7 @@ class PurpleBot extends EventEmitter {
   /**
    * Disconnect from the IRC server.
    *
-   * @param {string=} message
+   * @param {string} message
    *
    * @memberOf PurpleBot
    */
@@ -177,7 +196,7 @@ class PurpleBot extends EventEmitter {
    * Parts the bot from an IRC channel.
    *
    * @param {string} channel
-   * @param {string=} message
+   * @param {string} message
    * @param {function(): void} callback
    *
    * @memberOf PurpleBot
