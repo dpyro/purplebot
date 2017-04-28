@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 
+/**
+ * @author Sumant Manne <sumant.manne@gmail.com>
+ * @license MIT
+ */
+
 const PurpleBot = require('./bot.js')
 const Cli = require('./cli')
 

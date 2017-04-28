@@ -8,6 +8,11 @@ const getPlugins = require('./plugins')
  *
  * @class PurpleBot
  * @extends {EventEmitter}
+ *
+ * @property {string} server
+ * @property {irc.Client} client
+ * @property {Map<string, any>} commands
+ * @property {any} plugins
  */
 class PurpleBot extends EventEmitter {
   /**
@@ -151,7 +156,8 @@ class PurpleBot extends EventEmitter {
   /**
    * Connect to the IRC server.
    *
-   * @param {function(): void} callback
+   * @param {function(): void=} callback
+   * @fires PurpleBot#connect
    *
    * @memberOf PurpleBot
    */
@@ -159,7 +165,7 @@ class PurpleBot extends EventEmitter {
     this.client.connect(() => {
       this.emit('connect', this.server)
       if (callback != null) {
-        callback()
+        callback.apply(this)
       }
     })
   }
@@ -168,6 +174,8 @@ class PurpleBot extends EventEmitter {
    * Disconnect from the IRC server.
    *
    * @param {string} message
+   * @param {function(): void=} callback
+   * @fires PurpleBot#disconnect
    *
    * @memberOf PurpleBot
    */
@@ -175,7 +183,7 @@ class PurpleBot extends EventEmitter {
     this.client.disconnect(message, () => {
       this.emit('disconnect', this.server, message)
       if (callback != null) {
-        callback()
+        callback.apply(this)
       }
     })
   }
@@ -184,7 +192,8 @@ class PurpleBot extends EventEmitter {
    * Joins the bot to an IRC channel.
    *
    * @param {string} channel
-   * @param {function(): void} callback
+   * @param {function(): void=} callback
+   * @fires PurpleBot#join
    *
    * @memberOf PurpleBot
    */
@@ -197,7 +206,8 @@ class PurpleBot extends EventEmitter {
    *
    * @param {string} channel
    * @param {string} message
-   * @param {function(): void} callback
+   * @param {function(): void=} callback
+   * @fires PurpleBot#part
    *
    * @memberOf PurpleBot
    */
@@ -205,7 +215,7 @@ class PurpleBot extends EventEmitter {
     this.client.part(channel, message, () => {
       this.nicks.delete(channel)
       if (callback != null) {
-        callback()
+        callback.apply(this)
       }
     })
   }
@@ -215,6 +225,7 @@ class PurpleBot extends EventEmitter {
    *
    * @param {string} target
    * @param {string} message
+   * @fires PurpleBot#say
    *
    * @memberOf PurpleBot
    */
@@ -236,7 +247,7 @@ class PurpleBot extends EventEmitter {
   /**
    * Current nick of the bot.
    *
-   * @readonly {string}
+   * @readonly
    *
    * @memberOf PurpleBot
    */
@@ -247,7 +258,7 @@ class PurpleBot extends EventEmitter {
   /**
    * Updated channel info from the client.
    *
-   * @readonly {any}
+   * @readonly
    *
    * @memberOf PurpleBot
    */

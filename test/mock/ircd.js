@@ -30,6 +30,13 @@ function tmpSocket () {
  *
  * @class MockIrcd
  * @extends {EventEmitter}
+ *
+ * @property {net.server} server description
+ * @property {string} name server name
+ * @property {string} nick configured client name
+ * @property {boolean} debug print debug info
+ * @property {Array<string>} incoming
+ * @property {Array<string>} outgoing
  */
 class MockIrcd extends EventEmitter {
   /**
@@ -102,6 +109,8 @@ class MockIrcd extends EventEmitter {
    * @param {string} [user='testuser']
    * @param {string} [host='testhost']
    *
+   * @fires PurpleBot#send
+   *
    * @memberOf MockIrcd
    */
   register (user = 'testuser', host = 'testhost') {
@@ -115,14 +124,16 @@ class MockIrcd extends EventEmitter {
    *
    * @param {string} channel
    * @param {string} topic
-   * @param {Array<string>} nicks
+   * @param {Array<string>=} additionalNicks
+   *
+   * @fires PurpleBot#send
    *
    * @memberOf MockIrcd
    */
-  join (channel, topic, nicks) {
+  join (channel, topic, additionalNicks = []) {
     this.send(`:${this.hostmask} JOIN :${channel}`)
     this.topic(channel, topic)
-    this.names(channel, nicks)
+    this.names(channel, additionalNicks)
   }
 
   /**
@@ -130,6 +141,8 @@ class MockIrcd extends EventEmitter {
    *
    * @param {string} channel
    * @param {string} message
+   *
+   * @fires PurpleBot#send
    *
    * @memberOf MockIrcd
    */
@@ -144,6 +157,8 @@ class MockIrcd extends EventEmitter {
    *
    * @param {string} channel
    * @param {string=} topic
+   *
+   * @fires PurpleBot#send
    *
    * @memberOf MockIrcd
    */
@@ -160,11 +175,13 @@ class MockIrcd extends EventEmitter {
    * A `RPL_NAMEREPLY` message is sent followed by a `RPL_ENDOFNAMES`.
    *
    * @param {string} channel
-   * @param {Array<string>} additionalNicks sent in addition to the configured client nick
+   * @param {Array<string>=} additionalNicks sent in addition to the configured client nick
+   *
+   * @fires PurpleBot#send
    *
    * @memberOf MockIrcd
    */
-  names (channel, additionalNicks) {
+  names (channel, additionalNicks = []) {
     const nicks = [this.nick, ...additionalNicks]
     this.numericReply(353, `= ${channel} :${nicks.join(' ')}`)
     this.numericReply(366, `${channel} :End of NAMES list`)
@@ -176,6 +193,8 @@ class MockIrcd extends EventEmitter {
    *
    * @param {number|string} numeric
    * @param {string} message
+   *
+   * @fires PurpleBot#send
    *
    * @memberOf MockIrcd
    */
@@ -190,6 +209,8 @@ class MockIrcd extends EventEmitter {
    * Send a message with an appended `CRLF`.
    *
    * @param {string} data
+   *
+   * @fires MockIrcd#send
    *
    * @memberOf MockIrcd
    */

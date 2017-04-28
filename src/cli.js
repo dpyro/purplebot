@@ -7,6 +7,15 @@ const _ = require('lodash')
  * @class Cli
  */
 class Cli {
+  /**
+   * Universal commands
+   *
+   * @returns {Map<string, function(...): void>}
+   * @readonly
+   * @static
+   *
+   * @memberOf Cli
+   */
   static get globalCommands () {
     const map = new Map()
     map.set('quit', (...args) => {
@@ -20,8 +29,8 @@ class Cli {
    * Creates an active `Cli` instance.
    *
    * @param {EventEmitter} target
-   * @param {?stream.Readable} [input=process.stdin]
-   * @param {?stream.Writable} [output=process.stdout]
+   * @param {stream.Readable} [input=process.stdin]
+   * @param {stream.Writable} [output=process.stdout]
    *
    * @memberOf Console
    */
@@ -85,7 +94,7 @@ class Cli {
    * Readline completer function
    *
    * @param {string} line
-   * @param {Function} callback
+   * @param {function(...): void} callback
    *
    * @memberOf Console
    */

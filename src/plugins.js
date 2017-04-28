@@ -4,8 +4,8 @@ const path = require('path')
 /**
  * Synchronously fetch the available plugins.
  *
- * @param {function(Array<any>): void} callback that accepts a list of plugin modules
- * @returns {Array} valid plugins
+ * @param {PurpleBot} bot loads plugin with this parameter
+ * @returns {Array} loaded plugins
  */
 function getPlugins (bot) {
   const pluginsDir = 'plugins'

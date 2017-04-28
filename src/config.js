@@ -2,8 +2,11 @@ const fs = require('fs-extra')
 const os = require('os')
 const path = require('path')
 
-// TODO: intercept SIGHUP
-// TODO: symbolize '.purplebot'
+/**
+ * Manages configuration and data paths.
+ *
+ * @class Config
+ */
 class Config {
   /**
    * Returns a path rooted in the local config directory.
@@ -15,11 +18,13 @@ class Config {
    * @memberOf Config
    */
   static path (...args) {
+    // TODO: symbolize '.purplebot'
     return path.join(os.homedir(), '.purplebot', ...args)
   }
 
   /**
    * Creates an instance of Config.
+   *
    * @param {string=} name
    *
    * @memberOf Config

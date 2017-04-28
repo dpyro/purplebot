@@ -7,8 +7,8 @@ const Config = require('../src/config')
  * Adds an exception-catching wrapped listener to an event emitter
  *
  * @param {event.EventEmitter} emitter
- * @param {any} eventName
- * @param {function(...any): void} callback
+ * @param {string} eventName
+ * @param {function(this:event.Emitter, ...any): void} callback
  */
 function onSafe (emitter, eventName, callback) {
   emitter.on(eventName, (...args) => {
@@ -126,13 +126,18 @@ function getLoggers () {
   return loggers
 }
 
+/**
+ * Plugin to log sent and recieved messages.
+ *
+ * @class LoggingPlugin
+ */
 class LoggingPlugin {
   /**
    * Function to create and return a new `LoggingPlugin` instance.
    *
    * @static
-   * @param {any} bot
-   * @param {any} output
+   * @param {PurpleBot} bot
+   * @param {Buffer|stream.Writeable} output
    * @returns
    *
    * @memberOf LoggingPlugin
