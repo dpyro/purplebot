@@ -54,7 +54,7 @@ describe('mock ircd', function () {
     })
   })
 
-  it('connect & join * part', function (done) {
+  it('connect & join & part', function (done) {
     this.timeout(10000)
 
     let gotTopic = false

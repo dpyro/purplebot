@@ -17,7 +17,6 @@ class Config {
    */
   constructor (name) {
     this.configPath = (!name) ? path.join(Config.dir, name) : name
-    this.json = null
     this.sync()
   }
 

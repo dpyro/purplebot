@@ -56,11 +56,11 @@ class PurpleBot extends EventEmitter {
       }
     })
 
-    this.setupCommandHooks()
-    this.setupOutputHooks()
+    this._setupCommandHooks()
+    this._setupOutputHooks()
   }
 
-  setupCommandHooks () {
+  _setupCommandHooks () {
     this.commands = new Map()
 
     this.commands.set('connect', this.connect.bind(this))
@@ -93,7 +93,7 @@ class PurpleBot extends EventEmitter {
     })
   }
 
-  setupOutputHooks () {
+  _setupOutputHooks () {
     this.forwardClientEvent('error')
 
     this.forwardClientEvent('action')
