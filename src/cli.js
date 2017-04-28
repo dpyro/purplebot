@@ -1,10 +1,14 @@
+/**
+ * @module PurpleBot
+ * @author Sumant Manne <sumant.manne@gmail.com>
+ * @license MIT
+ */
+
 const readline = require('readline')
 const _ = require('lodash')
 
 /**
  * Encapulates a readline interface.
- *
- * @class Cli
  */
 class Cli {
   /**
@@ -13,7 +17,6 @@ class Cli {
    * @returns {Map<string, function(...): void>}
    * @readonly
    * @static
-   *
    * @memberOf Cli
    */
   static get globalCommands () {
@@ -31,7 +34,6 @@ class Cli {
    * @param {EventEmitter} target
    * @param {stream.Readable} [input=process.stdin]
    * @param {stream.Writable} [output=process.stdout]
-   *
    * @memberOf Console
    */
   constructor (target, input = process.stdin, output = process.stdout) {
@@ -95,7 +97,6 @@ class Cli {
    *
    * @param {string} line
    * @param {function(...): void} callback
-   *
    * @memberOf Console
    */
   completer (line, callback) {

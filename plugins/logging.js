@@ -1,14 +1,28 @@
+/**
+ * @module PurpleBot/plugins
+ * @author Sumant Manne <sumant.manne@gmail.com>
+ * @license MIT
+ */
+
 const fs = require('fs-extra')
 const _ = require('lodash')
 
 const Config = require('../src/config')
 
 /**
+ * @callback listenerCallback
+ * @this {EventEmitter}
+ * @param {EventEmitter} emitter
+ * @param {string} eventName
+ * @param {...any} args
+ */
+
+/**
  * Adds an exception-catching wrapped listener to an event emitter
  *
- * @param {event.EventEmitter} emitter
+ * @param {EventEmitter} emitter
  * @param {string} eventName
- * @param {function(this:event.Emitter, ...any): void} callback
+ * @param {listenerCallback} callback
  */
 function onSafe (emitter, eventName, callback) {
   emitter.on(eventName, (...args) => {
@@ -127,9 +141,21 @@ function getLoggers () {
 }
 
 /**
+ * @external Buffer
+ */
+
+/**
+ * @external stream
+ */
+
+/**
+ * @class Writeable
+ * @memberof external:stream
+ * @see {@link https://nodejs.org/api/stream.html#stream_class_stream_writable Node.js stream.Writeable}
+ */
+
+/**
  * Plugin to log sent and recieved messages.
- *
- * @class LoggingPlugin
  */
 class LoggingPlugin {
   /**
@@ -137,9 +163,8 @@ class LoggingPlugin {
    *
    * @static
    * @param {PurpleBot} bot
-   * @param {Buffer|stream.Writeable} output
-   * @returns
-   *
+   * @param {external:Buffer|external:stream.Writeable} output
+   * @returns {Self}
    * @memberOf LoggingPlugin
    */
   static init (bot, output) {
@@ -151,7 +176,6 @@ class LoggingPlugin {
    *
    * @param {PurpleBot} bot
    * @param {Buffer|stream.Writeable} output optional buffer or writeable stream
-   *
    * @memberOf LoggingPlugin
    */
   constructor (bot, output) {

@@ -1,25 +1,47 @@
+/**
+ * @module PurpleBot
+ * @author Sumant Manne <sumant.manne@gmail.com>
+ * @license MIT
+ */
+
 const EventEmitter = require('events')
 const irc = require('irc')
 
 const getPlugins = require('./plugins')
 
 /**
+ * Node.js asynchronous core.
+ *
+ * @external EventEmitter
+ * @see {@link https://nodejs.org/api/events.html Node.js Events API}
+ */
+
+/**
+ * A library to provide IRC functionality.
+ *
+ * @external irc
+ * @see {@link https://github.com/martynsmith/node-irc node-irc}
+ */
+
+/**
+ * @class Client
+ * @memberof external:irc
+ */
+
+/**
  * Configurable bot that wraps `node-irc`.
  *
- * @class PurpleBot
- * @extends {EventEmitter}
- *
+ * @extends external:EventEmitter
  * @property {string} server
- * @property {irc.Client} client
- * @property {Map<string, any>} commands
- * @property {any} plugins
+ * @property {external:irc.Client} client
+ * @property {Map<string, function(...any): void>} commands
+ * @property {Array<any>} plugins
  */
 class PurpleBot extends EventEmitter {
   /**
    * Creates an instance of PurpleBot.
    *
    * @param {{nick: string, server: string, channels: Array<string>, debug: boolean}} options
-   *
    * @memberOf PurpleBot
    */
   constructor (options) {
@@ -143,7 +165,6 @@ class PurpleBot extends EventEmitter {
    *
    * @param {string} from event name to listen for in client
    * @param {string} [to=from] name for forwarding the client event
-   *
    * @memberOf PurpleBot
    * @private
    */
@@ -158,7 +179,6 @@ class PurpleBot extends EventEmitter {
    *
    * @param {function(): void=} callback
    * @fires PurpleBot#connect
-   *
    * @memberOf PurpleBot
    */
   connect (callback) {
@@ -176,7 +196,6 @@ class PurpleBot extends EventEmitter {
    * @param {string} message
    * @param {function(): void=} callback
    * @fires PurpleBot#disconnect
-   *
    * @memberOf PurpleBot
    */
   disconnect (message, callback) {
@@ -194,7 +213,6 @@ class PurpleBot extends EventEmitter {
    * @param {string} channel
    * @param {function(): void=} callback
    * @fires PurpleBot#join
-   *
    * @memberOf PurpleBot
    */
   join (channel, callback) {
@@ -208,7 +226,6 @@ class PurpleBot extends EventEmitter {
    * @param {string} message
    * @param {function(): void=} callback
    * @fires PurpleBot#part
-   *
    * @memberOf PurpleBot
    */
   part (channel, message, callback) {
@@ -226,7 +243,6 @@ class PurpleBot extends EventEmitter {
    * @param {string} target
    * @param {string} message
    * @fires PurpleBot#say
-   *
    * @memberOf PurpleBot
    */
   say (target, message) {
@@ -248,7 +264,6 @@ class PurpleBot extends EventEmitter {
    * Current nick of the bot.
    *
    * @readonly
-   *
    * @memberOf PurpleBot
    */
   get nick () {
@@ -259,7 +274,6 @@ class PurpleBot extends EventEmitter {
    * Updated channel info from the client.
    *
    * @readonly
-   *
    * @memberOf PurpleBot
    */
   get chans () {

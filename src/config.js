@@ -1,11 +1,15 @@
+/**
+ * @module PurpleBot
+ * @author Sumant Manne <sumant.manne@gmail.com>
+ * @license MIT
+ */
+
 const fs = require('fs-extra')
 const os = require('os')
 const path = require('path')
 
 /**
  * Manages configuration and data paths.
- *
- * @class Config
  */
 class Config {
   /**
@@ -13,8 +17,7 @@ class Config {
    *
    * @static
    * @param {...string} args
-   * @returns
-   *
+   * @returns {string}
    * @memberOf Config
    */
   static path (...args) {
@@ -26,7 +29,6 @@ class Config {
    * Creates an instance of Config.
    *
    * @param {string=} name
-   *
    * @memberOf Config
    */
   constructor (name) {
@@ -57,7 +59,6 @@ class Config {
    *
    * @param {string} key
    * @returns {any}
-   *
    * @memberOf Config
    */
   get (key) {
@@ -69,7 +70,6 @@ class Config {
    *
    * @param {string} key
    * @param {any} value
-   *
    * @memberOf Config
    */
   set (key, value) {

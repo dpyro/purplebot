@@ -1,3 +1,9 @@
+/**
+ * @module PurpleBot/plugins
+ * @author Sumant Manne <sumant.manne@gmail.com>
+ * @license MIT
+ */
+
 const JSDOM = require('jsdom').JSDOM
 const mime = require('mime-types')
 const request = require('request')
@@ -8,8 +14,6 @@ const matcher = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9
 /**
  * Plugin to snarf URLs and images.
  *
- * @class WebPlugin
- *
  * @prop {Array<string>} imageExts
  */
 class WebPlugin {
@@ -19,7 +23,6 @@ class WebPlugin {
    * @static
    * @param {PurpleBot} bot
    * @returns {Self}
-   *
    * @memberOf WebPlugin
    */
   static init (bot) {
@@ -30,7 +33,6 @@ class WebPlugin {
    * Creates an instance of WebPlugin.
    *
    * @param {PurpleBot} bot
-   *
    * @memberOf WebPlugin
    */
   constructor (bot) {

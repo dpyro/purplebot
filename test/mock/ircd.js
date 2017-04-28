@@ -1,6 +1,9 @@
 /**
  * mock ircd server
- * based on https://github.com/martynsmith/node-irc/blob/master/test/helpers.js
+ *
+ * @module mockircd
+ * @author Sumant Manne <sumant.manne@gmail.com>
+ * @license MIT
  */
 
 const EventEmitter = require('events')
@@ -28,22 +31,14 @@ function tmpSocket () {
 /**
  * A mock ircd available in the same thread.
  *
- * @class MockIrcd
  * @extends {EventEmitter}
- *
- * @property {net.server} server description
- * @property {string} name server name
- * @property {string} nick configured client name
- * @property {boolean} debug print debug info
- * @property {Array<string>} incoming
- * @property {Array<string>} outgoing
  */
 class MockIrcd extends EventEmitter {
   /**
    * Creates an instance of MockIrcd.
    *
    * @param {string} nick client nick
-   * @param {function(string): void} callback fires on every IRC message from the client
+   * @param {MockIrcd~messageCallback} callback fires on every IRC message from the client
    * @param {boolean} [debug=false] output sent and recieved messages
    *
    * @memberOf MockIrcd
@@ -51,11 +46,16 @@ class MockIrcd extends EventEmitter {
   constructor (nick, callback, debug = false) {
     super()
 
+    /** The server name. */
     this.name = 'mockircd'
+    /** Configured client name. */
     this.nick = nick
+    /** Flag to print debug info. */
     this.debug = debug
-    this.incoming = []
-    this.outgoing = []
+    /** Messages received. */
+    this.received = []
+    /** Messages sent. */
+    this.sent = []
 
     this.server = net.createServer((conn) => {
       conn.on('data', (data) => {
@@ -72,7 +72,7 @@ class MockIrcd extends EventEmitter {
           }
         }
 
-        this.incoming = this.incoming.concat(msg)
+        this.incoming = this.received.concat(msg)
       })
 
       conn.on('end', () => {
@@ -80,7 +80,7 @@ class MockIrcd extends EventEmitter {
       })
 
       this.on('send', (data) => {
-        this.outgoing.push(data)
+        this.sent.push(data)
         conn.write(data)
       })
     })
@@ -98,7 +98,6 @@ class MockIrcd extends EventEmitter {
    *
    * @memberOf MockIrcd
    */
-
   get hostmask () {
     return `${this.nick}!${this.user}@${this.host}`
   }
@@ -230,5 +229,12 @@ class MockIrcd extends EventEmitter {
     this.server.close()
   }
 }
+
+/**
+ * Called for every recieved IRC message.
+ *
+ * @callback MockIrcd~messageCallback
+ * @param {string} message
+ */
 
 module.exports = MockIrcd
