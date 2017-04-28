@@ -5,7 +5,6 @@
 
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
-
 An IRC bot using Node.js and modern JavaScript.
 
 ## Things to do

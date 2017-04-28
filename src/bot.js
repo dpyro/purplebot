@@ -3,13 +3,6 @@ const irc = require('irc')
 
 const getPlugins = require('./plugins')
 
-class ChannelInfo {
-  constructor () {
-    this.nicks = new Map()
-    this.topic = ''
-  }
-}
-
 class PurpleBot extends EventEmitter {
   constructor (options) {
     super()
