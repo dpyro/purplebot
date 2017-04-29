@@ -4,8 +4,8 @@
  * @license MIT
  */
 
-const readline = require('readline')
-const _ = require('lodash')
+import readline from 'readline'
+import _ from 'lodash'
 
 /**
  * Encapulates a readline interface.

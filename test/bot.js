@@ -1,8 +1,10 @@
-const expect = require('chai').expect
+import { expect } from 'chai'
 
-const PurpleBot = require('../src/bot')
+import PurpleBot from '../src/bot'
 
 describe('bot', function () {
+  this.timeout(5000)
+
   it('new', () => {
     const bot = new PurpleBot()
     expect(bot).to.exist

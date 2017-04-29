@@ -1,7 +1,7 @@
-const expect = require('chai').expect
+import { expect } from 'chai'
 
-const MockIrcd = require('./mock/ircd')
-const PurpleBot = require('../src/bot')
+import MockIrcd from './mock/ircd'
+import PurpleBot from '../src/bot'
 
 const nick = 'testnick'
 const channel = '#test'

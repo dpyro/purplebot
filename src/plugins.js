@@ -4,8 +4,8 @@
  * @license MIT
  */
 
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import path from 'path'
 
 /**
  * Synchronously fetch the available plugins.

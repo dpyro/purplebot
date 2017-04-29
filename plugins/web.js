@@ -4,9 +4,9 @@
  * @license MIT
  */
 
-const JSDOM = require('jsdom').JSDOM
-const mime = require('mime-types')
-const request = require('request')
+import { JSDOM } from 'jsdom'
+import mime from 'mime-types'
+import request from 'request'
 
 // http://stackoverflow.com/a/17773849/1440740
 const matcher = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/

@@ -6,15 +6,14 @@
  * @license MIT
  */
 
-const EventEmitter = require('events')
-const fs = require('fs')
-const net = require('net')
-const os = require('os')
-const path = require('path')
+import EventEmitter from 'events'
+import fs from 'fs'
+import net from 'net'
+import os from 'os'
+import path from 'path'
 
 /**
  * Creates a temporary socket and returns its path.
- *
  * @returns {string}
  */
 function tmpSocket () {
@@ -30,7 +29,6 @@ function tmpSocket () {
 
 /**
  * A mock ircd available in the same thread.
- *
  * @extends {EventEmitter}
  */
 class MockIrcd extends EventEmitter {
@@ -40,7 +38,6 @@ class MockIrcd extends EventEmitter {
    * @param {string} nick client nick
    * @param {MockIrcd~messageCallback} callback fires on every IRC message from the client
    * @param {boolean} [debug=false] output sent and recieved messages
-   *
    * @memberOf MockIrcd
    */
   constructor (nick, callback, debug = false) {
@@ -93,9 +90,7 @@ class MockIrcd extends EventEmitter {
    * Returns the full hostmask for the client.
    *
    * @return {string}
-   *
    * @readonly
-   *
    * @memberOf MockIrcd
    */
   get hostmask () {
@@ -107,9 +102,7 @@ class MockIrcd extends EventEmitter {
    *
    * @param {string} [user='testuser']
    * @param {string} [host='testhost']
-   *
    * @fires PurpleBot#send
-   *
    * @memberOf MockIrcd
    */
   register (user = 'testuser', host = 'testhost') {
@@ -124,9 +117,7 @@ class MockIrcd extends EventEmitter {
    * @param {string} channel
    * @param {string} topic
    * @param {Array<string>=} additionalNicks
-   *
    * @fires PurpleBot#send
-   *
    * @memberOf MockIrcd
    */
   join (channel, topic, additionalNicks = []) {
@@ -140,9 +131,7 @@ class MockIrcd extends EventEmitter {
    *
    * @param {string} channel
    * @param {string} message
-   *
    * @fires PurpleBot#send
-   *
    * @memberOf MockIrcd
    */
   part (channel, message) {
@@ -156,9 +145,7 @@ class MockIrcd extends EventEmitter {
    *
    * @param {string} channel
    * @param {string=} topic
-   *
    * @fires PurpleBot#send
-   *
    * @memberOf MockIrcd
    */
   topic (channel, topic) {
@@ -175,9 +162,7 @@ class MockIrcd extends EventEmitter {
    *
    * @param {string} channel
    * @param {Array<string>=} additionalNicks sent in addition to the configured client nick
-   *
    * @fires PurpleBot#send
-   *
    * @memberOf MockIrcd
    */
   names (channel, additionalNicks = []) {
@@ -192,9 +177,7 @@ class MockIrcd extends EventEmitter {
    *
    * @param {number|string} numeric
    * @param {string} message
-   *
    * @fires PurpleBot#send
-   *
    * @memberOf MockIrcd
    */
   numericReply (numeric, message) {
@@ -208,9 +191,7 @@ class MockIrcd extends EventEmitter {
    * Send a message with an appended `CRLF`.
    *
    * @param {string} data
-   *
    * @fires MockIrcd#send
-   *
    * @memberOf MockIrcd
    */
   send (data) {

@@ -1,8 +1,8 @@
-const expect = require('chai').expect
-const nock = require('nock')
-const path = require('path')
+import { expect } from 'chai'
+import nock from 'nock'
+import path from 'path'
 
-const PurpleBot = require('../src/bot')
+import PurpleBot from '../src/bot'
 
 describe('plugin: web', function () {
   let bot, scope

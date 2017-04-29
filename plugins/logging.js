@@ -4,10 +4,10 @@
  * @license MIT
  */
 
-const fs = require('fs-extra')
-const _ = require('lodash')
+import fs from 'fs-extra'
+import _ from 'lodash'
 
-const Config = require('../src/config')
+import Config from '../src/config'
 
 /**
  * @callback listenerCallback

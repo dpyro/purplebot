@@ -1,9 +1,9 @@
-const EventEmitter = require('events')
-const expect = require('chai').expect
-const streamBuffers = require('stream-buffers')
-const _ = require('lodash')
+import EventEmitter from 'events'
+import { expect } from 'chai'
+import streamBuffers from 'stream-buffers'
+import _ from 'lodash'
 
-const logging = require('../plugins/logging')
+import logging from '../plugins/logging'
 
 function setupLogging () {
   const emitter = new EventEmitter()

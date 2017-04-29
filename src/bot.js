@@ -4,10 +4,10 @@
  * @license MIT
  */
 
-const EventEmitter = require('events')
-const irc = require('irc')
+import EventEmitter from 'events'
+import irc from 'irc'
 
-const getPlugins = require('./plugins')
+import getPlugins from './plugins'
 
 /**
  * Node.js asynchronous core.

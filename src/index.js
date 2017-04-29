@@ -6,8 +6,8 @@
  * @license MIT
  */
 
-const PurpleBot = require('./bot.js')
-const Cli = require('./cli')
+import PurpleBot from './bot.js'
+import Cli from './cli'
 
 if (require.main === module) {
   const yargs = require('yargs')

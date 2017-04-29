@@ -1,6 +1,6 @@
-const expect = require('chai').expect
+import { expect } from 'chai'
 
-const PurpleBot = require('../src/bot')
+import PurpleBot from '../src/bot'
 
 describe('command', function () {
   let bot

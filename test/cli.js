@@ -1,8 +1,8 @@
-const expect = require('chai').expect
-const EventEmitter = require('events')
-const streamBuffers = require('stream-buffers')
+import { expect } from 'chai'
+import EventEmitter from 'events'
+import streamBuffers from 'stream-buffers'
 
-const Cli = require('../src/cli')
+import Cli from '../src/cli'
 
 /**
  *

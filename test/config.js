@@ -1,7 +1,7 @@
-const expect = require('chai').expect
-const join = require('path').join
-const fs = require('fs-extra')
-const tmpdir = require('os').tmpdir
+import { expect } from 'chai'
+import { join } from 'path'
+import fs from 'fs-extra'
+import { tmpdir } from 'os'
 
 const Config = require('../src/config')
 
