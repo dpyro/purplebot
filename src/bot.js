@@ -37,7 +37,7 @@ import getPlugins from './plugins'
  * @property {Map<string, function(...any): void>} commands
  * @property {Array<any>} plugins
  */
-class PurpleBot extends EventEmitter {
+export default class PurpleBot extends EventEmitter {
   /**
    * Creates an instance of PurpleBot.
    *
@@ -280,5 +280,3 @@ class PurpleBot extends EventEmitter {
     return this.client.chans
   }
 }
-
-module.exports = PurpleBot

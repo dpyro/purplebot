@@ -16,19 +16,7 @@ const matcher = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9
  *
  * @prop {Array<string>} imageExts
  */
-class WebPlugin {
-  /**
-   * Function to create and return a new `WebPlugin`.
-   *
-   * @static
-   * @param {PurpleBot} bot
-   * @returns {Self}
-   * @memberOf WebPlugin
-   */
-  static init (bot) {
-    return new WebPlugin(bot)
-  }
-
+export default class WebPlugin {
   /**
    * Creates an instance of WebPlugin.
    *
@@ -84,5 +72,3 @@ class WebPlugin {
     })
   }
 }
-
-module.exports = WebPlugin.init

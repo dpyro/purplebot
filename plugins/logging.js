@@ -157,29 +157,16 @@ function getLoggers () {
 /**
  * Plugin to log sent and recieved messages.
  */
-class LoggingPlugin {
-  /**
-   * Function to create and return a new `LoggingPlugin` instance.
-   *
-   * @static
-   * @param {PurpleBot} bot
-   * @param {external:Buffer|external:stream.Writeable} output
-   * @returns {Self}
-   * @memberOf LoggingPlugin
-   */
-  static init (bot, output) {
-    return new LoggingPlugin(bot, output)
-  }
-
+export default class LoggingPlugin {
   /**
    * Creates an attached instance of `LoggingPlugin`.
    *
    * @param {PurpleBot} bot
-   * @param {Buffer|stream.Writeable} output optional buffer or writeable stream
+   * @param {external:Buffer|external:stream.Writeable} output optional buffer or writeable stream
    * @memberOf LoggingPlugin
+   * @todo set socket server file name to server name
    */
   constructor (bot, output) {
-    // TODO: set output to server name
     let stream
     if (output != null) {
       stream = output
@@ -199,5 +186,3 @@ class LoggingPlugin {
     }
   }
 }
-
-module.exports = LoggingPlugin.init

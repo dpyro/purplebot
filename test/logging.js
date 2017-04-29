@@ -3,16 +3,7 @@ import { expect } from 'chai'
 import streamBuffers from 'stream-buffers'
 import _ from 'lodash'
 
-import logging from '../plugins/logging'
-
-function setupLogging () {
-  const emitter = new EventEmitter()
-  const output = new streamBuffers.WritableStreamBuffer()
-
-  logging(emitter, output)
-
-  return [emitter, output]
-}
+import LoggingPlugin from '../plugins/logging'
 
 /**
  * @returns {Map<string, Array<string>>}
@@ -67,17 +58,19 @@ function eventTests () {
 }
 
 describe('plugin: logging', function () {
-  it('attaches logging', function () {
-    const [emitter] = setupLogging()
+  let logger, emitter, output
 
-    expect(emitter.eventNames()).to.not.be.empty
+  beforeEach(function () {
+    emitter = new EventEmitter()
+    output = new streamBuffers.WritableStreamBuffer()
+    logger = new LoggingPlugin(emitter, output)
+
+    expect(logger).to.exist
   })
 
   const tests = eventTests()
   for (const [event, ...args] of tests) {
     it(`outputs data on ${event}: ${(args && args.length) || 0}`, function () {
-      const [emitter, output] = setupLogging()
-
       expect(output.size()).to.equal(0)
 
       emitter.emit(event, ...args)

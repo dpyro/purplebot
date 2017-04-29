@@ -6,12 +6,13 @@
  * @license MIT
  */
 
+import yargs from 'yargs'
+
 import PurpleBot from './bot.js'
 import Cli from './cli'
 
 if (require.main === module) {
-  const yargs = require('yargs')
-    .usage('Usage: $0 [-s server.address:port] [-c #channel1 #channel2 ...]')
+  yargs.usage('Usage: $0 [-s server.address:port] [-c #channel1 #channel2 ...]')
     .options('c', {
       alias: 'channels',
       default: [],

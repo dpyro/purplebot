@@ -3,7 +3,7 @@ import { join } from 'path'
 import fs from 'fs-extra'
 import { tmpdir } from 'os'
 
-const Config = require('../src/config')
+import Config from '../src/config'
 
 let testDir = null
 

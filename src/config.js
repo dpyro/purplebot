@@ -11,7 +11,7 @@ import path from 'path'
 /**
  * Manages configuration and data paths.
  */
-class Config {
+export default class Config {
   /**
    * Returns a path rooted in the local config directory.
    *
@@ -76,5 +76,3 @@ class Config {
     this.json[key] = value
   }
 }
-
-module.exports = Config

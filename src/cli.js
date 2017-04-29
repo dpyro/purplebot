@@ -10,7 +10,7 @@ import _ from 'lodash'
 /**
  * Encapulates a readline interface.
  */
-class Cli {
+export default class Cli {
   /**
    * Universal commands
    *
@@ -113,5 +113,3 @@ class Cli {
     callback(null, [results, line])
   }
 }
-
-module.exports = Cli
