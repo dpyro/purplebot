@@ -31,7 +31,7 @@ function tmpSocket () {
  * A mock ircd available in the same thread.
  * @extends {EventEmitter}
  */
-class MockIrcd extends EventEmitter {
+export default class MockIrcd extends EventEmitter {
   /**
    * Creates an instance of MockIrcd.
    *
@@ -217,5 +217,3 @@ class MockIrcd extends EventEmitter {
  * @callback MockIrcd~messageCallback
  * @param {string} message
  */
-
-module.exports = MockIrcd

@@ -58,7 +58,6 @@ function getLoggers () {
     const msg = (message) ? `: ${message}` : ''
     return `DISCONNECT ${server}${msg}`
   })
-
   loggers.set('action', (from, to, text, message) => {
     return `ACTION ${from} → ${to}: ${text}`
   })
@@ -166,7 +165,7 @@ export default class LoggingPlugin {
    * @memberOf LoggingPlugin
    * @todo set socket server file name to server name
    */
-  constructor (bot, output) {
+  constructor (bot, output = null) {
     let stream
     if (output != null) {
       stream = output
