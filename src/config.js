@@ -26,6 +26,21 @@ export default class Config {
     return path.join(os.homedir(), '.purplebot', ...args)
   }
 
+  static async database () {
+    if (Config.db != null) {
+      return Config.db
+    }
+
+    const dbPath = Config.path('database.db')
+    return Promise.resolve()
+      .then(() => sqlite.open(dbPath))
+      .catch(err => console.error(err.stack))
+      .then((db) => {
+        Config.db = db
+        return db
+      })
+  }
+
   /**
    * Creates an instance of Config.
    *
@@ -75,20 +90,5 @@ export default class Config {
    */
   set (key, value) {
     this.json[key] = value
-  }
-
-  async database () {
-    if (this.db != null) {
-      return this.db
-    }
-
-    const dbPath = Config.path('database.db')
-    return Promise.resolve()
-      .then(() => sqlite.open(dbPath))
-      .catch(err => console.error(err.stack))
-      .then((db) => {
-        this.db = db
-        return db
-      })
   }
 }

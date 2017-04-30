@@ -31,9 +31,12 @@ export class KarmaPlugin {
       ;
     `
 
-    this.db = await Config.database()
-    return Promise.resolve()
-      .then(() => this.db.run(sql))
+    return Config.database()
+      .then(db => {
+        this.db = db
+        return db
+      })
+      .then(db => db.run(sql))
       .catch(err => console.error(err.stack))
   }
 
@@ -54,6 +57,6 @@ export class KarmaPlugin {
 
 export default async function init (bot) {
   const plugin = new KarmaPlugin(bot)
-  // await plugin.database()
+  await plugin.database()
   return plugin
 }
