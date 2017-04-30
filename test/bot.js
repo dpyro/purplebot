@@ -16,33 +16,23 @@ describe('bot', function () {
       })
   })
 
-  it('new', function () {})
+  it('#forwardClientEvent implicit arg', (done) => {
+    bot.on('testout', (arg) => {
+      expect(arg).to.equal('arg')
+      done()
+    })
 
-  async function forwardClientEventBot (done) {
-    return Promise.resolve()
-      .then(() => {
-        bot.on('testout', (arg) => {
-          if (arg) {
-            expect(arg).to.string('arg')
-          }
-          done()
-        })
-      })
-  }
-
-  it('#forwardClientEvent 1', (done) => {
-    forwardClientEventBot(done)
-      .then(() => {
-        bot.forwardClientEvent('test1', 'testout')
-        expect(bot.client.emit('test1', 'arg')).is.true
-      })
+    bot.forwardClientEvent('test1', 'testout')
+    expect(bot.client.emit('test1', 'arg')).is.true
   })
 
-  it('#forwardClientEvent 2', (done) => {
-    forwardClientEventBot(done)
-      .then(() => {
-        bot.forwardClientEvent('testout')
-        expect(bot.client.emit('testout', 'arg')).is.true
-      })
+  it('#forwardClientEvent both args', (done) => {
+    bot.on('testout', (arg) => {
+      expect(arg).to.equal('arg')
+      done()
+    })
+
+    bot.forwardClientEvent('testout')
+    expect(bot.client.emit('testout', 'arg')).is.true
   })
 })
