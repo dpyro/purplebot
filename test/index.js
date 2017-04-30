@@ -2,8 +2,8 @@ import { expect } from 'chai'
 import { exec } from 'child_process'
 
 describe('index', function () {
-  this.slow(2000)
-  this.timeout(5000)
+  this.slow(3000)
+  this.timeout(6000)
 
   it('npm start --help', function () {
     return new Promise(function (resolve) {

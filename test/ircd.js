@@ -47,13 +47,12 @@ describe('mock ircd', function () {
       })
   })
 
-  it('connect & disconnect', (done) => {
-    bot.connect(() => {
-      bot.disconnect(null, done)
-    })
+  it('connect & disconnect', () => {
+    return bot.connect()
+      .then(() => bot.disconnect())
   })
 
-  it('connect & join & part', function (done) {
+  it('connect & join & part', function () {
     this.timeout(10000)
 
     let gotTopic = false
@@ -69,19 +68,13 @@ describe('mock ircd', function () {
       gotNames = true
     })
 
-    bot.connect(() => {
-      expect(bot.nick).to.equal(nick)
-      bot.join(channel, () => {
-        bot.part(channel, () => {
-          let error
-          if (!gotTopic) {
-            error = new Error('Did not get topic')
-          } else if (!gotNames) {
-            error = new Error('Did not get names')
-          }
-          done(error)
-        })
+    return bot.connect()
+      .then(() => expect(bot.nick).to.equal(nick))
+      .then(() => bot.join(channel))
+      .then(() => bot.part(channel))
+      .then(() => {
+        if (!gotTopic) throw new Error('Did not get topic')
+        if (!gotNames) throw new Error('Did not get names')
       })
-    })
   })
 })

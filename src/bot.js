@@ -146,7 +146,6 @@ export class PurpleBot extends EventEmitter {
 
     this.forwardClientEvent('action')
     this.forwardClientEvent('invite')
-    this.forwardClientEvent('join')
     this.forwardClientEvent('kill')
     this.forwardClientEvent('message')
     this.forwardClientEvent('message#')
@@ -155,7 +154,6 @@ export class PurpleBot extends EventEmitter {
     this.forwardClientEvent('motd')
     this.forwardClientEvent('names')
     this.forwardClientEvent('notice')
-    this.forwardClientEvent('part')
     this.forwardClientEvent('pm')
     this.forwardClientEvent('quit')
     this.forwardClientEvent('registered', 'register')
@@ -180,33 +178,31 @@ export class PurpleBot extends EventEmitter {
   /**
    * Connect to the IRC server.
    *
-   * @param {function(): void=} callback
    * @fires PurpleBot#connect
    * @memberOf PurpleBot
    */
-  connect (callback) {
-    this.client.connect(() => {
-      this.emit('connect', this.server)
-      if (callback != null) {
-        callback.apply(this)
-      }
+  async connect () {
+    return new Promise((resolve, reject) => {
+      this.client.connect(() => {
+        this.emit('connect', this.server)
+        return resolve.call(this, this.server)
+      })
     })
   }
 
   /**
    * Disconnect from the IRC server.
    *
-   * @param {string} message
-   * @param {function(): void=} callback
+   * @param {string=} message
    * @fires PurpleBot#disconnect
    * @memberOf PurpleBot
    */
-  disconnect (message, callback) {
-    this.client.disconnect(message, () => {
-      this.emit('disconnect', this.server, message)
-      if (callback != null) {
-        callback.apply(this)
-      }
+  async disconnect (message) {
+    return new Promise((resolve, reject) => {
+      this.client.disconnect(message, () => {
+        this.emit('disconnect', this.server, message)
+        return resolve.call(this, this.server, message)
+      })
     })
   }
 
@@ -214,29 +210,32 @@ export class PurpleBot extends EventEmitter {
    * Joins the bot to an IRC channel.
    *
    * @param {string} channel
-   * @param {function(): void=} callback
    * @fires PurpleBot#join
    * @memberOf PurpleBot
    */
-  join (channel, callback) {
-    this.client.join(channel, callback)
+  async join (channel) {
+    return new Promise((resolve, reject) => {
+      this.client.join(channel, () => {
+        this.emit('join', channel)
+        return resolve.call(this, channel)
+      })
+    })
   }
 
   /**
    * Parts the bot from an IRC channel.
    *
    * @param {string} channel
-   * @param {string} message
-   * @param {function(): void=} callback
+   * @param {string=} message
    * @fires PurpleBot#part
    * @memberOf PurpleBot
    */
-  part (channel, message, callback) {
-    this.client.part(channel, message, () => {
-      this.nicks.delete(channel)
-      if (callback != null) {
-        callback.apply(this)
-      }
+  async part (channel, message) {
+    return new Promise((resolve, reject) => {
+      this.client.part(channel, message, () => {
+        this.emit('part', channel, message)
+        resolve.call(this, channel)
+      })
     })
   }
 
