@@ -4,10 +4,11 @@
  * @license MIT
  */
 
+import 'babel-polyfill'
 import EventEmitter from 'events'
 import irc from 'irc'
 
-import getPlugins from './plugins'
+import loadPlugins from './plugins'
 
 /**
  * Node.js asynchronous core.
@@ -37,7 +38,7 @@ import getPlugins from './plugins'
  * @property {Map<string, function(...any): void>} commands
  * @property {Array<any>} plugins
  */
-export default class PurpleBot extends EventEmitter {
+export class PurpleBot extends EventEmitter {
   /**
    * Creates an instance of PurpleBot.
    *
@@ -68,8 +69,6 @@ export default class PurpleBot extends EventEmitter {
       clientOptions
     )
 
-    this.plugins = getPlugins(this)
-
     this.client.on('message', (nick, to, text, message) => {
       const trimmedText = text.trim()
       if (trimmedText.startsWith('.') && trimmedText.substring(1, 2) !== '.') {
@@ -91,6 +90,10 @@ export default class PurpleBot extends EventEmitter {
 
     this._setupCommandHooks()
     this._setupOutputHooks()
+  }
+
+  async loadPlugins () {
+    this.plugins = await loadPlugins(this)
   }
 
   /**
@@ -279,4 +282,10 @@ export default class PurpleBot extends EventEmitter {
   get chans () {
     return this.client.chans
   }
+}
+
+export default async function init (options) {
+  const bot = new PurpleBot(options)
+  await bot.loadPlugins()
+  return bot
 }

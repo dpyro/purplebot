@@ -156,7 +156,7 @@ function getLoggers () {
 /**
  * Plugin to log sent and recieved messages.
  */
-export default class LoggingPlugin {
+export class LoggingPlugin {
   /**
    * Creates an attached instance of `LoggingPlugin`.
    *
@@ -184,4 +184,8 @@ export default class LoggingPlugin {
       })
     }
   }
+}
+
+export default function init (...args) {
+  return new LoggingPlugin(...args)
 }

@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 
 import MockIrcd from './mock/ircd'
-import PurpleBot from '../src/bot'
+import initBot from '../src/bot'
 
 const nick = 'testnick'
 const channel = '#test'
@@ -36,16 +36,15 @@ describe('mock ircd', function () {
         }
       }
     })
-    const socket = ircd.socket
-    bot = new PurpleBot({
-      server: socket,
-      socket: true
-    })
 
-    expect(bot).to.exist
     expect(ircd).to.exist
+    const socket = ircd.socket
 
-    return [bot, ircd]
+    return initBot({server: socket, socket: true})
+      .then(newBot => {
+        expect(newBot).to.exist
+        bot = newBot
+      })
   })
 
   it('connect & disconnect', (done) => {

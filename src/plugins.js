@@ -4,8 +4,10 @@
  * @license MIT
  */
 
+import 'babel-polyfill'
 import { join } from 'path'
 import requireAll from 'require-all'
+import _ from 'lodash'
 
 /**
  * Synchronously fetch the available plugins.
@@ -13,12 +15,19 @@ import requireAll from 'require-all'
  * @param {PurpleBot} bot loads plugin with this parameter
  * @returns {Array} loaded plugins
  */
-export default function getPlugins (bot) {
-  return requireAll({
+export default async function loadPlugins (bot) {
+  const plugins = requireAll({
     dirname: join(__dirname, '..', 'plugins'),
     resolve: (plugin) => {
-      const P = plugin.default
-      return new P(bot)
+      return plugin.default
     }
   })
+  const values = _.values(plugins)
+  return Promise.all(values.map(element => {
+    try {
+      return element(bot)
+    } catch (err) {
+      console.error(err.stack)
+    }
+  }))
 }

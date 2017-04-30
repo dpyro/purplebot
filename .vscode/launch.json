@@ -7,6 +7,15 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Launch Program",
+            "program": "${workspaceRoot}/node_modules/babel-cli/bin/babel-node.js",
+            "args": [
+                "${workspaceRoot}/src/index.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Mocha Tests",
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "args": [
@@ -15,37 +24,9 @@
                 "--timeout",
                 "999999",
                 "--colors",
-                "${workspaceRoot}/test"
-            ],
-            "internalConsoleOptions": "openOnSessionStart"
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Mocha Tests - mockircd",
-            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
-            "args": [
-                "-u",
-                "tdd",
-                "--timeout",
-                "999999",
-                "--colors",
-                "${workspaceRoot}/test/ircd.js"
-            ],
-            "internalConsoleOptions": "openOnSessionStart"
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Mocha Tests - web",
-            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
-            "args": [
-                "-u",
-                "tdd",
-                "--timeout",
-                "999999",
-                "--colors",
-                "${workspaceRoot}/test/web.js"
+                "${workspaceRoot}/test",
+                "--compilers",
+                "js:babel-register"
             ],
             "internalConsoleOptions": "openOnSessionStart"
         }

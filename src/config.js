@@ -7,6 +7,7 @@
 import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
+import sqlite from 'sqlite'
 
 /**
  * Manages configuration and data paths.
@@ -74,5 +75,20 @@ export default class Config {
    */
   set (key, value) {
     this.json[key] = value
+  }
+
+  async database () {
+    if (this.db != null) {
+      return this.db
+    }
+
+    const dbPath = Config.path('database.db')
+    return Promise.resolve()
+      .then(() => sqlite.open(dbPath))
+      .catch(err => console.error(err.stack))
+      .then((db) => {
+        this.db = db
+        return db
+      })
   }
 }

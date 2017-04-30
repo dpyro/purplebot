@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import nock from 'nock'
 import path from 'path'
 
-import PurpleBot from '../src/bot'
+import initBot from '../src/bot'
 
 describe('plugin: web', function () {
   let bot, scope
@@ -30,8 +30,11 @@ describe('plugin: web', function () {
   })
 
   beforeEach(function () {
-    bot = new PurpleBot()
-    expect(bot).to.exist
+    return initBot()
+      .then(newBot => {
+        expect(newBot).to.exist
+        bot = newBot
+      })
   })
 
   after(function () {

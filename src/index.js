@@ -6,9 +6,10 @@
  * @license MIT
  */
 
+import 'babel-polyfill'
 import yargs from 'yargs'
 
-import PurpleBot from './bot.js'
+import initBot from './bot.js'
 import Cli from './cli'
 
 if (require.main === module) {
@@ -39,13 +40,18 @@ if (require.main === module) {
     process.exit(0)
   }
 
-  const bot = new PurpleBot({
+  const options = {
     server: argv.server,
     channels: argv.channels,
     debug: argv.v
-  })
+  }
 
-  // eslint-disable-next-line no-unused-vars
+  launchBot(options)
+}
+
+async function launchBot (options) {
+  const bot = await initBot(options)
   const cli = new Cli(bot)
   bot.connect()
+  return cli
 }

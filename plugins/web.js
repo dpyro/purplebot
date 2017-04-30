@@ -16,7 +16,7 @@ const matcher = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9
  *
  * @prop {Array<string>} imageExts
  */
-export default class WebPlugin {
+export class WebPlugin {
   /**
    * Creates an instance of WebPlugin.
    *
@@ -71,4 +71,8 @@ export default class WebPlugin {
 
     })
   }
+}
+
+export default function init (...args) {
+  return new WebPlugin(...args)
 }

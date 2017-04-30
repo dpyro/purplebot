@@ -1,14 +1,17 @@
 import { expect } from 'chai'
 
-import PurpleBot from '../src/bot'
+import initBot from '../src/bot'
 
 describe('command', function () {
   let bot
   const channel = '#test'
 
   beforeEach(function () {
-    bot = new PurpleBot()
-    expect(bot).to.exist
+    return initBot()
+      .then(newBot => {
+        expect(newBot).to.exist
+        bot = newBot
+      })
   })
 
   function emitMessage (text) {
