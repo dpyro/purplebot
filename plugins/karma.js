@@ -5,7 +5,7 @@
  */
 
 import 'babel-polyfill'
-import fs from 'fs'
+import fs from 'fs-extra'
 import sqlite from 'sqlite'
 
 import Config from '../src/config'
@@ -37,6 +37,7 @@ export class KarmaPlugin {
       ;
     `
 
+    await fs.mkdirs(this.databasePath)
     this.db = await sqlite.open(this.databasePath)
     await this.db.exec(sql)
   }
