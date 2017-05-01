@@ -7,7 +7,6 @@
 import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
-import sqlite from 'sqlite'
 
 /**
  * Manages configuration and data paths.
@@ -24,21 +23,6 @@ export default class Config {
   static path (...args) {
     // TODO: symbolize '.purplebot'
     return path.join(os.homedir(), '.purplebot', ...args)
-  }
-
-  static async database () {
-    if (Config.db != null) {
-      return Config.db
-    }
-
-    const dbPath = Config.path('database.db')
-    return Promise.resolve()
-      .then(() => sqlite.open(dbPath))
-      .catch(err => console.error(err.stack))
-      .then((db) => {
-        Config.db = db
-        return db
-      })
   }
 
   /**

@@ -3,8 +3,8 @@
 - [ ] autologin
 - [ ] logging
 - [ ] karma
-  - [ ] .karma
-  - [ ] .karma set
+  - [ ] .karma info
+  - [ ] .karma set / .karma clear
   - [ ] thing++ / ++thing
   - [ ] thing-- / --thing
 - [ ] terms

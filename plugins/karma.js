@@ -5,12 +5,18 @@
  */
 
 import 'babel-polyfill'
+import fs from 'fs'
+import sqlite from 'sqlite'
 
 import Config from '../src/config'
 
 export class KarmaPlugin {
   constructor (bot) {
     this.bot = bot
+  }
+
+  get databasePath () {
+    return Config.path('karma.db')
   }
 
   async database () {
@@ -31,27 +37,40 @@ export class KarmaPlugin {
       ;
     `
 
-    return Config.database()
-      .then(db => {
-        this.db = db
-        return db
+    this.db = await sqlite.open(this.databasePath)
+    await this.db.exec(sql)
+  }
+
+  async resetDatabase () {
+    if (this.db) {
+      await this.db.close()
+    }
+
+    await new Promise((resolve, reject) => {
+      fs.unlink(this.databasePath, err => {
+        if (err) reject(err)
+        else resolve(err)
       })
-      .then(db => db.run(sql))
-      .catch(err => console.error(err.stack))
+    })
+
+    await this.database()
   }
 
-  async addKarma (name, user = null, points = 1) {
+  async add (name, user = null, points = 1) {
     const sql = 'INSERT INTO karma (name, user, points) VALUES (?, ?, ?);'
-    return Promise.resolve()
-      .then(() => this.db.run(sql, name, user, points))
-      .then(() => this.displayKarma(name))
+    await this.db.run(sql, name, user, points)
   }
 
-  async getKarma (name) {
+  async get (name) {
     const sql = 'SELECT total FROM karma_total WHERE name = ?;'
-    return Promise.resolve()
-      .then(() => this.db.get(sql, name))
-      .then(result => result.total)
+    const result = await this.db.get(sql, name)
+    return result.total
+  }
+
+  async top (limit = 5) {
+    const sql = 'SELECT * FROM karma_total LIMIT ?;'
+    const results = await this.db.all(sql, limit)
+    await results.map(({ name, total }, index) => { return { index, name, total } })
   }
 }
 
