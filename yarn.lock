@@ -1915,8 +1915,8 @@ jsdoc@^3.4.3:
     underscore "~1.8.3"
 
 jsdom@^10.0.0:
-  version "10.0.0"
-  resolved "https://registry.yarnpkg.com/jsdom/-/jsdom-10.0.0.tgz#3dda0b760aa248dd9b1392f8bb82e93ad70377b4"
+  version "10.1.0"
+  resolved "https://registry.yarnpkg.com/jsdom/-/jsdom-10.1.0.tgz#7765e00fd5c3567f34985a1c86ff466a61dacc6a"
   dependencies:
     abab "^1.0.3"
     acorn "^4.0.4"
@@ -2809,8 +2809,8 @@ sqlite3@^3.1.8:
     node-pre-gyp "~0.6.31"
 
 sqlite@^2.5.0:
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/sqlite/-/sqlite-2.5.0.tgz#8298c13851c01be315e23af620e225c8279fb44c"
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/sqlite/-/sqlite-2.6.0.tgz#8b2ee14c6152a802e79beee5e8fb707b97094072"
   dependencies:
     sqlite3 "^3.1.8"
 

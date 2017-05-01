@@ -1,3 +1,4 @@
+import 'babel-polyfill'
 import { expect } from 'chai'
 import nock from 'nock'
 import path from 'path'
@@ -29,12 +30,9 @@ describe('plugin: web', function () {
     expect(scope).to.exist
   })
 
-  beforeEach(function () {
-    return initBot()
-      .then(newBot => {
-        expect(newBot).to.exist
-        bot = newBot
-      })
+  beforeEach(async function () {
+    bot = await initBot()
+    expect(bot).to.exist
   })
 
   after(function () {
@@ -45,81 +43,85 @@ describe('plugin: web', function () {
     expect(bot.client.emit('message#', 'someone', channel, link)).is.true
   }
 
-  function validateResult (done) {
-    bot.on('self', (target, text) => {
-      try {
-        expect(target).to.equal(channel)
-        expect(text.toLowerCase()).to.have.string('valid title')
-        done()
-      } catch (e) {
-        done(e)
-      }
+  async function validateResult (test) {
+    return new Promise((resolve, reject) => {
+      bot.on('self', (target, text) => {
+        try {
+          expect(target).to.equal(channel)
+          expect(text.toLowerCase()).to.have.string('valid title')
+          resolve()
+        } catch (err) {
+          reject(err)
+        }
+      })
+
+      test()
     })
   }
 
-  function expectNoEvent (bot, event, done, test) {
-    let error
+  async function expectNoEvent (bot, event, test) {
+    return new Promise((resolve, reject) => {
+      bot.on(event, (nick, to, link) => {
+        reject(new Error(`Expected no emit for event ${event}`))
+      })
 
-    bot.on(event, (nick, to, link) => {
-      error = new Error(`Expected no emit for event ${event}`)
+      test()
+
+      resolve()
     })
-
-    test()
-
-    done(error)
   }
 
-  it('does not emit on invalid link', function (done) {
-    expectNoEvent(bot, 'web', done, () => {
+  it('does not emit on invalid link', function () {
+    return expectNoEvent(bot, 'web', () => {
       emitUrl('http://:example.local/valid')
     })
   })
 
-  it('title for valid link', function (done) {
-    validateResult(done)
-
-    emitUrl('http://example.local/valid')
+  it('title for valid link', function () {
+    return validateResult(() => {
+      emitUrl('http://example.local/valid')
+    })
   })
 
-  it('title for valid link (html4)', function (done) {
-    validateResult(done)
-
-    emitUrl('http://example.local/valid4')
+  it('title for valid link (html4)', function () {
+    return validateResult(() => {
+      emitUrl('http://example.local/valid4')
+    })
   })
 
-  it('ignores erroneous replies', function (done) {
-    expectNoEvent(bot, 'self', done, () => {
+  it('ignores erroneous replies', function () {
+    return expectNoEvent(bot, 'self', () => {
       emitUrl('http://example.local/error')
     })
   })
 
-  it('follows redirect', function (done) {
-    validateResult(done)
-
-    emitUrl('http://example.local/redirect')
+  it('follows redirect', function () {
+    return validateResult(() => {
+      emitUrl('http://example.local/redirect')
+    })
   })
 
-  it('ignores erroneous redirect', function (done) {
-    expectNoEvent(bot, 'self', done, () => {
+  it('ignores erroneous redirect', function () {
+    return expectNoEvent(bot, 'self', () => {
       emitUrl('http://example.local/redirect/error')
     })
   })
 
-  it('image', function (done) {
-    expectNoEvent(bot, 'self', done, () => {
+  it('image', function () {
+    return expectNoEvent(bot, 'self', () => {
       emitUrl('http://example.local/image')
     })
   })
 
   it('ignores timeout')
 
-  it('https', function (done) {
+  it('https', function () {
     nock('https://example.local/')
       .get('/valid')
       .replyWithFile(200, path.join(__dirname, '/fixtures/valid.html'))
 
-    validateResult(done)
-
-    emitUrl('https://example.local/valid')
+    return validateResult(() => {
+      emitUrl('https://example.local/valid')
+    })
   })
 })
