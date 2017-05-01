@@ -37,7 +37,7 @@ export class KarmaPlugin {
       ;
     `
 
-    await fs.mkdirs(this.databasePath)
+    await fs.ensureDir(Config.path())
     this.db = await sqlite.open(this.databasePath)
     await this.db.exec(sql)
   }
