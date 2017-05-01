@@ -19,7 +19,7 @@ export class KarmaPlugin {
     return Config.path('karma.db')
   }
 
-  async database () {
+  async load () {
     const sql = `
       CREATE TABLE IF NOT EXISTS karma (
         id        INTEGER PRIMARY KEY,
@@ -54,7 +54,7 @@ export class KarmaPlugin {
       })
     })
 
-    await this.database()
+    await this.load()
   }
 
   async add (name, user = null, points = 1) {
@@ -77,6 +77,6 @@ export class KarmaPlugin {
 
 export default async function init (bot) {
   const plugin = new KarmaPlugin(bot)
-  await plugin.database()
+  await plugin.load()
   return plugin
 }
