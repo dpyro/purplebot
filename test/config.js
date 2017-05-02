@@ -1,3 +1,4 @@
+import 'babel-polyfill'
 import { expect } from 'chai'
 import { join } from 'path'
 import fs from 'fs-extra'
@@ -16,13 +17,14 @@ describe('config', function () {
     })
   })
 
-  beforeEach(function createConfigFile () {
+  beforeEach(async function createConfigFile () {
     const testPath = join(testDir, 'test.json')
     const testData = '{ "test": "valid" }'
 
     fs.writeFileSync(testPath, testData)
 
     config = new Config(testPath)
+    await config.sync()
     expect(config).to.exist
   })
 
@@ -40,10 +42,10 @@ describe('config', function () {
     expect(value).to.equal('valid')
   })
 
-  it('#set', function () {
+  it('#set', async function () {
     config.set('test', 'different')
-    config.flush()
-    config.sync()
+    await config.flush()
+    await config.sync()
     const value = config.get('test')
 
     expect(value).to.equal('different')

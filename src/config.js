@@ -32,25 +32,41 @@ class Config {
    */
   constructor (name) {
     this.configPath = (!name) ? path.join(Config.dir, name) : name
-    this.sync()
   }
 
   /**
-   * Synchronously saves this configuration.
+   * Saves this configuration.
    *
    * @memberOf Config
    */
-  sync () {
-    this.json = fs.readJSONSync(this.configPath, this.json, {spaces: 2})
+  async sync () {
+    return new Promise((resolve, reject) => {
+      fs.readJson(this.configPath, (err, result) => {
+        if (err) {
+          reject(err)
+        } else {
+          this.json = result
+          resolve(result)
+        }
+      })
+    })
   }
 
   /**
-   * Synchronously loads the configuration from disk.
+   * Loads the configuration from disk.
    *
    * @memberOf Config
    */
-  flush () {
-    fs.writeJSONSync(this.configPath, this.json)
+  async flush () {
+    return new Promise((resolve, reject) => {
+      fs.writeJson(this.configPath, this.json, {spaces: 2}, (err, result) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      })
+    })
   }
 
   /**
