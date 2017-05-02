@@ -3,7 +3,7 @@
 - [ ] autologin
 - [ ] logging
 - [ ] karma
-  - [ ] .karma
+  - [x] .karma
   - [ ] .karma set / clear
   - [x] thing++ / ++thing
   - [x] thing-- / --thing

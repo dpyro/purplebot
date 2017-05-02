@@ -19,10 +19,16 @@ Testing uses Mocha with Chai with Nock HTTP mocking.
 npm test
 ```
 
+Make the documentation.
+
+```shell
+npm run doc
+```
+
 This project conforms to [JavaScript Standard Style](https://github.com/feross/standard).
 
 ```shell
-npm run-script lint
+npm run lint
 ```
 
 ## References
