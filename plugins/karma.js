@@ -13,6 +13,35 @@ import Config from '../src/config'
 export class KarmaPlugin {
   constructor (bot) {
     this.bot = bot
+
+    this.matcher = /(\w+)(\+\+|--)(\d*)(?!\w)/
+    this.bot.on('message#', (nick, to, text, message) => {
+      this.onMessage(nick, to, text)
+    })
+
+    this.bot.on('karma.respond', (nick, to, term, karma) => {
+      this.respond(nick, to, term, karma)
+    })
+  }
+
+  async onMessage (nick, to, text) {
+    const result = this.matcher.exec(text)
+    if (result === null) return
+
+    const term = result[1]
+    const dir = (result[2][0] === '-') ? -1 : +1
+    const points = (result[3] != null) ? Number.parseInt(result[3]) || 1 : 1
+    await this.add(term, nick, dir * points)
+
+    const karma = await this.get(term)
+    this.bot.emit('karma.respond', nick, to, term, karma)
+  }
+
+  async respond (nick, to, term, karma) {
+    if (typeof this.bot.say === 'function') {
+      const response = `${nick}: karma for ${term} is now ${karma}`
+      await this.bot.say(to, response)
+    }
   }
 
   get databasePath () {
@@ -35,6 +64,8 @@ export class KarmaPlugin {
         GROUP BY name
         ORDER BY total DESC
       ;
+
+      PRAGMA busy_timeout = 0;
     `
 
     await fs.ensureDir(Config.path())
@@ -75,8 +106,8 @@ export class KarmaPlugin {
   }
 }
 
-export default async function init (bot) {
-  const plugin = new KarmaPlugin(bot)
+export default async function init (...args) {
+  const plugin = new KarmaPlugin(...args)
   await plugin.load()
   return plugin
 }
