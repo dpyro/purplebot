@@ -33,6 +33,7 @@
     "eslint": "^3.19.0",
     "fs-extra": "^2.1.2",
     "jsdoc": "^3.4.3",
+    "jsdoc-strip-async-await": "^0.1.0",
     "mocha": "^3.2.0",
     "nock": "^9.0.13",
     "standard": "^10.0.1",

@@ -12,7 +12,8 @@
     "excludePattern": "(^|\\/|\\\\)_"
   },
   "plugins": [
-    "node_modules/jsdoc/plugins/markdown"
+    "node_modules/jsdoc/plugins/markdown",
+    "node_modules/jsdoc-strip-async-await"
   ],
   "templates": {
     "cleverLinks": true,

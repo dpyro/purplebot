@@ -46,7 +46,7 @@ function timestamp () {
 /**
  * Logger functions.
  *
- * @type {Map<string, function(...any): string>} logger functions
+ * @type {Map<string, function(...any): string>}
  */
 const loggers = {
   'connect': (server) => {
