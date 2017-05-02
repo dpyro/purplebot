@@ -44,88 +44,86 @@ function timestamp () {
 }
 
 /**
- * Builds and returns logger functions.
+ * Logger functions.
  *
- * @returns {Map<string, function(...args): void>} map of logger functions
+ * @type {Map<string, function(...any): string>} logger functions
  */
-function getLoggers () {
-  const loggers = new Map()
-
-  loggers.set('connect', (server) => {
+const loggers = {
+  'connect': (server) => {
     return `CONNECT ${server}`
-  })
-  loggers.set('disconnect', (server, message) => {
+  },
+  'disconnect': (server, message) => {
     const msg = (message) ? `: ${message}` : ''
     return `DISCONNECT ${server}${msg}`
-  })
-  loggers.set('action', (from, to, text, message) => {
+  },
+  'action': (from, to, text, message) => {
     return `ACTION ${from} → ${to}: ${text}`
-  })
-  loggers.set('ctcp-notice', (from, to, text, message) => {
+  },
+  'ctcp-notice': (from, to, text, message) => {
     return `CTCP NOTICE ${from} → ${to}: ${text}`
-  })
-  loggers.set('ctcp-privmsg', (from, to, text, message) => {
+  },
+  'ctcp-privmsg': (from, to, text, message) => {
     return `CTCP PRIVMSG ${from} → ${to}: ${text}`
-  })
-  loggers.set('ctcp-version', (from, to, message) => {
+  },
+  'ctcp-version': (from, to, message) => {
     return `CTCP VERSION ${from} → ${to}`
-  })
-  loggers.set('invite', (channel, from, message) => {
+  },
+  'invite': (channel, from, message) => {
     return `INVITE ${from} → ${channel}`
-  })
-  loggers.set('join', (channel, who, message) => {
+  },
+  'join': (channel, who, message) => {
     return `JOIN ${who} → ${channel}`
-  })
-  loggers.set('kick', (channel, who, by, reason) => {
+  },
+  'kick': (channel, who, by, reason) => {
     return `KICK ${by} → ${channel}: ${who} ${reason}`
-  })
-  loggers.set('kill', (nick, reason, channels, message) => {
+  },
+  'kill': (nick, reason, channels, message) => {
     return `KILL ${nick} → ${channels.join(' ')}: ${reason}`
-  })
-  loggers.set('+mode', (channel, by, mode, argument, message) => {
-    return _.filter([`MODE ${by} → +${mode} ${channel}`, argument]).join(' ')
-  })
-  loggers.set('-mode', (channel, by, mode, argument, message) => {
-    return _.filter([`MODE ${by} → -${mode} ${channel}`, argument]).join(' ')
-  })
-  loggers.set('motd', (motd) => {
+  },
+  '+mode': (channel, by, mode, argument, message) => {
+    return [`MODE ${by} → +${mode} ${channel}`, argument].filter(e => e).join(' ')
+  },
+  '-mode': (channel, by, mode, argument, message) => {
+    return [`MODE ${by} → -${mode} ${channel}`, argument].filter(e => e).join(' ')
+  },
+  'motd': (motd) => {
     return `MOTD ${motd}`
-  })
-  loggers.set('msg', (nick, to, text, message) => {
+  },
+  'msg': (nick, to, text, message) => {
     return `${nick} → ${to}: ${text}`
-  })
-  loggers.set('names', (channel, names) => {
+  },
+  'names': (channel, names) => {
     const nameString = _.toPairs(names).map(([name, mode]) => {
       return `${mode}${name}`
     }).join(' ')
     return `NAMES ${channel}: ${nameString}`
-  })
-  loggers.set('nick', (oldnick, newnick, channels, message) => {
+  },
+  'nick': (oldnick, newnick, channels, message) => {
     return `NICK ${oldnick} → ${newnick} on ${channels.join(' ')}`
-  })
-  loggers.set('notice', (nick, to, text, message) => {
+  },
+  'notice': (nick, to, text, message) => {
     const nickString = (nick != null) ? `${nick} → ` : ''
     return `NOTICE ${nickString}${to}: ${text}`
-  })
-  loggers.set('part', (channel, who, reason) => {
+  },
+  'part': (channel, who, reason) => {
     return `PART ${channel} → ${who}: ${reason}`
-  })
-  loggers.set('pm', (nick, text, message) => {
+  },
+  'pm': (nick, text, message) => {
     return `PM ${nick}: ${text}`
-  })
-  loggers.set('quit', (nick, reason, channels, message) => {
+  },
+  'quit': (nick, reason, channels, message) => {
     return `QUIT ${nick}: ${reason}`
-  })
-  loggers.set('registered', (message) => {
+  },
+  'registered': (message) => {
     return `REGISTERED`
-  })
-  loggers.set('selfMessage', (to, text) => {
+  },
+  'selfMessage': (to, text) => {
     return `${to} ← ${text}`
-  })
-  loggers.set('topic', (channel, topic, nick, message) => {
+  },
+  'topic': (channel, topic, nick, message) => {
     return `TOPIC ${nick} → ${channel}: ${topic}`
-  })
-  loggers.set('whois', (info) => {
+  },
+  'whois': (info) => {
     const output = _.toPairs(info).map(([key, value]) => {
       if (_.isArray(value)) {
         value = value.join(' ')
@@ -134,9 +132,7 @@ function getLoggers () {
     }).join('\n')
 
     return `WHOIS\n${output}`
-  })
-
-  return loggers
+  }
 }
 
 /**
@@ -175,8 +171,8 @@ export class LoggingPlugin {
       stream = fs.createWriteStream(filePath, { flags: 'a' })
     }
 
-    const loggers = getLoggers()
-    for (let [eventName, callback] of loggers) {
+    for (let eventName of Object.keys(loggers)) {
+      const callback = loggers[eventName]
       onSafe(bot, eventName, (...args) => {
         const data = callback.apply(null, args)
         const line = `[${timestamp()}] ${data}\n`
