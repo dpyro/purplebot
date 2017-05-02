@@ -4,9 +4,9 @@
 - [ ] logging
 - [ ] karma
   - [ ] .karma info
-  - [ ] .karma set / .karma clear
-  - [ ] thing++ / ++thing
-  - [ ] thing-- / --thing
+  - [ ] .karma clear
+  - [x] thing++ / ++thing
+  - [x] thing-- / --thing
 - [ ] terms
   - [ ] .learn
   - [ ] .info
@@ -23,6 +23,10 @@
   - [ ] log links
 - [ ] heralds
 - [ ] permissions
+- [ ] conversions
+  - [ ] temperature
+  - [ ] height
+  - [ ] weight
 
 ## Testing
 

@@ -6,7 +6,6 @@ import initKarma from '../plugins/karma'
 
 describe('plugin: karma', function () {
   const nick = 'chameleon'
-  const user = 'testuser'
   const channel = '#test'
   let emitter, plugin
 
@@ -24,36 +23,42 @@ describe('plugin: karma', function () {
     expect(output).to.be.empty
   })
 
-  it('starts empty', async function () {})
-
-  it('get 1 row', function () {
-    return plugin.add(nick, user, 10)
-      .then(() => plugin.get(nick))
-      .then(total => expect(total).to.equal(10))
+  it('top empty', async function () {
+    const results = await plugin.top()
+    expect(results).to.be.empty
   })
 
-  const valids = [
-    'term++', ' term++', 'term++ ', 'this term++',
-    'term--', ' term--', 'term-- ', 'another term--'
-  ]
-  for (const valid of valids) {
-    it(`recognizes: "${valid}"`, function (done) {
-      emitter.on('karma.respond', (fromNick, to, term, karma) => {
-        let error
+  it('get nonexistant', async function () {
+    const result = await plugin.get('term')
+    expect(result).to.not.exist
+  })
 
-        try {
-          expect(fromNick).to.equal(nick)
-          expect(to).to.equal(channel)
-          expect(term).to.equal('term')
-          expect(karma).to.exist
-        } catch (err) {
-          error = err
-        }
-
-        done(error)
+  function checkValid (name, message, result) {
+    it(`${name}: "${message}"`, async function () {
+      return new Promise((resolve, reject) => {
+        emitter.on('karma.respond', (fromNick, to, term, karma) => {
+          try {
+            expect(fromNick).to.equal(nick)
+            expect(to).to.equal(channel)
+            expect(term).to.equal('term')
+            expect(karma).to.equal(result)
+          } catch (error) {
+            reject(error)
+          }
+          resolve()
+        })
+        emitter.emit('message#', nick, channel, message)
       })
-
-      emitter.emit('message#', nick, channel, valid)
     })
+  }
+
+  const increments = ['term++', ' term++', 'term++ ', 'this term++']
+  for (const increment of increments) {
+    checkValid('increments', increment, 1)
+  }
+
+  const decrements = ['term--', ' term--', 'term-- ', 'another term--']
+  for (const decrement of decrements) {
+    checkValid('decrements', decrement, -1)
   }
 })

@@ -22,6 +22,10 @@ export class KarmaPlugin {
     this.bot.on('karma.respond', (nick, to, term, karma) => {
       this.respond(nick, to, term, karma)
     })
+
+    this.bot.on('command', async (nick, command, ...args) => {
+      // if (command !== 'karma') return
+    })
   }
 
   async onMessage (nick, to, text) {
@@ -31,9 +35,8 @@ export class KarmaPlugin {
     const term = result[1]
     const dir = (result[2][0] === '-') ? -1 : +1
     const points = (result[3] != null) ? Number.parseInt(result[3]) || 1 : 1
-    await this.add(term, nick, dir * points)
+    const karma = await this.updateBy(term, dir * points)
 
-    const karma = await this.get(term)
     this.bot.emit('karma.respond', nick, to, term, karma)
   }
 
@@ -52,18 +55,15 @@ export class KarmaPlugin {
     const sql = `
       CREATE TABLE IF NOT EXISTS karma (
         id        INTEGER PRIMARY KEY,
-        name      TEXT    NOT NULL,
-        user      TEXT    COLLATE NOCASE,
-        points    INTEGER NOT NULL,
-        timestamp TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
+        name      TEXT    NOT NULL UNIQUE COLLATE NOCASE,
+        increased INTEGER NOT NULL DEFAULT 0 CHECK (increased >= 0),
+        decreased INTEGER NOT NULL DEFAULT 0 CHECK (decreased >= 0)
       );
 
-      CREATE VIEW IF NOT EXISTS karma_total AS
-        SELECT name, SUM(points) AS total
+      CREATE VIEW IF NOT EXISTS karma_view AS
+        SELECT *, increased-decreased AS points
         FROM karma
-        GROUP BY name
-        ORDER BY total DESC
-      ;
+        ORDER BY points, name DESC;
 
       PRAGMA busy_timeout = 0;
     `
@@ -88,21 +88,37 @@ export class KarmaPlugin {
     await this.load()
   }
 
-  async add (name, user = null, points = 1) {
-    const sql = 'INSERT INTO karma (name, user, points) VALUES (?, ?, ?);'
-    await this.db.run(sql, name, user, points)
+  async get (name) {
+    const sql = 'SELECT * FROM karma_view WHERE name = ?;'
+    await this.db.get(sql, name)
   }
 
-  async get (name) {
-    const sql = 'SELECT total FROM karma_total WHERE name = ?;'
-    const result = await this.db.get(sql, name)
-    return result.total
+  async updateBy (name, points) {
+    if (points == null) return null
+
+    const sqlInsert = 'INSERT OR IGNORE INTO karma (name) VALUES (?1);'
+    await this.db.run(sqlInsert, name)
+
+    if (points > 0) {
+      const sqlUpdate = 'UPDATE karma SET increased = increased+?2 WHERE name = ?1;'
+      this.db.run(sqlUpdate, name, points)
+    } else if (points < 0) {
+      const sqlUpdate = 'UPDATE karma SET decreased = decreased+?2 WHERE name = ?1;'
+      this.db.run(sqlUpdate, name, -points)
+    }
+
+    const sqlSelect = 'SELECT points FROM karma_view WHERE name = ?1;'
+    const result = await this.db.get(sqlSelect, name)
+
+    return result.points
   }
 
   async top (limit = 5) {
-    const sql = 'SELECT * FROM karma_total LIMIT ?;'
+    const sql = 'SELECT * FROM karma_view LIMIT ?;'
     const results = await this.db.all(sql, limit)
-    await results.map(({ name, total }, index) => { return { index, name, total } })
+    await results.map(({ name, increased, decreased, points }, index) => {
+      return { index, name, increased, decreased, points }
+    })
   }
 }
 

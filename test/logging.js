@@ -72,11 +72,9 @@ describe('plugin: logging', function () {
   for (const [event, ...args] of tests) {
     it(`outputs data on ${event}: ${(args && args.length) || 0}`, function () {
       expect(output.size()).to.equal(0)
-
       emitter.emit(event, ...args)
 
       expect(output.size()).to.above(0)
-
       const line = output.getContentsAsString()
 
       _.flatMapDeep(args, (arg) => {
