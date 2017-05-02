@@ -1,5 +1,4 @@
 /**
- * @module PurpleBot
  * @author Sumant Manne <sumant.manne@gmail.com>
  * @license MIT
  */
@@ -10,7 +9,7 @@ import _ from 'lodash'
 /**
  * Encapulates a readline interface.
  */
-export default class Cli {
+class Cli {
   /**
    * Universal commands
    *
@@ -113,3 +112,5 @@ export default class Cli {
     callback(null, [results, line])
   }
 }
+
+export default Cli

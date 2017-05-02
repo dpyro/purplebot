@@ -1,5 +1,4 @@
 /**
- * @module PurpleBot
  * @author Sumant Manne <sumant.manne@gmail.com>
  * @license MIT
  */
@@ -11,7 +10,7 @@ import path from 'path'
 /**
  * Manages configuration and data paths.
  */
-export default class Config {
+class Config {
   /**
    * Returns a path rooted in the local config directory.
    *
@@ -76,3 +75,5 @@ export default class Config {
     this.json[key] = value
   }
 }
+
+export default Config

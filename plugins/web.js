@@ -1,5 +1,4 @@
 /**
- * @module PurpleBot/plugins
  * @author Sumant Manne <sumant.manne@gmail.com>
  * @license MIT
  */
@@ -16,7 +15,7 @@ const matcher = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9
  *
  * @prop {Array<string>} imageExts
  */
-export class WebPlugin {
+class WebPlugin {
   /**
    * Creates an instance of WebPlugin.
    *
@@ -73,6 +72,9 @@ export class WebPlugin {
   }
 }
 
-export default function init (...args) {
+function init (...args) {
   return new WebPlugin(...args)
 }
+
+export default init
+export { WebPlugin }

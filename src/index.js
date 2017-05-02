@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 /**
- * @module PurpleBot
  * @author Sumant Manne <sumant.manne@gmail.com>
  * @license MIT
  */

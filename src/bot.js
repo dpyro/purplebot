@@ -1,5 +1,4 @@
 /**
- * @module PurpleBot
  * @author Sumant Manne <sumant.manne@gmail.com>
  * @license MIT
  */
@@ -25,11 +24,6 @@ import loadPlugins from './plugins'
  */
 
 /**
- * @class Client
- * @memberof external:irc
- */
-
-/**
  * Configurable bot that wraps `node-irc`.
  *
  * @extends external:EventEmitter
@@ -38,7 +32,7 @@ import loadPlugins from './plugins'
  * @property {Map<string, function(...any): void>} commands
  * @property {Array<any>} plugins
  */
-export class PurpleBot extends EventEmitter {
+class PurpleBot extends EventEmitter {
   /**
    * Creates an instance of PurpleBot.
    *
@@ -284,8 +278,13 @@ export class PurpleBot extends EventEmitter {
   }
 }
 
-export default async function init (options) {
+async function init (options) {
   const bot = new PurpleBot(options)
   await bot.loadPlugins()
   return bot
 }
+
+// Exports are named at the end to work around a JSDoc3 bug.
+// See: https://github.com/jsdoc3/jsdoc/issues/1137.
+export default init
+export { PurpleBot }

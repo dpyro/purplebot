@@ -1,5 +1,4 @@
 /**
- * @module PurpleBot
  * @author Sumant Manne <sumant.manne@gmail.com>
  * @license MIT
  */
@@ -15,7 +14,7 @@ import _ from 'lodash'
  * @param {PurpleBot} bot loads plugin with this parameter
  * @returns {Array} loaded plugins
  */
-export default async function loadPlugins (bot) {
+async function loadPlugins (bot) {
   const plugins = requireAll({
     dirname: join(__dirname, '..', 'plugins'),
     resolve: (plugin) => {
@@ -31,3 +30,5 @@ export default async function loadPlugins (bot) {
     }
   }))
 }
+
+export default loadPlugins

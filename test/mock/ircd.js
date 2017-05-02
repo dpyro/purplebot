@@ -1,7 +1,6 @@
 /**
  * mock ircd server
  *
- * @module mockircd
  * @author Sumant Manne <sumant.manne@gmail.com>
  * @license MIT
  */
@@ -31,7 +30,7 @@ function tmpSocket () {
  * A mock ircd available in the same thread.
  * @extends {EventEmitter}
  */
-export default class MockIrcd extends EventEmitter {
+class MockIrcd extends EventEmitter {
   /**
    * Creates an instance of MockIrcd.
    *
@@ -217,3 +216,5 @@ export default class MockIrcd extends EventEmitter {
  * @callback MockIrcd~messageCallback
  * @param {string} message
  */
+
+export default MockIrcd

@@ -1,5 +1,4 @@
 /**
- * @module PurpleBot/plugins
  * @author Sumant Manne <sumant.manne@gmail.com>
  * @license MIT
  */
@@ -10,7 +9,7 @@ import sqlite from 'sqlite'
 
 import Config from '../src/config'
 
-export class KarmaPlugin {
+class KarmaPlugin {
   constructor (bot) {
     this.bot = bot
 
@@ -153,8 +152,11 @@ export class KarmaPlugin {
   }
 }
 
-export default async function init (...args) {
+async function init (...args) {
   const plugin = new KarmaPlugin(...args)
   await plugin.load()
   return plugin
 }
+
+export default init
+export { KarmaPlugin }

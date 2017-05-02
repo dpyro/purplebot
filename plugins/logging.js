@@ -1,5 +1,4 @@
 /**
- * @module PurpleBot/plugins
  * @author Sumant Manne <sumant.manne@gmail.com>
  * @license MIT
  */
@@ -23,6 +22,7 @@ import Config from '../src/config'
  * @param {EventEmitter} emitter
  * @param {string} eventName
  * @param {listenerCallback} callback
+ * @private
  */
 function onSafe (emitter, eventName, callback) {
   emitter.on(eventName, (...args) => {
@@ -47,6 +47,7 @@ function timestamp () {
  * Logger functions.
  *
  * @type {Map<string, function(...any): string>}
+ * @private
  */
 const loggers = {
   'connect': (server) => {
@@ -152,7 +153,7 @@ const loggers = {
 /**
  * Plugin to log sent and recieved messages.
  */
-export class LoggingPlugin {
+class LoggingPlugin {
   /**
    * Creates an attached instance of `LoggingPlugin`.
    *
@@ -182,6 +183,9 @@ export class LoggingPlugin {
   }
 }
 
-export default function init (...args) {
+function init (...args) {
   return new LoggingPlugin(...args)
 }
+
+export default init
+export { LoggingPlugin }
