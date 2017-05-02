@@ -36,13 +36,13 @@ describe('config', function () {
 
   it('new', function () {})
 
-  it('#get', function () {
+  it('get', function () {
     const value = config.get('test')
 
     expect(value).to.equal('valid')
   })
 
-  it('#set', async function () {
+  it('set', async function () {
     config.set('test', 'different')
     await config.flush()
     await config.sync()
