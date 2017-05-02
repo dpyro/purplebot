@@ -14,6 +14,7 @@ import path from 'path'
 /**
  * Creates a temporary socket and returns its path.
  * @returns {string}
+ * @private
  */
 function tmpSocket () {
   const sockPath = path.join(os.tmpdir(), 'mock_ircd.sock')

@@ -38,6 +38,7 @@ function onSafe (emitter, eventName, callback) {
  * Return the current timestamp.
  *
  * @returns {string}
+ * @private
  */
 function timestamp () {
   return new Date().toUTCString()
