@@ -21,9 +21,11 @@ describe('command', function () {
   async function validateCommandResult (argResults, test) {
     let error
 
-    bot.on('command', (nick, command, ...args) => {
+    bot.on('command', (context, command, ...args) => {
       try {
-        expect(nick).to.exist
+        expect(context).to.exist
+        expect(context.nick).to.exist
+        expect(context.to).to.exist
         expect(command).to.equal('test')
         expect(args).to.deep.equal(argResults)
       } catch (err) {

@@ -82,7 +82,8 @@ export class PurpleBot extends EventEmitter {
           const command = filteredWords.shift().substring(1)
           if (command !== '') {
             const args = filteredWords
-            this.emit('command', nick, command, ...args)
+            const context = { nick, to, text, message }
+            this.emit('command', context, command, ...args)
           }
         }
       }

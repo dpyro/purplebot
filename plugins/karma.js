@@ -23,8 +23,28 @@ export class KarmaPlugin {
       this.respond(nick, to, term, karma)
     })
 
-    this.bot.on('command', async (nick, command, ...args) => {
-      // if (command !== 'karma') return
+    this.bot.on('karma.get', (nick, to, term, karma) => {
+      if (karma != null) {
+        this.respond(nick, to, term, karma)
+      } else {
+        this.responseNoKarma(nick, to, term)
+      }
+    })
+
+    this.bot.on('command', async (context, command, ...args) => {
+      if (command !== 'karma') return
+
+      if (args.length < 1) {
+        // TODO: print usage or help
+        return
+      }
+
+      const term = args.shift()
+      const result = await this.get(term)
+      const { nick, to } = context
+
+      const karma = (result != null) ? result.points : null
+      this.bot.emit('karma.get', nick, to, term, karma)
     })
   }
 
@@ -42,7 +62,14 @@ export class KarmaPlugin {
 
   async respond (nick, to, term, karma) {
     if (typeof this.bot.say === 'function') {
-      const response = `${nick}: karma for ${term} is now ${karma}`
+      const response = `${nick}: karma for ${term} is now ${karma}.`
+      await this.bot.say(to, response)
+    }
+  }
+
+  async respondNoKarma (nick, to, term) {
+    if (typeof this.bot.say === 'function') {
+      const response = `${nick}: There is no karma for ${term}.`
       await this.bot.say(to, response)
     }
   }
@@ -89,26 +116,30 @@ export class KarmaPlugin {
   }
 
   async get (name) {
-    const sql = 'SELECT * FROM karma_view WHERE name = ?;'
+    const sql = 'SELECT * FROM karma_view WHERE name = ?'
     await this.db.get(sql, name)
   }
 
   async updateBy (name, points) {
     if (points == null) return null
 
-    const sqlInsert = 'INSERT OR IGNORE INTO karma (name) VALUES (?1);'
+    await this.db.exec('BEGIN')
+
+    const sqlInsert = 'INSERT OR IGNORE INTO karma (name) VALUES (?1)'
     await this.db.run(sqlInsert, name)
 
     if (points > 0) {
-      const sqlUpdate = 'UPDATE karma SET increased = increased+?2 WHERE name = ?1;'
+      const sqlUpdate = 'UPDATE karma SET increased = increased+?2 WHERE name = ?1'
       this.db.run(sqlUpdate, name, points)
     } else if (points < 0) {
-      const sqlUpdate = 'UPDATE karma SET decreased = decreased+?2 WHERE name = ?1;'
+      const sqlUpdate = 'UPDATE karma SET decreased = decreased+?2 WHERE name = ?1'
       this.db.run(sqlUpdate, name, -points)
     }
 
-    const sqlSelect = 'SELECT points FROM karma_view WHERE name = ?1;'
+    const sqlSelect = 'SELECT points FROM karma_view WHERE name = ?1'
     const result = await this.db.get(sqlSelect, name)
+
+    await this.db.exec('END')
 
     return result.points
   }

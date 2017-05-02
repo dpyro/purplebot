@@ -61,4 +61,14 @@ describe('plugin: karma', function () {
   for (const decrement of decrements) {
     checkValid('decrements', decrement, -1)
   }
+
+  it('increment & .karma', function () {
+    emitter.on('karma.get', (nick, to, term, karma) => {
+      expect(nick).to.equal(nick)
+      expect(to).to.equal(channel)
+      expect(term).to.equal('term')
+      expect(karma).to.equal(1)
+    })
+    emitter.emit('message#', nick, channel, 'term++')
+  })
 })
