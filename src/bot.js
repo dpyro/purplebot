@@ -84,7 +84,7 @@ class PurpleBot extends EventEmitter {
     })
 
     this._setupCommandHooks()
-    this._setupOutputHooks()
+    this._installForwards()
   }
 
   async loadPlugins () {
@@ -136,7 +136,7 @@ class PurpleBot extends EventEmitter {
    * @memberOf PurpleBot
    * @private
    */
-  _setupOutputHooks () {
+  _installForwards () {
     this.forwardClientEvent('error')
 
     this.forwardClientEvent('action')

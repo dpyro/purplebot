@@ -12,8 +12,10 @@ import Config from '../src/config'
 class KarmaPlugin {
   constructor (bot) {
     this.bot = bot
+    this._installHooks()
+  }
 
-    this.matcher = /(\w+)(\+\+|--)(\d*)(?!\w)/
+  _installHooks () {
     this.bot.on('message#', (nick, to, text, message) => {
       this.onMessage(nick, to, text)
     })
@@ -48,7 +50,7 @@ class KarmaPlugin {
   }
 
   async onMessage (nick, to, text) {
-    const result = this.matcher.exec(text)
+    const result = /(\w+)(\+\+|--)(\d*)(?!\w)/.exec(text)
     if (result === null) return
 
     const term = result[1]
