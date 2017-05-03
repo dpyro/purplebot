@@ -5,6 +5,8 @@ import EventEmitter from 'events'
 import initKarma from '../plugins/karma'
 
 describe('plugin: karma', function () {
+  this.timeout(4000)
+
   const nick = 'chameleon'
   const channel = '#test'
   let emitter, plugin

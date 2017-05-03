@@ -26,7 +26,7 @@ async function loadPlugins (bot) {
     try {
       return element(bot)
     } catch (err) {
-      console.error(err.stack)
+      console.error(`Warning: could not load plugin ${element}`)
     }
   }))
 }
