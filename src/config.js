@@ -13,6 +13,27 @@ import path from 'path'
  */
 class Config {
   /**
+   * Creates a temporary config directory.
+   *
+   * @static
+   *
+   * @memberof Config
+   */
+  static async temp () {
+    const tempPrefix = path.join(os.tmpdir(), 'purplebot-')
+    return new Promise((resolve, reject) => {
+      fs.mkdtemp(tempPrefix, (err, folder) => {
+        if (err != null) {
+          reject(err)
+        } else {
+          const config = new Config(folder)
+          resolve(config)
+        }
+      })
+    })
+  }
+
+  /**
    * Creates an instance of Config.
    *
    * @param {string=} name
@@ -28,6 +49,7 @@ class Config {
         this.configDir = path.join(os.homedir(), name)
       }
     }
+    this.json = {}
   }
 
   /**
@@ -42,9 +64,9 @@ class Config {
     return new Promise((resolve, reject) => {
       fs.access(this.configDir, fs.constants.F_OK | fs.constants.R_OK, (err) => {
         if (err != null) {
-          reject(err)
+          resolve(false)
         } else {
-          resolve()
+          resolve(true)
         }
       })
     })
@@ -116,12 +138,16 @@ class Config {
   /**
    * Returns an associated value.
    *
-   * @param {string} key
+   * @param {string=} key
    * @returns {any}
    * @memberOf Config
    */
   get (key) {
-    return this.json[key]
+    if (key == null) {
+      return this.json
+    } else {
+      return this.json[key]
+    }
   }
 
   /**

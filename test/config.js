@@ -1,43 +1,32 @@
 import 'babel-polyfill'
 import { expect } from 'chai'
-import path from 'path'
 import fs from 'fs-extra'
-import { tmpdir } from 'os'
 
 import Config from '../src/config'
 
 describe('config', function () {
-  function tempConfigDir () {
-    const tempPrefix = path.join(tmpdir(), 'purplebot-')
-    const tempDirPath = fs.mkdtempSync(tempPrefix)
-    return tempDirPath
-  }
-
-  let tempDirPath, config
+  let config
 
   beforeEach(async function createConfig () {
-    tempDirPath = tempConfigDir()
-
-    config = new Config(tempDirPath)
-    expect(config).to.exist
-    expect(() => fs.accessSync(tempDirPath)).to.throw
+    config = await Config.temp()
+    expect(config).to.be.instanceof(Config)
 
     await config.ensureDir()
-    expect(fs.accessSync(tempDirPath)).to.not.throw
+    expect(fs.accessSync(config.configDir)).to.not.throw
+    expect(await config.hasDir()).to.be.true
 
     const testData = '{ "test": "valid" }'
     fs.writeFileSync(config.configPath, testData)
 
+    expect(config.get()).to.be.empty
+
     await config.sync()
+    expect(config.get()).to.not.be.empty
   })
 
   afterEach(async function deleteConfigDir () {
     await config.removeDir()
-    expect(fs.accessSync(tempDirPath)).to.throw
-  })
-
-  it('new', function () {
-
+    expect(fs.accessSync(config.configDir)).to.throw
   })
 
   it('get', function () {
