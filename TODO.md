@@ -7,17 +7,12 @@
   - [ ] .karma set / clear
   - [x] thing++ / ++thing
   - [x] thing-- / --thing
-- [ ] terms
+- [ ] dict
   - [ ] .learn
   - [ ] .info
   - [ ] .forget
   - [ ] thing?
   - [ ] save images
-- [ ] quotes
-  - [ ] add
-  - [ ] remove
-  - [ ] search
-  - [ ] random
 - [ ] web
   - [x] url snarfer
   - [ ] log links

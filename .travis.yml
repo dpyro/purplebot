@@ -8,8 +8,7 @@ notifications:
   email: false
   irc:
     channels:
-      - "irc.quakenet.org#PPDBot"
-      - "irc.quakenet.org#ppdstem"
+      - "irc.rizon.net#ppdcasual"
     template:
-      - "🤖 %{repository_slug}: (%{commit_subject})"
-      - "🏁 %{message}"
+      - "🤖 %{repository_slug}: %{commit_subject}"
+      - "🏁 %{message} (%{build_url})"
