@@ -1,40 +1,44 @@
 import 'babel-polyfill'
 import { expect } from 'chai'
-import { join } from 'path'
+import path from 'path'
 import fs from 'fs-extra'
 import { tmpdir } from 'os'
 
 import Config from '../src/config'
 
 describe('config', function () {
-  let testDir, config
+  function tempConfigDir () {
+    const tempPrefix = path.join(tmpdir(), 'purplebot-')
+    const tempDirPath = fs.mkdtempSync(tempPrefix)
+    return tempDirPath
+  }
 
-  before('create temp dir', function (done) {
-    const tempDirPath = join(tmpdir(), 'purplebot-')
-    fs.mkdtemp(tempDirPath, (err, folder) => {
-      testDir = folder
-      done(err)
-    })
-  })
+  let tempDirPath, config
 
-  beforeEach(async function createConfigFile () {
-    const testPath = join(testDir, 'test.json')
-    const testData = '{ "test": "valid" }'
+  beforeEach(async function createConfig () {
+    tempDirPath = tempConfigDir()
 
-    fs.writeFileSync(testPath, testData)
-
-    config = new Config(testPath)
-    await config.sync()
+    config = new Config(tempDirPath)
     expect(config).to.exist
+    expect(() => fs.accessSync(tempDirPath)).to.throw
+
+    await config.ensureDir()
+    expect(fs.accessSync(tempDirPath)).to.not.throw
+
+    const testData = '{ "test": "valid" }'
+    fs.writeFileSync(config.configPath, testData)
+
+    await config.sync()
   })
 
-  after('delete temp dir', function (done) {
-    fs.emptyDir(testDir, () => {
-      fs.rmdir(testDir, done)
-    })
+  afterEach(async function deleteConfigDir () {
+    await config.removeDir()
+    expect(fs.accessSync(tempDirPath)).to.throw
   })
 
-  it('new', function () {})
+  it('new', function () {
+
+  })
 
   it('get', function () {
     const value = config.get('test')

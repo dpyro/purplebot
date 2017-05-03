@@ -3,6 +3,7 @@
  * @license MIT
  */
 
+import 'babel-polyfill'
 import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
@@ -12,30 +13,73 @@ import path from 'path'
  */
 class Config {
   /**
-   * Returns a path rooted in the local config directory.
-   *
-   * @static
-   * @param {...string} args
-   * @returns {string}
-   * @memberOf Config
-   */
-  static path (...args) {
-    // TODO: symbolize '.purplebot'
-    return path.join(os.homedir(), '.purplebot', ...args)
-  }
-
-  /**
    * Creates an instance of Config.
    *
    * @param {string=} name
    * @memberOf Config
    */
   constructor (name) {
-    this.configPath = (!name) ? path.join(Config.dir, name) : name
+    if (!name) {
+      this.configDir = path.join(os.homedir(), '.purplebot')
+    } else {
+      if (path.isAbsolute(name)) {
+        this.configDir = path.normalize(name)
+      } else {
+        this.configDir = path.join(os.homedir(), name)
+      }
+    }
   }
 
   /**
-   * Saves this configuration.
+   * Determine if the directory already exists.
+   *
+   * @param {...string=} args
+   * @return {bool}
+   *
+   * @memberOf Config
+   */
+  async hasDir () {
+    return new Promise((resolve, reject) => {
+      fs.access(this.configDir, fs.constants.F_OK | fs.constants.R_OK, (err) => {
+        if (err != null) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      })
+    })
+  }
+
+  /**
+   * Creates the directory for this `Config`.
+   *
+   * @memberOf Config
+   */
+  async ensureDir () {
+    return fs.ensureDir(this.configDir)
+  }
+
+  async removeDir () {
+    return fs.remove(this.configDir)
+  }
+
+  get configPath () {
+    return this.path('config.json')
+  }
+
+  /**
+   * Returns a path rooted in the local config directory.
+   *
+   * @param {...string} args
+   * @returns {string}
+   * @memberOf Config
+   */
+  path (...args) {
+    return path.join(this.configDir, ...args)
+  }
+
+  /**
+   * Loads this configuration from disk.
    *
    * @memberOf Config
    */
@@ -53,7 +97,7 @@ class Config {
   }
 
   /**
-   * Loads the configuration from disk.
+   * Saves the configuration to disk.
    *
    * @memberOf Config
    */

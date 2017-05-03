@@ -10,8 +10,9 @@ import sqlite from 'sqlite'
 import Config from '../src/config'
 
 class KarmaPlugin {
-  constructor (bot) {
+  constructor (bot, config) {
     this.bot = bot
+    this.config = config || new Config()
     this._installHooks()
   }
 
@@ -76,7 +77,7 @@ class KarmaPlugin {
   }
 
   get databasePath () {
-    return Config.path('karma.db')
+    return this.config.path('karma.db')
   }
 
   async load () {
@@ -96,7 +97,7 @@ class KarmaPlugin {
       PRAGMA busy_timeout = 0;
     `
 
-    await fs.ensureDir(Config.path())
+    await this.config.ensureDir()
     this.db = await sqlite.open(this.databasePath)
     await this.db.exec(sql)
   }

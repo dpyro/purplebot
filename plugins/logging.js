@@ -168,7 +168,8 @@ class LoggingPlugin {
     if (output != null) {
       stream = output
     } else {
-      const filePath = Config.path(`${bot.server}.log`)
+      this.config = new Config()
+      const filePath = this.config.path(`${bot.server}.log`)
       fs.ensureFileSync(filePath)
       stream = fs.createWriteStream(filePath, { flags: 'a' })
     }
