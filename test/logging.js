@@ -70,7 +70,7 @@ describe('plugin: logging', function () {
 
   const tests = eventTests()
   for (const [event, ...args] of tests) {
-    it(`outputs data on ${event}: ${(args && args.length) || 0}`, function () {
+    it(`outputs on ${event}: ${(args && args.length) || 0}`, function () {
       expect(output.size()).to.equal(0)
       emitter.emit(event, ...args)
 

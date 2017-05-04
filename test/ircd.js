@@ -47,12 +47,12 @@ describe('mock ircd', function () {
       })
   })
 
-  it('connect & disconnect', () => {
+  it('connect(), disconnect()', () => {
     return bot.connect()
       .then(() => bot.disconnect())
   })
 
-  it('connect & join & part', function () {
+  it('connect(), join(), part()', function () {
     this.timeout(10000)
 
     let gotTopic = false

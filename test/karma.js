@@ -25,12 +25,12 @@ describe('plugin: karma', function () {
     expect(output).to.be.empty
   })
 
-  it('top empty', async function () {
+  it('top() [empty]', async function () {
     const results = await plugin.top()
     expect(results).to.be.empty
   })
 
-  it('get nonexistant', async function () {
+  it('get() [empty]', async function () {
     const result = await plugin.get('term')
     expect(result).to.not.exist
   })
@@ -63,14 +63,4 @@ describe('plugin: karma', function () {
   for (const decrement of decrements) {
     checkValid('decrements', decrement, -1)
   }
-
-  it('increment & .karma', function () {
-    emitter.on('karma.get', (nick, to, term, karma) => {
-      expect(nick).to.equal(nick)
-      expect(to).to.equal(channel)
-      expect(term).to.equal('term')
-      expect(karma).to.equal(1)
-    })
-    emitter.emit('message#', nick, channel, 'term++')
-  })
 })
