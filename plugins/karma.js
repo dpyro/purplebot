@@ -125,17 +125,17 @@ class KarmaPlugin {
   async updateBy (name, points) {
     if (points == null) return null
 
-    await this.db.exec('BEGIN EXCLUSIVE')
+    await this.db.exec('BEGIN')
 
     const sqlInsert = 'INSERT OR IGNORE INTO karma (name) VALUES (?1)'
     await this.db.run(sqlInsert, name)
 
     if (points > 0) {
       const sqlUpdate = 'UPDATE karma SET increased = increased+?2 WHERE name = ?1'
-      this.db.run(sqlUpdate, name, points)
+      await this.db.run(sqlUpdate, name, points)
     } else if (points < 0) {
       const sqlUpdate = 'UPDATE karma SET decreased = decreased+?2 WHERE name = ?1'
-      this.db.run(sqlUpdate, name, -points)
+      await this.db.run(sqlUpdate, name, -points)
     }
 
     const sqlSelect = 'SELECT points FROM karma_view WHERE name = ?1'
