@@ -23,7 +23,39 @@ describe('plugin: dict', function () {
     plugin = null
   })
 
-  it('empty', function () {
+  it('definition() [empty]', async function () {
+    const result = await plugin.definition('term')
+    expect(result).to.not.exist
+  })
 
+  it('definitions() [empty]', async function () {
+    const result = await plugin.definition('term')
+    expect(result).to.be.empty
+  })
+
+  it('add(), definition()', async function () {
+    const definition = {
+      key: 'term',
+      value: 'test value',
+      user: 'testuser'
+    }
+
+    await plugin.add(definition.key, definition.value, definition.user)
+
+    const result = await plugin.definition('term')
+    expect(result).to.include(definition)
+  })
+
+  it('add(), definition(user = null)', async function () {
+    const definition = {
+      key: 'term',
+      value: 'test value',
+      user: null
+    }
+
+    await plugin.add(definition.key, definition.value, definition.user)
+
+    const result = await plugin.definition('term')
+    expect(result).to.include(definition)
   })
 })
