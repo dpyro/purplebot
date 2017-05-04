@@ -1,4 +1,4 @@
-# Todo
+# TODO
 
 - [ ] autologin
 - [x] logging
