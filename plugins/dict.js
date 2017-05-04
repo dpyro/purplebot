@@ -56,7 +56,7 @@ class DictPlugin {
   async remove (key, valueId) {
     if (valueId <= 0) return false
 
-    await this.db.run('BEGIN')
+    await this.db.run('BEGIN EXCLUSIVE')
     const results = this.definitions(key)
     if (valueId > results.length) return false
     const value = results[valueId - 1].value

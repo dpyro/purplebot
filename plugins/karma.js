@@ -125,7 +125,7 @@ class KarmaPlugin {
   async updateBy (name, points) {
     if (points == null) return null
 
-    await this.db.exec('BEGIN')
+    await this.db.exec('BEGIN EXCLUSIVE')
 
     const sqlInsert = 'INSERT OR IGNORE INTO karma (name) VALUES (?1)'
     await this.db.run(sqlInsert, name)
