@@ -58,13 +58,16 @@ class DictPlugin {
 
     await this.db.run('BEGIN')
 
-    const results = this.definitions(key)
+    const results = await this.definitions(key)
     if (valueId > results.length) return false
+
     const value = results[valueId - 1].value
-    const sql = 'DELETE FROM definition WHERE key = ?, value = ?'
+    const sql = 'DELETE FROM definition WHERE key = ? AND value = ?'
     await this.db.run(sql, key, value)
 
     await this.db.run('END')
+
+    return true
   }
 
   async definition (name) {

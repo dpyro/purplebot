@@ -58,4 +58,22 @@ describe('plugin: dict', function () {
     const result = await plugin.definition('term')
     expect(result).to.include(definition)
   })
+
+  it('add(), definition(), remove()', async function () {
+    const definition = {
+      key: 'term',
+      value: 'test value',
+      user: 'testuser'
+    }
+
+    await plugin.add(definition.key, definition.value, definition.user)
+
+    const result = await plugin.definition('term')
+    expect(result).to.include(definition)
+
+    expect(await plugin.remove(definition.key, 1)).to.be.true
+
+    const resultAfter = await plugin.definition('term')
+    expect(resultAfter).to.not.exist
+  })
 })
