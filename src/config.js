@@ -15,8 +15,9 @@ class Config {
   /**
    * Creates a temporary config directory.
    *
-   * @static
+   * @returns {Promise<string>}
    *
+   * @static
    * @memberof Config
    */
   static async temp () {
@@ -36,7 +37,8 @@ class Config {
   /**
    * Creates an instance of Config.
    *
-   * @param {string=} name
+   * @param {string=} name a path
+   *
    * @memberOf Config
    */
   constructor (name) {
@@ -53,10 +55,9 @@ class Config {
   }
 
   /**
-   * Determine if the directory already exists.
+   * Determine if the config directory already exists.
    *
-   * @param {...string=} args
-   * @return {boolean}
+   * @return {Promise<boolean>}
    *
    * @memberOf Config
    */
@@ -75,6 +76,8 @@ class Config {
   /**
    * Creates the directory for this `Config`.
    *
+   * @returns {Promise<void>}
+   *
    * @memberOf Config
    */
   async ensureDir () {
@@ -89,10 +92,23 @@ class Config {
     })
   }
 
+  /**
+   *
+   *
+   * @memberof Config
+   */
   async removeDir () {
     return fs.remove(this.configDir)
   }
 
+  /**
+   * Retrieves the path to the `config.json`.
+   *
+   * @returns {string}
+   *
+   * @readonly
+   * @memberof Config
+   */
   get configPath () {
     return this.path('config.json')
   }
@@ -102,6 +118,7 @@ class Config {
    *
    * @param {...string} args
    * @returns {string}
+   *
    * @memberOf Config
    */
   path (...args) {
@@ -112,6 +129,7 @@ class Config {
    * Loads this configuration from disk.
    *
    * @memberOf Config
+   * @todo rename to load
    */
   async sync () {
     return new Promise((resolve, reject) => {
@@ -128,6 +146,8 @@ class Config {
 
   /**
    * Saves the configuration to disk.
+   *
+   * @returns {Promise<void>}
    *
    * @memberOf Config
    */
@@ -148,6 +168,7 @@ class Config {
    *
    * @param {string=} key
    * @returns {any}
+   *
    * @memberOf Config
    */
   get (key) {
@@ -159,6 +180,7 @@ class Config {
    *
    * @param {string} key
    * @param {any} value
+   *
    * @memberOf Config
    */
   set (key, value) {

@@ -1,9 +1,12 @@
 {
   "opts": {
-    "destination": "./doc/",
+    "destination": "./doc",
+    "package": "package.json",
+    "readme": "README.md",
     "recurse": true
   },
   "tags": {
+    "allowUnknownTags": false,
     "dictionaries": ["jsdoc", "closure"]
   },
   "source": {

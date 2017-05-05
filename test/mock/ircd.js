@@ -13,7 +13,9 @@ import path from 'path'
 
 /**
  * Creates a temporary socket and returns its path.
+ *
  * @returns {string}
+ *
  * @private
  */
 function tmpSocket () {
@@ -29,7 +31,6 @@ function tmpSocket () {
 
 /**
  * A mock ircd available in the same thread.
- * @extends {EventEmitter}
  */
 class MockIrcd extends EventEmitter {
   /**
@@ -38,6 +39,7 @@ class MockIrcd extends EventEmitter {
    * @param {string} nick client nick
    * @param {MockIrcd~messageCallback} callback fires on every IRC message from the client
    * @param {boolean} [debug=false] output sent and recieved messages
+   *
    * @memberOf MockIrcd
    */
   constructor (nick, callback, debug = false) {
@@ -90,6 +92,7 @@ class MockIrcd extends EventEmitter {
    * Returns the full hostmask for the client.
    *
    * @return {string}
+   *
    * @readonly
    * @memberOf MockIrcd
    */
@@ -102,6 +105,7 @@ class MockIrcd extends EventEmitter {
    *
    * @param {string} [user='testuser']
    * @param {string} [host='testhost']
+   *
    * @fires PurpleBot#send
    * @memberOf MockIrcd
    */
@@ -117,6 +121,7 @@ class MockIrcd extends EventEmitter {
    * @param {string} channel
    * @param {string} topic
    * @param {Array<string>=} additionalNicks
+   *
    * @fires PurpleBot#send
    * @memberOf MockIrcd
    */
@@ -131,6 +136,7 @@ class MockIrcd extends EventEmitter {
    *
    * @param {string} channel
    * @param {string} message
+   *
    * @fires PurpleBot#send
    * @memberOf MockIrcd
    */
@@ -145,6 +151,7 @@ class MockIrcd extends EventEmitter {
    *
    * @param {string} channel
    * @param {string=} topic
+   *
    * @fires PurpleBot#send
    * @memberOf MockIrcd
    */
@@ -162,6 +169,7 @@ class MockIrcd extends EventEmitter {
    *
    * @param {string} channel
    * @param {Array<string>=} additionalNicks sent in addition to the configured client nick
+   *
    * @fires PurpleBot#send
    * @memberOf MockIrcd
    */
@@ -177,6 +185,7 @@ class MockIrcd extends EventEmitter {
    *
    * @param {number|string} numeric
    * @param {string} message
+   *
    * @fires PurpleBot#send
    * @memberOf MockIrcd
    */
@@ -191,6 +200,7 @@ class MockIrcd extends EventEmitter {
    * Send a message with an appended `CRLF`.
    *
    * @param {string} data
+   *
    * @fires MockIrcd#send
    * @memberOf MockIrcd
    */

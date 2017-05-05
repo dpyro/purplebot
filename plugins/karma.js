@@ -9,13 +9,60 @@ import sqlite from 'sqlite'
 
 import Config from '../src/config'
 
+/**
+ * Plugin for tracking karma.
+ *
+ * @implements {Plugin}
+ */
 class KarmaPlugin {
+  /**
+   * Creates an instance of KarmaPlugin.
+   * @param {any} bot
+   * @param {Config} config
+   *
+   * @memberof KarmaPlugin
+   */
   constructor (bot, config) {
     this.bot = bot
     this.config = config || new Config()
     this._installHooks()
   }
 
+  /**
+   * Asynchronously loads the database.
+   *
+   * @returns {Promise<void>}
+   *
+   * @memberof KarmaPlugin
+   */
+  async load () {
+    const sql = `
+      CREATE TABLE IF NOT EXISTS karma (
+        id        INTEGER PRIMARY KEY,
+        name      TEXT    NOT NULL UNIQUE COLLATE NOCASE,
+        increased INTEGER NOT NULL DEFAULT 0 CHECK (increased >= 0),
+        decreased INTEGER NOT NULL DEFAULT 0 CHECK (decreased >= 0)
+      );
+
+      CREATE VIEW IF NOT EXISTS karma_view AS
+        SELECT *, increased-decreased AS points
+        FROM karma
+        ORDER BY points, name DESC;
+
+      PRAGMA busy_timeout = 0;
+    `
+
+    await this.config.ensureDir()
+    this.db = await sqlite.open(this.databasePath)
+    await this.db.exec(sql)
+  }
+
+  /**
+   * Install hooks on the bot.
+   *
+   * @memberof KarmaPlugin
+   * @private
+   */
   _installHooks () {
     this.bot.on('message#', (nick, to, text, message) => {
       this.onMessage(nick, to, text)
@@ -76,30 +123,16 @@ class KarmaPlugin {
     }
   }
 
+  /**
+   * Return the path to the Karma database.
+   *
+   * @returns {string}
+   *
+   * @readonly
+   * @memberof KarmaPlugin
+   */
   get databasePath () {
     return this.config.path('karma.db')
-  }
-
-  async load () {
-    const sql = `
-      CREATE TABLE IF NOT EXISTS karma (
-        id        INTEGER PRIMARY KEY,
-        name      TEXT    NOT NULL UNIQUE COLLATE NOCASE,
-        increased INTEGER NOT NULL DEFAULT 0 CHECK (increased >= 0),
-        decreased INTEGER NOT NULL DEFAULT 0 CHECK (decreased >= 0)
-      );
-
-      CREATE VIEW IF NOT EXISTS karma_view AS
-        SELECT *, increased-decreased AS points
-        FROM karma
-        ORDER BY points, name DESC;
-
-      PRAGMA busy_timeout = 0;
-    `
-
-    await this.config.ensureDir()
-    this.db = await sqlite.open(this.databasePath)
-    await this.db.exec(sql)
   }
 
   async resetDatabase () {
@@ -117,6 +150,13 @@ class KarmaPlugin {
     await this.load()
   }
 
+  /**
+   * Retrieves the karma for a `name` if it exists.
+   *
+   * @param {string} name
+   *
+   * @memberof KarmaPlugin
+   */
   async get (name) {
     const sql = 'SELECT * FROM karma_view WHERE name = ?'
     return this.db.get(sql, name)

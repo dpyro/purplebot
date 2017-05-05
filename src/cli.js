@@ -14,8 +14,9 @@ class Cli {
    * Universal commands
    *
    * @returns {Map<string, function(...): void>}
-   * @readonly
+   *
    * @static
+   * @readonly
    * @memberOf Cli
    */
   static get globalCommands () {
@@ -30,9 +31,10 @@ class Cli {
   /**
    * Creates an active `Cli` instance.
    *
-   * @param {EventEmitter} target
+   * @param {PurpleBot} target
    * @param {stream.Readable} [input=process.stdin]
-   * @param {stream.Writable} [output=process.stdout]
+   * @param {stream.Writable|readline} [output=process.stdout]
+   *
    * @memberOf Console
    */
   constructor (target, input = process.stdin, output = process.stdout) {
@@ -78,7 +80,9 @@ class Cli {
 
     const attach = (event) => {
       this.target.on(event, (...args) => {
-        this.output.clearLine()
+        if (typeof this.output.clearLine === 'function') {
+          this.output.clearLine()
+        }
         this.readline.write(`* ${_.capitalize(event)}ed\n`)
       })
     }
@@ -96,6 +100,7 @@ class Cli {
    *
    * @param {string} line
    * @param {function(...): void} callback
+   *
    * @memberOf Console
    */
   completer (line, callback) {

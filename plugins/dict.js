@@ -8,13 +8,33 @@ import sqlite from 'sqlite'
 
 import Config from '../src/config'
 
+/**
+ * Plugin for user-defined terms.
+ *
+ * @implements {Plugin}
+ */
 class DictPlugin {
+  /**
+   * Creates an instance of DictPlugin.
+   *
+   * @param {any} bot
+   * @param {Config} config
+   *
+   * @memberof DictPlugin
+   */
   constructor (bot, config) {
     this.bot = bot
     this.config = config || new Config()
     this.databasePath = this.config.path('dict.db')
   }
 
+  /**
+   * Asynchronously loads the needed resources for this plugin.
+   *
+   * @returns {Promise<void>}
+   *
+   * @memberof DictPlugin
+   */
   async load () {
     const sql = `
       CREATE TABLE IF NOT EXISTS definition (
@@ -48,11 +68,29 @@ class DictPlugin {
     this.bot.emit('dict.respond', nick, to, name, definition)
   }
 
+  /**
+   * Adds a definition for `key`.
+   *
+   * @param {string} key
+   * @param {string} value
+   * @param {string} [user=null]
+   *
+   * @memberof DictPlugin
+   */
   async add (key, value, user = null) {
     const sql = 'INSERT INTO definition (key, value, user) VALUES (?, ?, ?)'
     return this.db.run(sql, key, value, user)
   }
 
+  /**
+   * Removes a definition for `key`.
+   *
+   * @param {string} key
+   * @param {number} valueId
+   * @returns {Promise<boolean>}
+   *
+   * @memberof DictPlugin
+   */
   async remove (key, valueId) {
     if (valueId <= 0) return false
 
@@ -61,23 +99,39 @@ class DictPlugin {
     const results = await this.definitions(key)
     if (valueId > results.length) return false
 
-    const value = results[valueId - 1].value
-    const sql = 'DELETE FROM definition WHERE key = ? AND value = ?'
-    await this.db.run(sql, key, value)
+    const id = results[valueId - 1].id
+    const sql = 'DELETE FROM definition WHERE id = ?'
+    await this.db.run(sql, id)
 
     await this.db.run('END')
 
     return true
   }
 
+  /**
+   * Retrieve a random definition for `key`, if it exists.
+   *
+   * @param {string} key
+   *
+   * @memberof DictPlugin
+   */
   async definition (name) {
     const sql = 'SELECT * FROM definition WHERE key = ? ORDER BY RANDOM() LIMIT 1'
-    return this.db.get(sql, name)
+    const value = await this.db.get(sql, name)
+    return value
   }
 
+  /**
+   * Retrieve all definitions for `key`, if they exist.
+   *
+   * @param {string} name
+   *
+   * @memberof DictPlugin
+   */
   async definitions (name) {
     const sql = 'SELECT * FROM definition WHERE key = ? ORDER BY timestamp, value'
-    return this.db.all(sql, name)
+    const definitions = await this.db.all(sql, name)
+    return definitions
   }
 }
 

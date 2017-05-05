@@ -10,13 +10,6 @@ import irc from 'irc'
 import loadPlugins from './plugins'
 
 /**
- * Node.js asynchronous core.
- *
- * @external EventEmitter
- * @see {@link https://nodejs.org/api/events.html Node.js Events API}
- */
-
-/**
  * A library to provide IRC functionality.
  *
  * @external irc
@@ -26,11 +19,12 @@ import loadPlugins from './plugins'
 /**
  * Configurable bot that wraps `node-irc`.
  *
- * @extends external:EventEmitter
+ * @extends NodeJS.EventEmitter
+ *
  * @property {string} server
  * @property {external:irc.Client} client
  * @property {Map<string, function(...any): void>} commands
- * @property {Array<any>} plugins
+ * @property {Array<Plugin>} plugins
  */
 class PurpleBot extends EventEmitter {
   /**
@@ -68,6 +62,12 @@ class PurpleBot extends EventEmitter {
     this._installForwards()
   }
 
+  /**
+   * Installs client hooks.
+   *
+   * @memberof PurpleBot
+   * @private
+   */
   _installClientHooks () {
     this.client.on('message', (nick, to, text, message) => {
       const trimmedText = text.trim()
@@ -134,23 +134,23 @@ class PurpleBot extends EventEmitter {
    * @private
    */
   _installForwards () {
-    this.forwardClientEvent('error')
+    this._forwardClientEvent('error')
 
-    this.forwardClientEvent('action')
-    this.forwardClientEvent('invite')
-    this.forwardClientEvent('kill')
-    this.forwardClientEvent('message')
-    this.forwardClientEvent('message#')
-    this.forwardClientEvent('+mode')
-    this.forwardClientEvent('-mode')
-    this.forwardClientEvent('motd')
-    this.forwardClientEvent('names')
-    this.forwardClientEvent('notice')
-    this.forwardClientEvent('pm')
-    this.forwardClientEvent('quit')
-    this.forwardClientEvent('registered', 'register')
-    this.forwardClientEvent('selfMessage', 'self')
-    this.forwardClientEvent('topic')
+    this._forwardClientEvent('action')
+    this._forwardClientEvent('invite')
+    this._forwardClientEvent('kill')
+    this._forwardClientEvent('message')
+    this._forwardClientEvent('message#')
+    this._forwardClientEvent('+mode')
+    this._forwardClientEvent('-mode')
+    this._forwardClientEvent('motd')
+    this._forwardClientEvent('names')
+    this._forwardClientEvent('notice')
+    this._forwardClientEvent('pm')
+    this._forwardClientEvent('quit')
+    this._forwardClientEvent('registered', 'register')
+    this._forwardClientEvent('selfMessage', 'self')
+    this._forwardClientEvent('topic')
   }
 
   /**
@@ -158,10 +158,11 @@ class PurpleBot extends EventEmitter {
    *
    * @param {string} from event name to listen for in client
    * @param {string} [to=from] name for forwarding the client event
+   *
    * @memberOf PurpleBot
    * @private
    */
-  forwardClientEvent (from, to = from) {
+  _forwardClientEvent (from, to = from) {
     this.client.on(from, (...args) => {
       this.emit(to, ...args)
     })
@@ -186,6 +187,8 @@ class PurpleBot extends EventEmitter {
    * Disconnect from the IRC server.
    *
    * @param {string=} message
+   * @returns {Promise<string>}
+   *
    * @fires PurpleBot#disconnect
    * @memberOf PurpleBot
    */
@@ -193,7 +196,7 @@ class PurpleBot extends EventEmitter {
     return new Promise((resolve, reject) => {
       this.client.disconnect(message, () => {
         this.emit('disconnect', this.server, message)
-        return resolve.call(this, this.server, message)
+        resolve(this.server)
       })
     })
   }
@@ -202,6 +205,8 @@ class PurpleBot extends EventEmitter {
    * Joins the bot to an IRC channel.
    *
    * @param {string} channel
+   * @returns {Promise<string>} the joined channel
+   *
    * @fires PurpleBot#join
    * @memberOf PurpleBot
    */
@@ -209,7 +214,7 @@ class PurpleBot extends EventEmitter {
     return new Promise((resolve, reject) => {
       this.client.join(channel, () => {
         this.emit('join', channel)
-        return resolve.call(this, channel)
+        return resolve(channel)
       })
     })
   }
@@ -219,6 +224,8 @@ class PurpleBot extends EventEmitter {
    *
    * @param {string} channel
    * @param {string=} message
+   * @returns {Promise<string>} the parted channel
+   *
    * @fires PurpleBot#part
    * @memberOf PurpleBot
    */
@@ -226,7 +233,7 @@ class PurpleBot extends EventEmitter {
     return new Promise((resolve, reject) => {
       this.client.part(channel, message, () => {
         this.emit('part', channel, message)
-        resolve.call(this, channel)
+        resolve(channel)
       })
     })
   }
@@ -236,6 +243,7 @@ class PurpleBot extends EventEmitter {
    *
    * @param {string} target
    * @param {string} message
+   *
    * @fires PurpleBot#say
    * @memberOf PurpleBot
    */
@@ -256,6 +264,8 @@ class PurpleBot extends EventEmitter {
 
   /**
    * Current nick of the bot.
+   *
+   * @returns {string}
    *
    * @readonly
    * @memberOf PurpleBot

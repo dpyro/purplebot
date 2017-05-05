@@ -14,6 +14,7 @@ import Config from '../src/config'
  * @param {NodeJS.EventEmitter} emitter
  * @param {string} eventName
  * @param {function(this:NodeJS.EventEmitter, ...any): void} callback
+ *
  * @private
  */
 function onSafe (emitter, eventName, callback) {
@@ -30,6 +31,7 @@ function onSafe (emitter, eventName, callback) {
  * Return the current timestamp.
  *
  * @returns {string}
+ *
  * @private
  */
 function timestamp () {
@@ -130,28 +132,16 @@ const loggers = {
 }
 
 /**
- * @external Buffer
- */
-
-/**
- * @external stream
- */
-
-/**
- * @class Writeable
- * @memberof external:stream
- * @see {@link https://nodejs.org/api/stream.html#stream_class_stream_writable Node.js stream.Writeable}
- */
-
-/**
- * Plugin to log sent and recieved messages.
+ * Plugin for logging sent and recieved messages.
+ *
+ * @implements {Plugin}
  */
 class LoggingPlugin {
   /**
    * Creates an attached instance of `LoggingPlugin`.
    *
-   * @param {PurpleBot} bot
-   * @param {external:Buffer|external:stream.Writeable} output optional buffer or writeable stream
+   * @param {any} bot
+   * @param {NodeBuffer} output optional buffer or writeable stream
    * @memberOf LoggingPlugin
    * @todo set socket server file name to server name
    */
