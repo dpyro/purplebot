@@ -36,7 +36,7 @@ class PurpleBot extends EventEmitter {
   /**
    * Creates an instance of PurpleBot.
    *
-   * @param {{nick: string, server: string, channels: Array<string>, debug: boolean}} options
+   * @param {Object} options
    * @memberOf PurpleBot
    */
   constructor (options) {
@@ -63,6 +63,12 @@ class PurpleBot extends EventEmitter {
       clientOptions
     )
 
+    this._installClientHooks()
+    this._setupCommandHooks()
+    this._installForwards()
+  }
+
+  _installClientHooks () {
     this.client.on('message', (nick, to, text, message) => {
       const trimmedText = text.trim()
       if (trimmedText.startsWith('.') && trimmedText.substring(1, 2) !== '.') {
@@ -82,9 +88,6 @@ class PurpleBot extends EventEmitter {
         }
       }
     })
-
-    this._setupCommandHooks()
-    this._installForwards()
   }
 
   async loadPlugins () {
@@ -103,26 +106,20 @@ class PurpleBot extends EventEmitter {
     this.commands.set('connect', this.connect.bind(this))
     this.commands.set('disconnect', this.disconnect.bind(this))
     this.commands.set('join', (...args) => {
-      if (args == null || args.length < 1) {
-        return false
-      }
+      if (args == null || args.length < 1) return
 
       const channel = args.shift()
       this.join(channel)
     })
     this.commands.set('part', (...args) => {
-      if (args == null || args.length < 1) {
-        return false
-      }
+      if (args == null || args.length < 1) return
 
       const channel = args.shift()
       const message = args.shift()
       this.part(channel, message)
     })
     this.commands.set('say', (...args) => {
-      if (args == null || args.length < 2) {
-        return false
-      }
+      if (args == null || args.length < 2) return
 
       const target = args.shift()
       const message = args.shift()

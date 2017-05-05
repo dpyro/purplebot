@@ -9,19 +9,11 @@ import _ from 'lodash'
 import Config from '../src/config'
 
 /**
- * @callback listenerCallback
- * @this {EventEmitter}
- * @param {EventEmitter} emitter
- * @param {string} eventName
- * @param {...any} args
- */
-
-/**
  * Adds an exception-catching wrapped listener to an event emitter
  *
- * @param {EventEmitter} emitter
+ * @param {NodeJS.EventEmitter} emitter
  * @param {string} eventName
- * @param {listenerCallback} callback
+ * @param {function(this:NodeJS.EventEmitter, ...any): void} callback
  * @private
  */
 function onSafe (emitter, eventName, callback) {
@@ -47,7 +39,7 @@ function timestamp () {
 /**
  * Logger functions.
  *
- * @type {Map<string, function(...any): string>}
+ * @type {Object<string, function(...any): string>}
  * @private
  */
 const loggers = {
@@ -185,8 +177,8 @@ class LoggingPlugin {
   }
 }
 
-function init (...args) {
-  return new LoggingPlugin(...args)
+function init (bot, config) {
+  return new LoggingPlugin(bot, config)
 }
 
 export default init

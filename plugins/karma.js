@@ -29,7 +29,7 @@ class KarmaPlugin {
       if (karma != null) {
         this.respond(nick, to, term, karma)
       } else {
-        this.responseNoKarma(nick, to, term)
+        this.respondNoKarma(nick, to, term)
       }
     })
 
@@ -119,7 +119,7 @@ class KarmaPlugin {
 
   async get (name) {
     const sql = 'SELECT * FROM karma_view WHERE name = ?'
-    await this.db.get(sql, name)
+    return this.db.get(sql, name)
   }
 
   async updateBy (name, points) {
@@ -155,8 +155,8 @@ class KarmaPlugin {
   }
 }
 
-async function init (...args) {
-  const plugin = new KarmaPlugin(...args)
+async function init (bot, config) {
+  const plugin = new KarmaPlugin(bot, config)
   await plugin.load()
   return plugin
 }

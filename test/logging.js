@@ -6,7 +6,7 @@ import _ from 'lodash'
 import LoggingPlugin from '../plugins/logging'
 
 /**
- * @returns {Map<string, Array<string>>}
+ * @returns {Array<Array<string>>}
  */
 function eventTests () {
   const server = 'example.com'

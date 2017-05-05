@@ -81,8 +81,8 @@ class DictPlugin {
   }
 }
 
-async function init (...args) {
-  const plugin = new DictPlugin(...args)
+async function init (bot, config) {
+  const plugin = new DictPlugin(bot, config)
   await plugin.load()
   return plugin
 }

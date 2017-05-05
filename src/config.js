@@ -56,7 +56,7 @@ class Config {
    * Determine if the directory already exists.
    *
    * @param {...string=} args
-   * @return {bool}
+   * @return {boolean}
    *
    * @memberOf Config
    */
@@ -78,7 +78,15 @@ class Config {
    * @memberOf Config
    */
   async ensureDir () {
-    return fs.ensureDir(this.configDir)
+    return new Promise((resolve, reject) => {
+      fs.ensureDir(this.configDir, (err) => {
+        if (err != null) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      })
+    })
   }
 
   async removeDir () {
@@ -125,7 +133,7 @@ class Config {
    */
   async flush () {
     return new Promise((resolve, reject) => {
-      fs.writeJson(this.configPath, this.json, {spaces: 2}, (err, result) => {
+      fs.writeJson(this.configPath, this.json, (err, result) => {
         if (err) {
           reject(err)
         } else {
@@ -143,11 +151,7 @@ class Config {
    * @memberOf Config
    */
   get (key) {
-    if (key == null) {
-      return this.json
-    } else {
-      return this.json[key]
-    }
+    return (key == null) ? this.json : this.json[key]
   }
 
   /**

@@ -7,5 +7,14 @@
   },
   "ecmaFeatures": {
     "modules": true
+  },
+  "rules": {
+    "complexity": ["warn", { "max": 10 }],
+    "consistent-return": "error",
+    "curly": ["error", "multi-line"],
+    "no-div-regex": "error",
+    "no-else-return": "error",
+    "prefer-promise-reject-errors": "error",
+    "yoda": ["error", "never", { "exceptRange": true } ]
   }
 }

@@ -3,6 +3,7 @@
  * @license MIT
  */
 
+// @ts-ignore
 import { JSDOM } from 'jsdom'
 import mime from 'mime-types'
 import request from 'request'
@@ -53,7 +54,7 @@ class WebPlugin {
             bot.emit('title', to, link, title)
           } else {
             const ext = mime.extension(type)
-            if (WebPlugin.imageExts.includes(ext)) {
+            if (typeof ext !== 'boolean' && this.imageExts.indexOf(ext) !== -1) {
               // TODO: save image or somesuch
               bot.emit('web.image', to, link, ext, body)
             }
@@ -72,8 +73,8 @@ class WebPlugin {
   }
 }
 
-function init (...args) {
-  return new WebPlugin(...args)
+function init (bot) {
+  return new WebPlugin(bot)
 }
 
 export default init
