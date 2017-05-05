@@ -15,7 +15,7 @@ class Config {
   /**
    * Creates a temporary config directory.
    *
-   * @returns {Promise<string>}
+   * @returns {Promise<Config>}
    *
    * @static
    * @memberof Config
@@ -93,12 +93,22 @@ class Config {
   }
 
   /**
+   * Deletes the config directory.
    *
+   * @returns {Promise<void>}
    *
    * @memberof Config
    */
   async removeDir () {
-    return fs.remove(this.configDir)
+    return new Promise((resolve, reject) => {
+      fs.remove(this.configDir, (err) => {
+        if (err != null) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      })
+    })
   }
 
   /**
@@ -127,6 +137,8 @@ class Config {
 
   /**
    * Loads this configuration from disk.
+   *
+   * @returns {Promise<any>}
    *
    * @memberOf Config
    * @todo rename to load

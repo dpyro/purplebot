@@ -143,6 +143,7 @@ class LoggingPlugin {
    * @param {any} bot
    * @param {NodeBuffer} output optional buffer or writeable stream
    * @memberOf LoggingPlugin
+   *
    * @todo set socket server file name to server name
    */
   constructor (bot, output = null) {

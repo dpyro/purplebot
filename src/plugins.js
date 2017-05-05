@@ -9,20 +9,23 @@ import requireAll from 'require-all'
 import _ from 'lodash'
 
 /**
+ * Plugin API.
+ *
  * @interface Plugin
  */
 
 /**
- * Creates an instance of the plugin.
+ * Creates an instance of the plugin. Required.
  *
- * @constructor
+ * @constructs
  * @param {PurpleBot} bot
  * @param {?Config} config
+ *
  * @memberof Plugin
  */
 
 /**
- * Asynchronously loads the resources for this plugin.
+ * Asynchronously loads the resources for this plugin. Optional.
  *
  * @function load
  * @returns {Promise}
@@ -35,7 +38,7 @@ import _ from 'lodash'
  * Synchronously fetch the available plugins.
  *
  * @param {PurpleBot} bot loads available plugins
- * @returns {Array<Plugin>} loaded plugins
+ * @returns {Promise<Plugin[]>} loaded plugins
  */
 async function loadPlugins (bot) {
   const plugins = requireAll({

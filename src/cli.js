@@ -32,8 +32,8 @@ class Cli {
    * Creates an active `Cli` instance.
    *
    * @param {PurpleBot} target
-   * @param {stream.Readable} [input=process.stdin]
-   * @param {stream.Writable|readline} [output=process.stdout]
+   * @param {NodeJS.ReadableStream} [input=process.stdin]
+   * @param {NodeJS.WritableStream} [output=process.stdout]
    *
    * @memberOf Console
    */
@@ -45,6 +45,7 @@ class Cli {
       input: input,
       output: output,
       completer: this.completer.bind(this),
+      // @ts-ignore
       prompt: ''
     })
 
@@ -80,9 +81,7 @@ class Cli {
 
     const attach = (event) => {
       this.target.on(event, (...args) => {
-        if (typeof this.output.clearLine === 'function') {
-          this.output.clearLine()
-        }
+        readline.clearLine(this.output, 0)
         this.readline.write(`* ${_.capitalize(event)}ed\n`)
       })
     }
