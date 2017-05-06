@@ -135,13 +135,15 @@ const loggers = {
 /**
  * Plugin for logging sent and recieved messages.
  *
- * @implements {Plugin}
+ * @implements {module:purplebot.Plugin}
+ *
+ * @memberof module:purplebot
  */
 class LoggingPlugin {
   /**
    * Creates an attached instance of `LoggingPlugin`.
    *
-   * @param {purplebot/PurpleBot} bot
+   * @param {module:purplebot.PurpleBot} bot
    * @param {NodeBuffer} [output=null] optional buffer or writeable stream
    *
    * @memberOf LoggingPlugin

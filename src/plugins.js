@@ -1,7 +1,6 @@
 /**
  * @author Sumant Manne <sumant.manne@gmail.com>
  * @license MIT
- * @module purplebot
  */
 
 import 'babel-polyfill'
@@ -13,16 +12,18 @@ import _ from 'lodash'
  * Plugin API.
  *
  * @interface Plugin
+ *
+ * @memberof module:purplebot
  */
 
 /**
  * Creates an instance of the plugin. Required.
  *
  * @constructs
- * @param {purplebot/PurpleBot} bot
- * @param {?Config} config
+ * @param {module:purplebot.PurpleBot} bot
+ * @param {?module:purplebot.Config} config
  *
- * @memberof Plugin
+ * @memberof module:purplebot.Plugin
  */
 
 /**
@@ -31,15 +32,17 @@ import _ from 'lodash'
  * @function load
  * @returns {Promise}
  *
- * @memberof Plugin
+ * @memberof module:purplebot.Plugin
  * @instance
  */
 
 /**
  * Synchronously fetch the available plugins.
  *
- * @param {purplebot/PurpleBot} bot loads available plugins
+ * @param {module:purplebot.PurpleBot} bot loads available plugins
  * @returns {Promise<Plugin[]>} loaded plugins
+ *
+ * @memberof module:purplebot
  */
 async function loadPlugins (bot) {
   const plugins = requireAll({

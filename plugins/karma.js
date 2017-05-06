@@ -12,14 +12,16 @@ import Config from '../src/config'
 /**
  * Plugin for tracking karma.
  *
- * @implements {purplebot/Plugin}
+ * @implements {module:purplebot.Plugin}
+ *
+ * @memberof module:purplebot
  */
 class KarmaPlugin {
   /**
    * Creates an instance of KarmaPlugin.
    *
-   * @param {purplebot/PurpleBot} bot
-   * @param {purplebot/Config} config
+   * @param {module:purplebot.PurpleBot} bot
+   * @param {module:purplebot.Config} config
    *
    * @memberof KarmaPlugin
    */

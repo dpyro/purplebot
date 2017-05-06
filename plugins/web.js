@@ -16,13 +16,15 @@ const matcher = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9
  *
  * @prop {string[]} imageExts
  *
- * @implements {Plugin}
+ * @implements {module:purplebot.Plugin}
+ *
+ * @memberof module:purplebot
  */
 class WebPlugin {
   /**
    * Creates an instance of WebPlugin.
    *
-   * @param {purplebot/PurpleBot} bot
+   * @param {module:purplebot.PurpleBot} bot
    *
    * @memberOf WebPlugin
    */

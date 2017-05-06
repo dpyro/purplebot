@@ -3,6 +3,11 @@
 /**
  * @author Sumant Manne <sumant.manne@gmail.com>
  * @license MIT
+ */
+
+/**
+ * The purpleist module.
+ *
  * @module purplebot
  */
 

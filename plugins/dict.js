@@ -11,14 +11,16 @@ import Config from '../src/config'
 /**
  * Plugin for user-defined terms.
  *
- * @implements {Plugin}
+ * @implements {module:purplebot.Plugin}
+ *
+ * @memberof module:purplebot
  */
 class DictPlugin {
   /**
    * Creates an instance of DictPlugin.
    *
-   * @param {purplebot/PurpleBot} bot
-   * @param {Config} config
+   * @param {module:purplebot.PurpleBot} bot
+   * @param {module:purplebot.Config} config
    *
    * @memberof DictPlugin
    */

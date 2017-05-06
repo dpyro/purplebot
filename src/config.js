@@ -1,7 +1,6 @@
 /**
  * @author Sumant Manne <sumant.manne@gmail.com>
  * @license MIT
- * @module purplebot
  */
 
 import 'babel-polyfill'
@@ -11,6 +10,8 @@ import path from 'path'
 
 /**
  * Manages configuration and data paths.
+ *
+ * @memberof module:purplebot
  */
 class Config {
   /**

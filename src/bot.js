@@ -1,7 +1,6 @@
 /**
  * @author Sumant Manne <sumant.manne@gmail.com>
  * @license MIT
- * @module purplebot
  */
 
 import 'babel-polyfill'
@@ -26,6 +25,8 @@ import loadPlugins from './plugins'
  * @property {external:irc.Client} client
  * @property {Map<string, function(...any): void>} commands
  * @property {Plugin[]} plugins
+ *
+ * @memberof module:purplebot
  */
 class PurpleBot extends EventEmitter {
   /**

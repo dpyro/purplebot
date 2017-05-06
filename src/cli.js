@@ -1,7 +1,6 @@
 /**
  * @author Sumant Manne <sumant.manne@gmail.com>
  * @license MIT
- * @module purplebot
  */
 
 import readline from 'readline'
@@ -9,6 +8,8 @@ import _ from 'lodash'
 
 /**
  * Encapulates a readline interface.
+ *
+ * @memberof module:purplebot
  */
 class Cli {
   /**
@@ -32,7 +33,7 @@ class Cli {
   /**
    * Creates an active `Cli` instance.
    *
-   * @param {purplebot/PurpleBot} target
+   * @param {module:purplebot.PurpleBot} target
    * @param {NodeJS.ReadableStream} [input=process.stdin]
    * @param {NodeJS.WritableStream} [output=process.stdout]
    *
