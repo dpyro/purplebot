@@ -141,7 +141,7 @@ class LoggingPlugin {
   /**
    * Creates an attached instance of `LoggingPlugin`.
    *
-   * @param {any} bot
+   * @param {PurpleBot} bot
    * @param {NodeBuffer} [output=null] optional buffer or writeable stream
    *
    * @memberOf LoggingPlugin

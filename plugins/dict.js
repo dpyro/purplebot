@@ -17,7 +17,7 @@ class DictPlugin {
   /**
    * Creates an instance of DictPlugin.
    *
-   * @param {any} bot
+   * @param {PurpleBot} bot
    * @param {Config} config
    *
    * @memberof DictPlugin
