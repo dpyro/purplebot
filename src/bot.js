@@ -1,6 +1,7 @@
 /**
  * @author Sumant Manne <sumant.manne@gmail.com>
  * @license MIT
+ * @module purplebot
  */
 
 import 'babel-polyfill'

@@ -1,6 +1,7 @@
 /**
  * @author Sumant Manne <sumant.manne@gmail.com>
  * @license MIT
+ * @module purplebot
  */
 
 import readline from 'readline'
@@ -13,7 +14,7 @@ class Cli {
   /**
    * Universal commands
    *
-   * @returns {Map<string, function(...): void>}
+   * @returns {Map<string, function(...any): void>}
    *
    * @static
    * @readonly
@@ -31,7 +32,7 @@ class Cli {
   /**
    * Creates an active `Cli` instance.
    *
-   * @param {PurpleBot} target
+   * @param {purplebot/PurpleBot} target
    * @param {NodeJS.ReadableStream} [input=process.stdin]
    * @param {NodeJS.WritableStream} [output=process.stdout]
    *
@@ -98,7 +99,7 @@ class Cli {
    * Readline completer function
    *
    * @param {string} line
-   * @param {function(...): void} callback
+   * @param {function(...any): void} callback
    *
    * @memberOf Console
    */

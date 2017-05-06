@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
-    "checkJs": true
-  },
-  "exclude": [
-    "node_modules"
-  ]
+    "checkJs": true,
+    "noEmit": true,
+    "lib": [
+      "es2017"
+    ],
+    "target": "es6"
+  }
 }

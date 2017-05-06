@@ -22,7 +22,7 @@ class WebPlugin {
   /**
    * Creates an instance of WebPlugin.
    *
-   * @param {PurpleBot} bot
+   * @param {purplebot/PurpleBot} bot
    *
    * @memberOf WebPlugin
    */
