@@ -42,6 +42,7 @@ function timestamp () {
  * Logger functions.
  *
  * @type {Object<string, function(...any): string>}
+ *
  * @private
  */
 const loggers = {
@@ -141,7 +142,8 @@ class LoggingPlugin {
    * Creates an attached instance of `LoggingPlugin`.
    *
    * @param {any} bot
-   * @param {NodeBuffer} output optional buffer or writeable stream
+   * @param {NodeBuffer} [output=null] optional buffer or writeable stream
+   *
    * @memberOf LoggingPlugin
    *
    * @todo set socket server file name to server name

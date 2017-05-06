@@ -57,6 +57,17 @@ class DictPlugin {
     })
   }
 
+  /**
+   *
+   *
+   * @param {string} nick
+   * @param {string} to
+   * @param {string} text
+   * @returns {Promise<void>}
+   *
+   * @fires PurpleBot#dict.respond
+   * @memberof DictPlugin
+   */
   async onMessage (nick, to, text) {
     const result = /([\w-]+?)\?+(?!\S)/.exec(text)
     if (result == null) return

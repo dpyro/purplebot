@@ -14,7 +14,7 @@ const matcher = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9
 /**
  * Plugin to snarf URLs and images.
  *
- * @prop {Array<string>} imageExts
+ * @prop {string[]} imageExts
  *
  * @implements {Plugin}
  */

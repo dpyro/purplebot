@@ -10,7 +10,7 @@
     "start": "babel-node src/index.js",
     "test": "./node_modules/mocha/bin/mocha --compilers js:babel-register",
     "lint": "./node_modules/eslint/bin/eslint.js **/*.js",
-    "doc": "rm -rf doc/ && ./node_modules/jsdoc/jsdoc.js -c jsdoc.json"
+    "doc": "rm -rf doc/* && ./node_modules/jsdoc/jsdoc.js -c jsdoc.json"
   },
   "dependencies": {
     "babel-polyfill": "^6.23.0",

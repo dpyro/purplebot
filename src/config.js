@@ -114,8 +114,6 @@ class Config {
   /**
    * Retrieves the path to the `config.json`.
    *
-   * @returns {string}
-   *
    * @readonly
    * @memberof Config
    */
@@ -141,6 +139,7 @@ class Config {
    * @returns {Promise<any>}
    *
    * @memberOf Config
+   *
    * @todo rename to load
    */
   async sync () {

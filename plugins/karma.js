@@ -17,6 +17,7 @@ import Config from '../src/config'
 class KarmaPlugin {
   /**
    * Creates an instance of KarmaPlugin.
+   *
    * @param {any} bot
    * @param {Config} config
    *
@@ -97,6 +98,16 @@ class KarmaPlugin {
     })
   }
 
+  /**
+   * Responds to `message#` from the client.
+   *
+   * @param {string} nick
+   * @param {string} to
+   * @param {string} text
+   *
+   * @memberof KarmaPlugin
+   * @fires PurpleBot#karma.respond
+   */
   async onMessage (nick, to, text) {
     const result = /(\w+)(\+\+|--)(\d*)(?!\w)/.exec(text)
     if (result === null) return
@@ -109,17 +120,37 @@ class KarmaPlugin {
     this.bot.emit('karma.respond', nick, to, term, karma)
   }
 
-  async respond (nick, to, term, karma) {
+  /**
+   * Outputs karma for a name.
+   *
+   * @param {string} nick
+   * @param {string} to
+   * @param {string} term
+   * @param {number} karma
+   *
+   * @memberof KarmaPlugin
+   */
+  respond (nick, to, term, karma) {
     if (typeof this.bot.say === 'function') {
       const response = `${nick}: karma for ${term} is now ${karma}.`
-      await this.bot.say(to, response)
+      this.bot.say(to, response)
     }
   }
 
-  async respondNoKarma (nick, to, term) {
+  /**
+   * Outputs for a name without karma.
+   *
+   * @param {string} nick
+   * @param {string} to
+   * @param {string} term
+   * @param {number} karma
+   *
+   * @memberof KarmaPlugin
+   */
+  respondNoKarma (nick, to, term) {
     if (typeof this.bot.say === 'function') {
       const response = `${nick}: There is no karma for ${term}.`
-      await this.bot.say(to, response)
+      this.bot.say(to, response)
     }
   }
 
@@ -128,13 +159,20 @@ class KarmaPlugin {
    *
    * @returns {string}
    *
-   * @readonly
    * @memberof KarmaPlugin
+   * @readonly
    */
   get databasePath () {
     return this.config.path('karma.db')
   }
 
+  /**
+   * Replaces the current database with an empty one.
+   *
+   * @returns {Promise<void>}
+   *
+   * @memberof KarmaPlugin
+   */
   async resetDatabase () {
     if (this.db) {
       await this.db.close()
@@ -162,6 +200,16 @@ class KarmaPlugin {
     return this.db.get(sql, name)
   }
 
+  /**
+   * Increase or decrease the given `name`'s karma by `points`.
+   * The `name` will be automatically created if it does not already exist.
+   *
+   * @param {string} name
+   * @param {number} points
+   * @returns {Promise<number>}
+   *
+   * @memberof KarmaPlugin
+   */
   async updateBy (name, points) {
     if (points == null) return null
 

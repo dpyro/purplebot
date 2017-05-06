@@ -26,7 +26,7 @@ describe('config', function () {
 
   afterEach(async function deleteConfigDir () {
     await config.removeDir()
-    expect(fs.accessSync(config.configDir)).to.throw
+    expect(() => fs.accessSync(config.configDir)).to.throw
   })
 
   it('get()', function () {

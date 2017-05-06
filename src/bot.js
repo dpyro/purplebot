@@ -24,7 +24,7 @@ import loadPlugins from './plugins'
  * @property {string} server
  * @property {external:irc.Client} client
  * @property {Map<string, function(...any): void>} commands
- * @property {Array<Plugin>} plugins
+ * @property {Plugin[]} plugins
  */
 class PurpleBot extends EventEmitter {
   /**

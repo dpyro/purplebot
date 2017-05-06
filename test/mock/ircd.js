@@ -120,7 +120,7 @@ class MockIrcd extends EventEmitter {
    *
    * @param {string} channel
    * @param {string} topic
-   * @param {Array<string>=} additionalNicks
+   * @param {?string[]} additionalNicks
    *
    * @fires PurpleBot#send
    * @memberOf MockIrcd
@@ -168,7 +168,7 @@ class MockIrcd extends EventEmitter {
    * A `RPL_NAMEREPLY` message is sent followed by a `RPL_ENDOFNAMES`.
    *
    * @param {string} channel
-   * @param {Array<string>=} additionalNicks sent in addition to the configured client nick
+   * @param {?string[]} additionalNicks sent in addition to the configured client nick
    *
    * @fires PurpleBot#send
    * @memberOf MockIrcd
