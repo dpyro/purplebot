@@ -3,7 +3,7 @@
  * @license MIT
  */
 
-import { EventEmitter }  from 'events'
+import { EventEmitter } from 'events'
 import * as irc from 'irc'
 
 import { CommandMap } from './cli'
@@ -25,7 +25,7 @@ import loadPlugins, { Plugin } from './plugins'
 export default class PurpleBot extends EventEmitter implements CommandMap {
   client: irc.Client
   server: string
-  commands: {[key in string]: (...any) => void}
+  commands: {[key in string]: (...args: any[]) => void}
   plugins: Plugin[]
 
   /**
@@ -57,111 +57,13 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
       clientOptions
     )
 
-    this._installClientHooks()
-    this._setupCommandHooks()
-    this._installForwards()
-  }
-
-  /**
-   * Installs client hooks.
-   *
-   * @memberof PurpleBot
-   */
-  private _installClientHooks (): void {
-    this.client.on('message', (nick, to, text, message) => {
-      const trimmedText = text.trim()
-      if (trimmedText.startsWith('.') && trimmedText.substring(1, 2) !== '.') {
-        // TODO: accept quoted arguments
-        const words = trimmedText.split(' ')
-        const filteredWords = words.filter((element, index, arr) => {
-          return element != null && element !== ''
-        })
-
-        if (filteredWords.length >= 1) {
-          const command = filteredWords.shift().substring(1)
-          if (command !== '') {
-            const args = filteredWords
-            const context = { nick, to, text, message }
-            this.emit('command', context, command, ...args)
-          }
-        }
-      }
-    })
+    this.installClientHooks()
+    this.setupCommandHooks()
+    this.installForwards()
   }
 
   async loadPlugins (): Promise<void> {
     this.plugins = await loadPlugins(this)
-  }
-
-  /**
-   * Creates and populates `this.commands`.
-   *
-   * @memberOf PurpleBot
-   */
-  private _setupCommandHooks (): void {
-    this.commands = {
-      'connect': this.connect.bind(this),
-      'disconnect': this.disconnect.bind(this),
-      'join': (...args) => {
-        if (args == null || args.length < 1) return
-
-        const channel = args.shift()
-        this.join(channel)
-      },
-      'part': (...args) => {
-        if (args == null || args.length < 1) return
-
-        const channel = args.shift()
-        const message = args.shift()
-        this.part(channel, message)
-      },
-      'say': (...args) => {
-        if (args == null || args.length < 2) return
-
-        const target = args.shift()
-        const message = args.shift()
-        this.say(target, message)
-      }
-    }
-  }
-
-  /**
-   * Applies event forwarding.
-   *
-   * @memberOf PurpleBot
-   */
-  private _installForwards () {
-    this._forwardClientEvent('error')
-
-    this._forwardClientEvent('action')
-    this._forwardClientEvent('invite')
-    this._forwardClientEvent('kill')
-    this._forwardClientEvent('message')
-    this._forwardClientEvent('message#')
-    this._forwardClientEvent('+mode')
-    this._forwardClientEvent('-mode')
-    this._forwardClientEvent('motd')
-    this._forwardClientEvent('names')
-    this._forwardClientEvent('notice')
-    this._forwardClientEvent('pm')
-    this._forwardClientEvent('quit')
-    this._forwardClientEvent('registered', 'register')
-    this._forwardClientEvent('selfMessage', 'self')
-    this._forwardClientEvent('topic')
-  }
-
-  /**
-   * Enable an event forward from `this.client` -> `this`.
-   *
-   * @param from event name to listen for in client
-   * @param to name for forwarding the client event
-   *
-   * @memberOf PurpleBot
-   */
-  private _forwardClientEvent (from: string, to: string = from) {
-    this.client.on(from, (...args) => {
-      this.emit(to, ...args)
-    })
   }
 
   /**
@@ -265,6 +167,104 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    */
   get chans () {
     return this.client.chans
+  }
+
+  /**
+   * Creates and populates `this.commands`.
+   *
+   * @memberOf PurpleBot
+   */
+  private setupCommandHooks (): void {
+    this.commands = {
+      'connect': this.connect.bind(this),
+      'disconnect': this.disconnect.bind(this),
+      'join': (...args) => {
+        if (args == null || args.length < 1) return
+
+        const channel = args.shift()
+        return this.join(channel)
+      },
+      'part': (...args) => {
+        if (args == null || args.length < 1) return
+
+        const channel = args.shift()
+        const message = args.shift()
+        return this.part(channel, message)
+      },
+      'say': (...args) => {
+        if (args == null || args.length < 2) return
+
+        const target = args.shift()
+        const message = args.shift()
+        return this.say(target, message)
+      }
+    }
+  }
+
+  /**
+   * Applies event forwarding.
+   *
+   * @memberOf PurpleBot
+   */
+  private installForwards () {
+    this.forwardClientEvent('error')
+
+    this.forwardClientEvent('action')
+    this.forwardClientEvent('invite')
+    this.forwardClientEvent('kill')
+    this.forwardClientEvent('message')
+    this.forwardClientEvent('message#')
+    this.forwardClientEvent('+mode')
+    this.forwardClientEvent('-mode')
+    this.forwardClientEvent('motd')
+    this.forwardClientEvent('names')
+    this.forwardClientEvent('notice')
+    this.forwardClientEvent('pm')
+    this.forwardClientEvent('quit')
+    this.forwardClientEvent('registered', 'register')
+    this.forwardClientEvent('selfMessage', 'self')
+    this.forwardClientEvent('topic')
+  }
+
+  /**
+   * Enable an event forward from `this.client` -> `this`.
+   *
+   * @param from event name to listen for in client
+   * @param to name for forwarding the client event
+   *
+   * @memberOf PurpleBot
+   */
+  private forwardClientEvent (from: string, to: string = from) {
+    this.client.on(from, (...args) => {
+      this.emit(to, ...args)
+    })
+  }
+
+  /**
+   * Installs client hooks.
+   *
+   * @memberof PurpleBot
+   */
+  private installClientHooks (): void {
+    this.client.on('message', (nick, to, text, message) => {
+      const trimmedText = text.trim()
+      if (trimmedText.startsWith('.') && trimmedText.substring(1, 2) !== '.') {
+        // TODO: accept quoted arguments
+        const words = trimmedText.split(' ')
+        const filteredWords = words.filter((element, index, arr) => {
+          return element != null && element !== ''
+        })
+
+        if (filteredWords.length >= 1) {
+          const command = filteredWords.shift().substring(1)
+          if (command !== '') {
+            const args = filteredWords
+            const context = { nick, to, text, message }
+            this.emit('command', context, command, ...args)
+          }
+        }
+      }
+    })
   }
 }
 

@@ -10,7 +10,7 @@
     "start": "./node_modules/ts-node/dist/bin.js src/index.ts",
     "test": "./node_modules/mocha/bin/mocha --compilers ts:ts-node/register,js:babel-register",
     "eslint": "./node_modules/eslint/bin/eslint.js **/*.js",
-    "tslint": "./node_modules/tslint/bin/tslint --project tsconfig.json --type-check **/*.ts",
+    "tslint": "./node_modules/tslint/bin/tslint --project tsconfig.json **/*.ts",
     "doc": "rm -rf doc/* && ./node_modules/jsdoc/jsdoc.js -c jsdoc.json"
   },
   "dependencies": {

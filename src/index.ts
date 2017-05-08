@@ -56,6 +56,6 @@ if (require.main === module) {
 async function launchBot (options) {
   const bot = await init(options)
   const cli = new Cli(bot)
-  bot.connect()
+  await bot.connect()
   return cli
 }

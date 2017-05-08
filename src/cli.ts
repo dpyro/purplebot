@@ -9,7 +9,7 @@ import * as _ from 'lodash'
 import PurpleBot from './bot'
 
 export interface CommandMap {
-  commands: {[key in string]: (...any) => void}
+  commands: {[key in string]: (...args: any[]) => void}
 }
 
 /**
@@ -37,9 +37,9 @@ export default class Cli {
     this.readline = readline.createInterface({
       input: input,
       output: output,
-      completer: this.completer.bind(this)//,
-      //prompt: ''
+      completer: this.completer.bind(this)
     })
+    this.readline.setPrompt('')
 
     if (this.target != null) {
       this._attachListeners()
@@ -57,6 +57,27 @@ export default class Cli {
         }
       }
     })
+  }
+
+  commands (line: string): string[] {
+    let results =
+      _.keys(this.target.commands)
+      .concat(_.keys(this.globalCommands))
+    if (line.length > 0) {
+      results = results.filter(key => key.startsWith(line))
+    }
+    return results
+  }
+
+  /**
+   * Readline completer function
+   *
+   * @memberOf Console
+   */
+  completer (line: string, callback: (...args: any[]) => void): void {
+    const results = this.commands(line)
+
+    callback(null, [results, line])
   }
 
   /**
@@ -88,37 +109,15 @@ export default class Cli {
   /**
    * Universal commands
    *
-   * @static
    * @readonly
    * @memberOf Cli
    */
-  get globalCommands (): {[key in string]: (...any) => void} {
+  get globalCommands (): {[key in string]: (...args: any[]) => void} {
     return {
       'quit': (...args) => {
         console.log('')
         process.exit(0)
       }
     }
-  }
-
-  commands (line: string): string[] {
-    let results =
-      _.keys(this.target.commands)
-      .concat(_.keys(this.globalCommands))
-    if (line.length > 0) {
-      results = results.filter(key => key.startsWith(line))
-    }
-    return results
-  }
-
-  /**
-   * Readline completer function
-   *
-   * @memberOf Console
-   */
-  completer (line: string, callback: (...any) => void): void {
-    const results = this.commands(line)
-
-    callback(null, [results, line])
   }
 }

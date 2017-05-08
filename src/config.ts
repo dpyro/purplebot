@@ -13,26 +13,6 @@ import path = require('path')
  * @memberof module:purplebot
  */
 export default class Config {
-  /**
-   * Creates a temporary config directory.
-   *
-   * @static
-   * @memberof Config
-   */
-  static async temp (): Promise<Config> {
-    const tempPrefix = path.join(os.tmpdir(), 'purplebot-')
-    return new Promise<Config>((resolve, reject) => {
-      fs.mkdtemp(tempPrefix, (err, folder) => {
-        if (err != null) {
-          reject(err)
-        } else {
-          const config = new Config(folder)
-          resolve(config)
-        }
-      })
-    })
-  }
-
   configDir: string
   json: Object
 
@@ -52,6 +32,26 @@ export default class Config {
       }
     }
     this.json = {}
+  }
+
+  /**
+   * Creates a temporary config directory.
+   *
+   * @static
+   * @memberof Config
+   */
+  static async temp (): Promise<Config> {
+    const tempPrefix = path.join(os.tmpdir(), 'purplebot-')
+    return new Promise<Config>((resolve, reject) => {
+      fs.mkdtemp(tempPrefix, (err, folder) => {
+        if (err != null) {
+          reject(err)
+        } else {
+          const config = new Config(folder)
+          resolve(config)
+        }
+      })
+    })
   }
 
   /**

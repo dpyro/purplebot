@@ -65,9 +65,5 @@ export default class WebPlugin implements Plugin {
     bot.on('title', (channel, link, title) => {
       bot.say(channel, `${link}: ${title}`)
     })
-
-    bot.on('web.image', (channel, link, ext, body) => {
-
-    })
   }
 }

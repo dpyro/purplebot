@@ -15,7 +15,7 @@ import { Plugin } from '../src/plugins'
  */
 function onSafe (emitter,
                  eventName: string,
-                 callback: (this:NodeJS.EventEmitter, ...any) => void) {
+                 callback: (...args: any[]) => void) {
   emitter.on(eventName, (...args) => {
     try {
       callback.apply(emitter, args)
@@ -130,7 +130,7 @@ export default class LoggingPlugin implements Plugin {
 
   bot: PurpleBot
   config: Config
-  output?: NodeBuffer
+  output: NodeBuffer
 
   constructor (output: NodeBuffer = null) {
     this.output = output

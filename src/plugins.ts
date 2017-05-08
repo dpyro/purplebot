@@ -5,7 +5,7 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
-import * as _  from 'lodash'
+import * as _ from 'lodash'
 
 import Config from './config'
 import PurpleBot from './bot'
@@ -19,7 +19,7 @@ export interface Plugin {
    *
    * @memberof module:purplebot.Plugin
    */
-  load(bot: PurpleBot, config?: Config): Promise<void>
+  load (bot: PurpleBot, config?: Config): Promise<void>
 }
 
 async function readdir (path): Promise<string[]> {
@@ -48,7 +48,7 @@ export default async function loadPlugins (bot: PurpleBot, config?: Config): Pro
   for (const pluginFile of filePaths) {
     try {
       const mod = require(pluginFile)
-      const Klass = (<any>mod).default
+      const Klass = (mod as any).default
       const plugin = new Klass()
       await plugin.load(bot, config)
     } catch (err) {

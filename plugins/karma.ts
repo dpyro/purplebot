@@ -34,87 +34,6 @@ export default class KarmaPlugin implements Plugin {
   }
 
   /**
-   * Install hooks on the bot.
-   *
-   * @memberof KarmaPlugin
-   */
-  private installHooks (): void {
-    this.bot.on('message#', (nick, to, text, message) => {
-      this.onMessage(nick, to, text)
-    })
-
-    this.bot.on('karma.respond', (nick, to, term, karma) => {
-      this.respond(nick, to, term, karma)
-    })
-
-    this.bot.on('karma.get', (nick, to, term, karma) => {
-      if (karma != null) {
-        this.respond(nick, to, term, karma)
-      } else {
-        this.respondNoKarma(nick, to, term)
-      }
-    })
-
-    this.bot.on('command', async (context, command, ...args) => {
-      if (command !== 'karma') return
-
-      if (args.length < 1) {
-        // TODO: print usage or help
-        return
-      }
-
-      const term = args.shift()
-      const result = await this.get(term)
-      const { nick, to } = context
-
-      const karma = (result != null) ? result.points : null
-      this.bot.emit('karma.get', nick, to, term, karma)
-    })
-  }
-
-  private async loadDatabase(): Promise<void> {
-    const sql = `
-      CREATE TABLE IF NOT EXISTS karma (
-        id        INTEGER PRIMARY KEY,
-        name      TEXT    NOT NULL UNIQUE COLLATE NOCASE,
-        increased INTEGER NOT NULL DEFAULT 0 CHECK (increased >= 0),
-        decreased INTEGER NOT NULL DEFAULT 0 CHECK (decreased >= 0)
-      );
-
-      CREATE VIEW IF NOT EXISTS karma_view AS
-        SELECT *, increased-decreased AS points
-        FROM karma
-        ORDER BY points, name DESC;
-
-      PRAGMA busy_timeout = 0;
-    `
-
-    await this.config.ensureDir()
-
-    this.db = await Database.open(this.databasePath)
-    await this.db.exec(sql)
-  }
-
-  /**
-   * Responds to `message#` from the client.
-   *
-   * @memberof KarmaPlugin
-   * @fires PurpleBot#karma.respond
-   */
-  async onMessage (nick: string, to: string, text: string): Promise<void> {
-    const result = /(\w+)(\+\+|--)(\d*)(?!\w)/.exec(text)
-    if (result === null) return
-
-    const term = result[1]
-    const dir = (result[2][0] === '-') ? -1 : +1
-    const points = (result[3] != null) ? Number.parseInt(result[3]) || 1 : 1
-
-    const karma = await this.updateBy(term, dir * points)
-
-    this.bot.emit('karma.respond', nick, to, term, karma)
-  }
-
-  /**
    * Outputs karma for a name.
    *
    * @memberof KarmaPlugin
@@ -213,5 +132,86 @@ export default class KarmaPlugin implements Plugin {
     return results.map(({ name, increased, decreased, points }, index) => {
       return { index, name, increased, decreased, points }
     })
+  }
+
+  /**
+   * Responds to `message#` from the client.
+   *
+   * @memberof KarmaPlugin
+   * @fires PurpleBot#karma.respond
+   */
+  async onMessage (nick: string, to: string, text: string): Promise<void> {
+    const result = /(\w+)(\+\+|--)(\d*)(?!\w)/.exec(text)
+    if (result === null) return
+
+    const term = result[1]
+    const dir = (result[2][0] === '-') ? -1 : +1
+    const points = (result[3] != null) ? Number.parseInt(result[3]) || 1 : 1
+
+    const karma = await this.updateBy(term, dir * points)
+
+    this.bot.emit('karma.respond', nick, to, term, karma)
+  }
+
+  /**
+   * Install hooks on the bot.
+   *
+   * @memberof KarmaPlugin
+   */
+  private installHooks (): void {
+    this.bot.on('message#', (nick, to, text, message) => {
+      this.onMessage(nick, to, text)
+    })
+
+    this.bot.on('karma.respond', (nick, to, term, karma) => {
+      this.respond(nick, to, term, karma)
+    })
+
+    this.bot.on('karma.get', (nick, to, term, karma) => {
+      if (karma != null) {
+        this.respond(nick, to, term, karma)
+      } else {
+        this.respondNoKarma(nick, to, term)
+      }
+    })
+
+    this.bot.on('command', async (context, command, ...args) => {
+      if (command !== 'karma') return
+
+      if (args.length < 1) {
+        // TODO: print usage or help
+        return
+      }
+
+      const term = args.shift()
+      const result = await this.get(term)
+      const { nick, to } = context
+
+      const karma = (result != null) ? result.points : null
+      this.bot.emit('karma.get', nick, to, term, karma)
+    })
+  }
+
+  private async loadDatabase (): Promise<void> {
+    const sql = `
+      CREATE TABLE IF NOT EXISTS karma (
+        id        INTEGER PRIMARY KEY,
+        name      TEXT    NOT NULL UNIQUE COLLATE NOCASE,
+        increased INTEGER NOT NULL DEFAULT 0 CHECK (increased >= 0),
+        decreased INTEGER NOT NULL DEFAULT 0 CHECK (decreased >= 0)
+      );
+
+      CREATE VIEW IF NOT EXISTS karma_view AS
+        SELECT *, increased-decreased AS points
+        FROM karma
+        ORDER BY points, name DESC;
+
+      PRAGMA busy_timeout = 0;
+    `
+
+    await this.config.ensureDir()
+
+    this.db = await Database.open(this.databasePath)
+    await this.db.exec(sql)
   }
 }

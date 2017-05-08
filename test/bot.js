@@ -19,7 +19,7 @@ describe('bot', function () {
       done()
     })
 
-    bot._forwardClientEvent('test1', 'testout')
+    bot.forwardClientEvent('test1', 'testout')
     expect(bot.client.emit('test1', 'arg')).is.true
   })
 
@@ -29,7 +29,7 @@ describe('bot', function () {
       done()
     })
 
-    bot._forwardClientEvent('testout')
+    bot.forwardClientEvent('testout')
     expect(bot.client.emit('testout', 'arg')).is.true
   })
 })
