@@ -13,8 +13,6 @@ import Database from '../src/sqlite'
 
 /**
  * Plugin for tracking karma.
- *
- * @memberof module:purplebot
  */
 export default class KarmaPlugin implements Plugin {
   bot: PurpleBot
@@ -23,8 +21,6 @@ export default class KarmaPlugin implements Plugin {
 
   /**
    * Asynchronously loads the database.
-   *
-   * @memberof KarmaPlugin
    */
   async load (bot: PurpleBot, config?: Config): Promise<void> {
     this.bot = bot
@@ -35,8 +31,6 @@ export default class KarmaPlugin implements Plugin {
 
   /**
    * Outputs karma for a name.
-   *
-   * @memberof KarmaPlugin
    */
   respond (nick: string, to: string, term: string, karma: number): void {
     if (typeof this.bot.say === 'function') {
@@ -47,8 +41,6 @@ export default class KarmaPlugin implements Plugin {
 
   /**
    * Outputs for a name without karma.
-   *
-   * @memberof KarmaPlugin
    */
   respondNoKarma (nick: string, to: string, term: string): void {
     if (typeof this.bot.say === 'function') {
@@ -60,7 +52,6 @@ export default class KarmaPlugin implements Plugin {
   /**
    * Return the path to the Karma database.
    *
-   * @memberof KarmaPlugin
    * @readonly
    */
   get databasePath (): string {
@@ -69,8 +60,6 @@ export default class KarmaPlugin implements Plugin {
 
   /**
    * Replaces the current database with an empty one.
-   *
-   * @memberof KarmaPlugin
    */
   async resetDatabase (): Promise<void> {
     if (this.db) {
@@ -89,8 +78,6 @@ export default class KarmaPlugin implements Plugin {
 
   /**
    * Retrieves the karma for a `name` if it exists.
-   *
-   * @memberof KarmaPlugin
    */
   async get (name: string): Promise<any> {
     const sql = 'SELECT * FROM karma_view WHERE name = ?'
@@ -102,8 +89,6 @@ export default class KarmaPlugin implements Plugin {
    * The `name` will be automatically created if it does not already exist.
    *
    * @returns the updated number of points
-   *
-   * @memberof KarmaPlugin
    */
   async updateBy (name: string, points: number): Promise<number> {
     if (!points) return null
@@ -137,7 +122,6 @@ export default class KarmaPlugin implements Plugin {
   /**
    * Responds to `message#` from the client.
    *
-   * @memberof KarmaPlugin
    * @fires PurpleBot#karma.respond
    */
   async onMessage (nick: string, to: string, text: string): Promise<void> {
@@ -155,8 +139,6 @@ export default class KarmaPlugin implements Plugin {
 
   /**
    * Install hooks on the bot.
-   *
-   * @memberof KarmaPlugin
    */
   private installHooks (): void {
     this.bot.on('message#', (nick, to, text, message) => {

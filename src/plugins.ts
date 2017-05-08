@@ -16,8 +16,6 @@ import PurpleBot from './bot'
 export interface Plugin {
   /**
    * Asynchronously loads the resources for this plugin.
-   *
-   * @memberof module:purplebot.Plugin
    */
   load (bot: PurpleBot, config?: Config): Promise<void>
 }
@@ -36,8 +34,6 @@ async function readdir (path): Promise<string[]> {
 
 /**
  * Synchronously fetch the available plugins.
- *
- * @memberof module:purplebot
  */
 export default async function loadPlugins (bot: PurpleBot, config?: Config): Promise<Plugin[]> {
   const dirname = path.join(__dirname, '..', 'plugins')

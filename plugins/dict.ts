@@ -12,8 +12,6 @@ import { Plugin } from '../src/plugins'
 
 /**
  * Plugin for user-defined terms.
- *
- * @memberof module:purplebot
  */
 export default class DictPlugin implements Plugin {
   bot: PurpleBot
@@ -23,8 +21,6 @@ export default class DictPlugin implements Plugin {
 
   /**
    * Asynchronously loads the needed resources for this plugin.
-   *
-   * @memberof DictPlugin
    */
   async load (bot: PurpleBot, config?: Config): Promise<void> {
     this.bot = bot
@@ -56,7 +52,6 @@ export default class DictPlugin implements Plugin {
    *
    *
    * @fires PurpleBot#dict.respond
-   * @memberof DictPlugin
    */
   async onMessage (nick: string, to: string, text: string): Promise<void> {
     const result = /([\w-]+?)\?+(?!\S)/.exec(text)
@@ -71,8 +66,6 @@ export default class DictPlugin implements Plugin {
 
   /**
    * Adds a definition for `key`.
-   *
-   * @memberof DictPlugin
    */
   async add (key: string, value: string, user: string = null) {
     const sql = 'INSERT INTO definition (key, value, user) VALUES (?, ?, ?)'
@@ -81,8 +74,6 @@ export default class DictPlugin implements Plugin {
 
   /**
    * Removes a definition for `key`.
-   *
-   * @memberof DictPlugin
    */
   async remove (key: string, valueId: number): Promise<boolean> {
     if (valueId <= 0) return false
@@ -103,8 +94,6 @@ export default class DictPlugin implements Plugin {
 
   /**
    * Retrieve a random definition for `key`, if it exists.
-   *
-   * @memberof DictPlugin
    */
   async definition (name: string): Promise<any> {
     const sql = 'SELECT * FROM definition WHERE key = ? ORDER BY RANDOM() LIMIT 1'
@@ -114,8 +103,6 @@ export default class DictPlugin implements Plugin {
 
   /**
    * Retrieve all definitions for `key`, if they exist.
-   *
-   * @memberof DictPlugin
    */
   async definitions (name: string): Promise<any> {
     const sql = 'SELECT * FROM definition WHERE key = ? ORDER BY timestamp, value'

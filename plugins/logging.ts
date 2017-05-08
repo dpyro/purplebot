@@ -34,8 +34,6 @@ function timestamp (): string {
 
 /**
  * Plugin for logging sent and recieved messages.
- *
- * @memberof module:purplebot
  */
 export default class LoggingPlugin implements Plugin {
   /**
@@ -138,8 +136,6 @@ export default class LoggingPlugin implements Plugin {
 
   /**
    * Creates an attached instance of `LoggingPlugin`.
-   *
-   * @memberOf LoggingPlugin
    *
    * @todo set socket server file name to server name
    */

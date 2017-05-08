@@ -15,8 +15,6 @@ const matcher = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9
 
 /**
  * Plugin to snarf URLs and images.
- *
- * @memberof module:purplebot
  */
 export default class WebPlugin implements Plugin {
   bot: PurpleBot

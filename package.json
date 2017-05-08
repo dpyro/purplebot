@@ -11,7 +11,7 @@
     "test": "./node_modules/mocha/bin/mocha --compilers ts:ts-node/register,js:babel-register",
     "eslint": "./node_modules/eslint/bin/eslint.js **/*.js",
     "tslint": "./node_modules/tslint/bin/tslint --project tsconfig.json **/*.ts",
-    "doc": "rm -rf doc/* && ./node_modules/jsdoc/jsdoc.js -c jsdoc.json"
+    "doc": "rm -rf doc/* && ./node_modules/typedoc/bin/typedoc --out doc/ --mode file --module commonjs --target es6"
   },
   "dependencies": {
     "@types/fs-extra": "^3.0.0",
@@ -50,6 +50,7 @@
     "standard": "^10.0.1",
     "stream-buffers": "^3.0.1",
     "tslint": "^5.2.0",
-    "tslint-config-standard": "^5.0.2"
+    "tslint-config-standard": "^5.0.2",
+    "typedoc": "^0.6.0"
   }
 }

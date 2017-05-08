@@ -14,8 +14,6 @@ export interface CommandMap {
 
 /**
  * Encapulates a readline interface.
- *
- * @memberof module:purplebot
  */
 export default class Cli {
   target: PurpleBot
@@ -25,8 +23,6 @@ export default class Cli {
 
   /**
    * Creates an active `Cli` instance.
-   *
-   * @memberOf Console
    */
   constructor (target: PurpleBot,
                input: NodeJS.ReadableStream = process.stdin,
@@ -71,8 +67,6 @@ export default class Cli {
 
   /**
    * Readline completer function
-   *
-   * @memberOf Console
    */
   completer (line: string, callback: (...args: any[]) => void): void {
     const results = this.commands(line)
@@ -82,8 +76,6 @@ export default class Cli {
 
   /**
    * Attach listeners to `this.target`.
-   *
-   * @memberOf Cli
    */
   private _attachListeners () {
     this.target.on('error', (message) => {
@@ -110,7 +102,6 @@ export default class Cli {
    * Universal commands
    *
    * @readonly
-   * @memberOf Cli
    */
   get globalCommands (): {[key in string]: (...args: any[]) => void} {
     return {

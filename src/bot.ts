@@ -19,8 +19,6 @@ import loadPlugins, { Plugin } from './plugins'
 
 /**
  * Configurable bot that wraps `node-irc`.
- *
- * @memberof module:purplebot
  */
 export default class PurpleBot extends EventEmitter implements CommandMap {
   client: irc.Client
@@ -30,8 +28,6 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
 
   /**
    * Creates an instance of PurpleBot.
-   *
-   * @memberOf PurpleBot
    */
   constructor (options?: any) {
     super()
@@ -70,7 +66,6 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * Connect to the IRC server.
    *
    * @fires PurpleBot#connect
-   * @memberOf PurpleBot
    */
   async connect (): Promise<string> {
     return new Promise<string>((resolve, reject) => {
@@ -85,7 +80,6 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * Disconnect from the IRC server.
    *
    * @fires PurpleBot#disconnect
-   * @memberOf PurpleBot
    */
   async disconnect (message?: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
@@ -102,7 +96,6 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * @returns the joined channel
    *
    * @fires PurpleBot#join
-   * @memberOf PurpleBot
    */
   async join (channel: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
@@ -119,7 +112,6 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * @returns the parted channel
    *
    * @fires PurpleBot#part
-   * @memberOf PurpleBot
    */
   async part (channel: string, message?: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
@@ -134,16 +126,13 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * Sends a message to the target.
    *
    * @fires PurpleBot#say
-   * @memberOf PurpleBot
    */
   say (target: string, message: string): void {
     this.client.say(target, message)
   }
 
   /**
-   * String representation
-   *
-   * @memberOf PurpleBot
+   * String representation.
    */
   toString (): string {
     return `[PurpleBot: ${this.server}]`
@@ -153,7 +142,6 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * Current nick of the bot.
    *
    * @readonly
-   * @memberOf PurpleBot
    */
   get nick (): string {
     return this.client.nick
@@ -163,7 +151,6 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * Updated channel info from the client.
    *
    * @readonly
-   * @memberOf PurpleBot
    */
   get chans () {
     return this.client.chans
@@ -171,8 +158,6 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
 
   /**
    * Creates and populates `this.commands`.
-   *
-   * @memberOf PurpleBot
    */
   private setupCommandHooks (): void {
     this.commands = {
@@ -203,8 +188,6 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
 
   /**
    * Applies event forwarding.
-   *
-   * @memberOf PurpleBot
    */
   private installForwards () {
     this.forwardClientEvent('error')
@@ -231,8 +214,6 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    *
    * @param from event name to listen for in client
    * @param to name for forwarding the client event
-   *
-   * @memberOf PurpleBot
    */
   private forwardClientEvent (from: string, to: string = from) {
     this.client.on(from, (...args) => {
@@ -242,8 +223,6 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
 
   /**
    * Installs client hooks.
-   *
-   * @memberof PurpleBot
    */
   private installClientHooks (): void {
     this.client.on('message', (nick, to, text, message) => {

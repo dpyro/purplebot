@@ -9,8 +9,6 @@ import path = require('path')
 
 /**
  * Manages configuration and data paths.
- *
- * @memberof module:purplebot
  */
 export default class Config {
   configDir: string
@@ -18,8 +16,6 @@ export default class Config {
 
   /**
    * Creates an instance of Config.
-   *
-   * @memberOf Config
    */
   constructor (name?: string) {
     if (!name) {
@@ -36,9 +32,6 @@ export default class Config {
 
   /**
    * Creates a temporary config directory.
-   *
-   * @static
-   * @memberof Config
    */
   static async temp (): Promise<Config> {
     const tempPrefix = path.join(os.tmpdir(), 'purplebot-')
@@ -56,8 +49,6 @@ export default class Config {
 
   /**
    * Determine if the config directory already exists.
-   *
-   * @memberOf Config
    */
   async hasDir (): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
@@ -73,8 +64,6 @@ export default class Config {
 
   /**
    * Creates the directory for this `Config`.
-   *
-   * @memberOf Config
    */
   async ensureDir (): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -90,8 +79,6 @@ export default class Config {
 
   /**
    * Deletes the config directory.
-   *
-   * @memberof Config
    */
   async removeDir (): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -109,7 +96,6 @@ export default class Config {
    * Retrieves the path to the `config.json`.
    *
    * @readonly
-   * @memberof Config
    */
   get configPath (): string {
     return this.path('config.json')
@@ -126,8 +112,6 @@ export default class Config {
 
   /**
    * Loads this configuration from disk.
-   *
-   * @memberOf Config
    *
    * @todo rename to load
    */
@@ -146,8 +130,6 @@ export default class Config {
 
   /**
    * Saves the configuration to disk.
-   *
-   * @memberOf Config
    */
   async flush (): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -163,8 +145,6 @@ export default class Config {
 
   /**
    * Returns an associated value.
-   *
-   * @memberOf Config
    */
   get (key?: string): any {
     return (key == null) ? this.json : this.json[key]
@@ -172,8 +152,6 @@ export default class Config {
 
   /**
    * Sets an associated value.
-   *
-   * @memberOf Config
    */
   set (key: string, value: any): void {
     this.json[key] = value
