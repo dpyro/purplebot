@@ -12,11 +12,11 @@ describe('config', function () {
     expect(config).to.be.instanceof(Config)
 
     await config.ensureDir()
-    expect(fs.accessSync(config.configDir)).to.not.throw
+    expect(() => fs.access(config.configDir)).to.not.throw
     expect(await config.hasDir()).to.be.true
 
     const testData = '{ "test": "valid" }'
-    fs.writeFileSync(config.configPath, testData)
+    await fs.writeFile(config.configPath, testData)
 
     expect(config.get()).to.be.empty
 
@@ -26,7 +26,7 @@ describe('config', function () {
 
   afterEach(async function deleteConfigDir () {
     await config.removeDir()
-    expect(() => fs.accessSync(config.configDir)).to.throw
+    expect(() => fs.access(config.configDir)).to.throw
   })
 
   it('get()', function () {

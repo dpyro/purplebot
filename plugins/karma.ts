@@ -4,7 +4,7 @@
  */
 
 import 'babel-polyfill'
-import { unlink } from 'fs-extra'
+import * as fs from 'fs-extra'
 
 import Config from '../src/config'
 import PurpleBot from '../src/bot'
@@ -66,13 +66,7 @@ export default class KarmaPlugin implements Plugin {
       await this.db.close()
     }
 
-    await new Promise((resolve, reject) => {
-      unlink(this.databasePath, err => {
-        if (err) reject(err)
-        else resolve(err)
-      })
-    })
-
+    await fs.unlink(this.databasePath)
     await this.loadDatabase()
   }
 

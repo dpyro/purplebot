@@ -3,7 +3,7 @@
  * @license MIT
  */
 
-import { ensureFileSync, createWriteStream } from 'fs-extra'
+import { ensureFile, createWriteStream } from 'fs-extra'
 import * as _ from 'lodash'
 
 import Config from '../src/config'
@@ -148,7 +148,7 @@ export default class LoggingPlugin implements Plugin {
       stream = this.output
     } else {
       const filePath = this.config.path(`${this.bot.server}.log`)
-      ensureFileSync(filePath)
+      await ensureFile(filePath)
       stream = createWriteStream(filePath, { flags: 'a' })
     }
 

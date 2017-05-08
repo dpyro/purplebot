@@ -3,9 +3,9 @@
  * @license MIT
  */
 
-import fs = require('fs-extra')
-import os = require('os')
-import path = require('path')
+import * as fs from 'fs-extra'
+import * as os from 'os'
+import * as path from 'path'
 
 /**
  * Manages configuration and data paths.

@@ -11,7 +11,7 @@
   - [ ] .learn
   - [ ] .info
   - [ ] .forget
-  - [ ] thing?
+  - [x] thing?
   - [ ] save images
 - [ ] list
   - [ ] .list create \<name\>
@@ -21,6 +21,7 @@
 - [ ] web
   - [x] url snarfer
   - [ ] log links
+  - [ ] show last link sent by user
 - [ ] heralds
 - [ ] permissions
 - [ ] conversions
