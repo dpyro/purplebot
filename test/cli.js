@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import EventEmitter from 'events'
+import { EventEmitter } from 'events'
 import streamBuffers from 'stream-buffers'
 
 import Cli from '../src/cli'
@@ -9,7 +9,7 @@ describe('cli', function () {
 
   beforeEach(function setupConsole () {
     target = new EventEmitter()
-    target.commands = new Map()
+    target.commands = {}
 
     input = new streamBuffers.ReadableStreamBuffer()
     output = new streamBuffers.WritableStreamBuffer()
@@ -22,7 +22,7 @@ describe('cli', function () {
   })
 
   it('runs command callback', function (done) {
-    target.commands.set('test', () => { done() })
+    target.commands['test'] = () => done()
 
     input.put('test\n')
     input.put(null)

@@ -11,10 +11,9 @@
  * @module purplebot
  */
 
-import 'babel-polyfill'
-import yargs from 'yargs'
+import * as yargs from 'yargs'
 
-import initBot from './bot.js'
+import { init } from './bot'
 import Cli from './cli'
 
 if (require.main === module) {
@@ -55,7 +54,7 @@ if (require.main === module) {
 }
 
 async function launchBot (options) {
-  const bot = await initBot(options)
+  const bot = await init(options)
   const cli = new Cli(bot)
   bot.connect()
   return cli

@@ -3,11 +3,12 @@
  * @license MIT
  */
 
-import 'babel-polyfill'
-import EventEmitter from 'events'
-import irc from 'irc'
+import { EventEmitter }  from 'events'
+import * as irc from 'irc'
 
-import loadPlugins from './plugins'
+import { CommandMap } from './cli'
+import Config from './config'
+import loadPlugins, { Plugin } from './plugins'
 
 /**
  * A library to provide IRC functionality.
@@ -19,23 +20,20 @@ import loadPlugins from './plugins'
 /**
  * Configurable bot that wraps `node-irc`.
  *
- * @extends NodeJS.EventEmitter
- *
- * @property {string} server
- * @property {external:irc.Client} client
- * @property {Map<string, function(...any): void>} commands
- * @property {Plugin[]} plugins
- *
  * @memberof module:purplebot
  */
-class PurpleBot extends EventEmitter {
+export default class PurpleBot extends EventEmitter implements CommandMap {
+  client: irc.Client
+  server: string
+  commands: {[key in string]: (...any) => void}
+  plugins: Plugin[]
+
   /**
    * Creates an instance of PurpleBot.
    *
-   * @param {Object} options
    * @memberOf PurpleBot
    */
-  constructor (options) {
+  constructor (options?: any) {
     super()
 
     options = options || {}
@@ -68,9 +66,8 @@ class PurpleBot extends EventEmitter {
    * Installs client hooks.
    *
    * @memberof PurpleBot
-   * @private
    */
-  _installClientHooks () {
+  private _installClientHooks (): void {
     this.client.on('message', (nick, to, text, message) => {
       const trimmedText = text.trim()
       if (trimmedText.startsWith('.') && trimmedText.substring(1, 2) !== '.') {
@@ -92,7 +89,7 @@ class PurpleBot extends EventEmitter {
     })
   }
 
-  async loadPlugins () {
+  async loadPlugins (): Promise<void> {
     this.plugins = await loadPlugins(this)
   }
 
@@ -100,42 +97,40 @@ class PurpleBot extends EventEmitter {
    * Creates and populates `this.commands`.
    *
    * @memberOf PurpleBot
-   * @private
    */
-  _setupCommandHooks () {
-    this.commands = new Map()
+  private _setupCommandHooks (): void {
+    this.commands = {
+      'connect': this.connect.bind(this),
+      'disconnect': this.disconnect.bind(this),
+      'join': (...args) => {
+        if (args == null || args.length < 1) return
 
-    this.commands.set('connect', this.connect.bind(this))
-    this.commands.set('disconnect', this.disconnect.bind(this))
-    this.commands.set('join', (...args) => {
-      if (args == null || args.length < 1) return
+        const channel = args.shift()
+        this.join(channel)
+      },
+      'part': (...args) => {
+        if (args == null || args.length < 1) return
 
-      const channel = args.shift()
-      this.join(channel)
-    })
-    this.commands.set('part', (...args) => {
-      if (args == null || args.length < 1) return
+        const channel = args.shift()
+        const message = args.shift()
+        this.part(channel, message)
+      },
+      'say': (...args) => {
+        if (args == null || args.length < 2) return
 
-      const channel = args.shift()
-      const message = args.shift()
-      this.part(channel, message)
-    })
-    this.commands.set('say', (...args) => {
-      if (args == null || args.length < 2) return
-
-      const target = args.shift()
-      const message = args.shift()
-      this.say(target, message)
-    })
+        const target = args.shift()
+        const message = args.shift()
+        this.say(target, message)
+      }
+    }
   }
 
   /**
    * Applies event forwarding.
    *
    * @memberOf PurpleBot
-   * @private
    */
-  _installForwards () {
+  private _installForwards () {
     this._forwardClientEvent('error')
 
     this._forwardClientEvent('action')
@@ -158,13 +153,12 @@ class PurpleBot extends EventEmitter {
   /**
    * Enable an event forward from `this.client` -> `this`.
    *
-   * @param {string} from event name to listen for in client
-   * @param {string} [to=from] name for forwarding the client event
+   * @param from event name to listen for in client
+   * @param to name for forwarding the client event
    *
    * @memberOf PurpleBot
-   * @private
    */
-  _forwardClientEvent (from, to = from) {
+  private _forwardClientEvent (from: string, to: string = from) {
     this.client.on(from, (...args) => {
       this.emit(to, ...args)
     })
@@ -176,11 +170,11 @@ class PurpleBot extends EventEmitter {
    * @fires PurpleBot#connect
    * @memberOf PurpleBot
    */
-  async connect () {
-    return new Promise((resolve, reject) => {
+  async connect (): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
       this.client.connect(() => {
         this.emit('connect', this.server)
-        return resolve.call(this, this.server)
+        return resolve(this.server)
       })
     })
   }
@@ -188,14 +182,11 @@ class PurpleBot extends EventEmitter {
   /**
    * Disconnect from the IRC server.
    *
-   * @param {string=} message
-   * @returns {Promise<string>}
-   *
    * @fires PurpleBot#disconnect
    * @memberOf PurpleBot
    */
-  async disconnect (message) {
-    return new Promise((resolve, reject) => {
+  async disconnect (message?: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
       this.client.disconnect(message, () => {
         this.emit('disconnect', this.server, message)
         resolve(this.server)
@@ -206,14 +197,13 @@ class PurpleBot extends EventEmitter {
   /**
    * Joins the bot to an IRC channel.
    *
-   * @param {string} channel
-   * @returns {Promise<string>} the joined channel
+   * @returns the joined channel
    *
    * @fires PurpleBot#join
    * @memberOf PurpleBot
    */
-  async join (channel) {
-    return new Promise((resolve, reject) => {
+  async join (channel: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
       this.client.join(channel, () => {
         this.emit('join', channel)
         return resolve(channel)
@@ -224,15 +214,13 @@ class PurpleBot extends EventEmitter {
   /**
    * Parts the bot from an IRC channel.
    *
-   * @param {string} channel
-   * @param {string=} message
-   * @returns {Promise<string>} the parted channel
+   * @returns the parted channel
    *
    * @fires PurpleBot#part
    * @memberOf PurpleBot
    */
-  async part (channel, message) {
-    return new Promise((resolve, reject) => {
+  async part (channel: string, message?: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
       this.client.part(channel, message, () => {
         this.emit('part', channel, message)
         resolve(channel)
@@ -243,36 +231,29 @@ class PurpleBot extends EventEmitter {
   /**
    * Sends a message to the target.
    *
-   * @param {string} target
-   * @param {string} message
-   *
    * @fires PurpleBot#say
    * @memberOf PurpleBot
    */
-  say (target, message) {
+  say (target: string, message: string): void {
     this.client.say(target, message)
   }
 
   /**
    * String representation
    *
-   * @returns {string}
-   *
    * @memberOf PurpleBot
    */
-  toString () {
+  toString (): string {
     return `[PurpleBot: ${this.server}]`
   }
 
   /**
    * Current nick of the bot.
    *
-   * @returns {string}
-   *
    * @readonly
    * @memberOf PurpleBot
    */
-  get nick () {
+  get nick (): string {
     return this.client.nick
   }
 
@@ -287,13 +268,8 @@ class PurpleBot extends EventEmitter {
   }
 }
 
-async function init (options) {
+export async function init (options?: any): Promise<PurpleBot> {
   const bot = new PurpleBot(options)
   await bot.loadPlugins()
   return bot
 }
-
-// Exports are named at the end to work around a JSDoc3 bug.
-// See: https://github.com/jsdoc3/jsdoc/issues/1137.
-export default init
-export { PurpleBot }

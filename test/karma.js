@@ -1,10 +1,10 @@
 import 'babel-polyfill'
 import { expect } from 'chai'
-import EventEmitter from 'events'
+import { EventEmitter } from 'events'
 
-import initKarma from '../plugins/karma'
+import KarmaPlugin from '../plugins/karma'
 
-describe('plugin: karma', function () {
+describe('plugin: karma', async function () {
   this.timeout(4000)
 
   const nick = 'chameleon'
@@ -14,10 +14,10 @@ describe('plugin: karma', function () {
   // TODO: use custom test config
   beforeEach(async function () {
     emitter = new EventEmitter()
-    emitter.say = function () {
+    emitter.say = () => {}
 
-    }
-    plugin = await initKarma(emitter)
+    plugin = new KarmaPlugin()
+    await plugin.load(emitter)
     expect(plugin).to.exist
 
     await plugin.resetDatabase()
@@ -35,22 +35,21 @@ describe('plugin: karma', function () {
     expect(result).to.not.exist
   })
 
-  function checkValid (name, message, result) {
-    it(`${name}: "${message}"`, async function () {
-      return new Promise((resolve, reject) => {
-        emitter.on('karma.respond', (fromNick, to, term, karma) => {
-          try {
-            expect(fromNick).to.equal(nick)
-            expect(to).to.equal(channel)
-            expect(term).to.equal('term')
-            expect(karma).to.equal(result)
-          } catch (error) {
-            reject(error)
-          }
-          resolve()
-        })
-        emitter.emit('message#', nick, channel, message)
+  const checkValid = (name, message, result) => {
+    it(`${name}: "${message}"`, function (done) {
+      emitter.on('karma.respond', (fromNick, to, term, karma) => {
+        try {
+          expect(fromNick).to.equal(nick)
+          expect(to).to.equal(channel)
+          expect(term).to.equal('term')
+          expect(karma).to.equal(result)
+          done()
+        } catch (error) {
+          done(error)
+        }
       })
+
+      emitter.emit('message#', nick, channel, message)
     })
   }
 

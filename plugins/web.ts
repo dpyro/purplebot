@@ -3,10 +3,12 @@
  * @license MIT
  */
 
-// @ts-ignore
 import { JSDOM } from 'jsdom'
-import mime from 'mime-types'
-import request from 'request'
+import { extension } from 'mime-types'
+import * as request from 'request'
+
+import { Plugin } from '../src/plugins'
+import PurpleBot from '../src/bot'
 
 // http://stackoverflow.com/a/17773849/1440740
 const matcher = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/
@@ -14,28 +16,20 @@ const matcher = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9
 /**
  * Plugin to snarf URLs and images.
  *
- * @prop {string[]} imageExts
- *
- * @implements {module:purplebot.Plugin}
- *
  * @memberof module:purplebot
  */
-class WebPlugin {
-  /**
-   * Creates an instance of WebPlugin.
-   *
-   * @param {module:purplebot.PurpleBot} bot
-   *
-   * @memberOf WebPlugin
-   */
-  constructor (bot) {
-    this.imageExts = [
-      'gif',
-      'jpg',
-      'png',
-      'webm',
-      'webp'
-    ]
+export default class WebPlugin implements Plugin {
+  bot: PurpleBot
+  imageExts: String[] = [
+    'gif',
+    'jpg',
+    'png',
+    'webm',
+    'webp'
+  ]
+
+  async load (bot: PurpleBot): Promise<void> {
+    this.bot = bot
 
     bot.on('message#', (nick, to, text, message) => {
       const result = matcher.exec(text)
@@ -58,7 +52,7 @@ class WebPlugin {
             // TODO: log found link
             bot.emit('title', to, link, title)
           } else {
-            const ext = mime.extension(type)
+            const ext = extension(type)
             if (typeof ext !== 'boolean' && this.imageExts.indexOf(ext) !== -1) {
               // TODO: save image or somesuch
               bot.emit('web.image', to, link, ext, body)
@@ -77,10 +71,3 @@ class WebPlugin {
     })
   }
 }
-
-function init (bot) {
-  return new WebPlugin(bot)
-}
-
-export default init
-export { WebPlugin }

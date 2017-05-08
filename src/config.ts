@@ -3,28 +3,25 @@
  * @license MIT
  */
 
-import 'babel-polyfill'
-import fs from 'fs-extra'
-import os from 'os'
-import path from 'path'
+import fs = require('fs-extra')
+import os = require('os')
+import path = require('path')
 
 /**
  * Manages configuration and data paths.
  *
  * @memberof module:purplebot
  */
-class Config {
+export default class Config {
   /**
    * Creates a temporary config directory.
-   *
-   * @returns {Promise<Config>}
    *
    * @static
    * @memberof Config
    */
-  static async temp () {
+  static async temp (): Promise<Config> {
     const tempPrefix = path.join(os.tmpdir(), 'purplebot-')
-    return new Promise((resolve, reject) => {
+    return new Promise<Config>((resolve, reject) => {
       fs.mkdtemp(tempPrefix, (err, folder) => {
         if (err != null) {
           reject(err)
@@ -36,14 +33,15 @@ class Config {
     })
   }
 
+  configDir: string
+  json: Object
+
   /**
    * Creates an instance of Config.
    *
-   * @param {string=} name a path
-   *
    * @memberOf Config
    */
-  constructor (name) {
+  constructor (name?: string) {
     if (!name) {
       this.configDir = path.join(os.homedir(), '.purplebot')
     } else {
@@ -59,12 +57,10 @@ class Config {
   /**
    * Determine if the config directory already exists.
    *
-   * @return {Promise<boolean>}
-   *
    * @memberOf Config
    */
-  async hasDir () {
-    return new Promise((resolve, reject) => {
+  async hasDir (): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
       fs.access(this.configDir, fs.constants.F_OK | fs.constants.R_OK, (err) => {
         if (err != null) {
           resolve(false)
@@ -78,12 +74,10 @@ class Config {
   /**
    * Creates the directory for this `Config`.
    *
-   * @returns {Promise<void>}
-   *
    * @memberOf Config
    */
-  async ensureDir () {
-    return new Promise((resolve, reject) => {
+  async ensureDir (): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
       fs.ensureDir(this.configDir, (err) => {
         if (err != null) {
           reject(err)
@@ -97,12 +91,10 @@ class Config {
   /**
    * Deletes the config directory.
    *
-   * @returns {Promise<void>}
-   *
    * @memberof Config
    */
-  async removeDir () {
-    return new Promise((resolve, reject) => {
+  async removeDir (): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
       fs.remove(this.configDir, (err) => {
         if (err != null) {
           reject(err)
@@ -119,33 +111,28 @@ class Config {
    * @readonly
    * @memberof Config
    */
-  get configPath () {
+  get configPath (): string {
     return this.path('config.json')
   }
 
   /**
    * Returns a path rooted in the local config directory.
    *
-   * @param {...string} args
-   * @returns {string}
-   *
    * @memberOf Config
    */
-  path (...args) {
+  path (...args): string {
     return path.join(this.configDir, ...args)
   }
 
   /**
    * Loads this configuration from disk.
    *
-   * @returns {Promise<any>}
-   *
    * @memberOf Config
    *
    * @todo rename to load
    */
-  async sync () {
-    return new Promise((resolve, reject) => {
+  async sync (): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
       fs.readJson(this.configPath, (err, result) => {
         if (err) {
           reject(err)
@@ -160,12 +147,10 @@ class Config {
   /**
    * Saves the configuration to disk.
    *
-   * @returns {Promise<void>}
-   *
    * @memberOf Config
    */
-  async flush () {
-    return new Promise((resolve, reject) => {
+  async flush (): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
       fs.writeJson(this.configPath, this.json, (err, result) => {
         if (err) {
           reject(err)
@@ -179,26 +164,18 @@ class Config {
   /**
    * Returns an associated value.
    *
-   * @param {string=} key
-   * @returns {any}
-   *
    * @memberOf Config
    */
-  get (key) {
+  get (key?: string): any {
     return (key == null) ? this.json : this.json[key]
   }
 
   /**
    * Sets an associated value.
    *
-   * @param {string} key
-   * @param {any} value
-   *
    * @memberOf Config
    */
-  set (key, value) {
+  set (key: string, value: any): void {
     this.json[key] = value
   }
 }
-
-export default Config

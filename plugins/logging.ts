@@ -3,21 +3,19 @@
  * @license MIT
  */
 
-import fs from 'fs-extra'
-import _ from 'lodash'
+import { ensureFileSync, createWriteStream } from 'fs-extra'
+import * as _ from 'lodash'
 
 import Config from '../src/config'
+import PurpleBot from '../src/bot'
+import { Plugin } from '../src/plugins'
 
 /**
  * Adds an exception-catching wrapped listener to an event emitter
- *
- * @param {NodeJS.EventEmitter} emitter
- * @param {string} eventName
- * @param {function(this:NodeJS.EventEmitter, ...any): void} callback
- *
- * @private
  */
-function onSafe (emitter, eventName, callback) {
+function onSafe (emitter,
+                 eventName: string,
+                 callback: (this:NodeJS.EventEmitter, ...any) => void) {
   emitter.on(eventName, (...args) => {
     try {
       callback.apply(emitter, args)
@@ -29,31 +27,21 @@ function onSafe (emitter, eventName, callback) {
 
 /**
  * Return the current timestamp.
- *
- * @returns {string}
- *
- * @private
  */
-function timestamp () {
+function timestamp (): string {
   return new Date().toUTCString()
 }
 
 /**
  * Plugin for logging sent and recieved messages.
  *
- * @implements {module:purplebot.Plugin}
- *
  * @memberof module:purplebot
  */
-class LoggingPlugin {
-    /**
+export default class LoggingPlugin implements Plugin {
+  /**
    * Logger functions.
-   *
-   * @type {Object<string, function(...any): string>}
-   *
-   * @private
    */
-  static loggers = {
+  protected static loggers = {
     'connect': (server) => {
       return `CONNECT ${server}`
     },
@@ -140,30 +128,37 @@ class LoggingPlugin {
     }
   }
 
+  bot: PurpleBot
+  config: Config
+  output?: NodeBuffer
+
+  constructor (output: NodeBuffer = null) {
+    this.output = output
+  }
+
   /**
    * Creates an attached instance of `LoggingPlugin`.
-   *
-   * @param {module:purplebot.PurpleBot} bot
-   * @param {NodeBuffer} [output=null] optional buffer or writeable stream
    *
    * @memberOf LoggingPlugin
    *
    * @todo set socket server file name to server name
    */
-  constructor (bot, output = null) {
+  async load (bot: PurpleBot, config?: Config): Promise<void> {
+    this.bot = bot
+    this.config = config || new Config()
+
     let stream
-    if (output != null) {
-      stream = output
+    if (this.output != null) {
+      stream = this.output
     } else {
-      this.config = new Config()
-      const filePath = this.config.path(`${bot.server}.log`)
-      fs.ensureFileSync(filePath)
-      stream = fs.createWriteStream(filePath, { flags: 'a' })
+      const filePath = this.config.path(`${this.bot.server}.log`)
+      ensureFileSync(filePath)
+      stream = createWriteStream(filePath, { flags: 'a' })
     }
 
     for (let eventName of Object.keys(LoggingPlugin.loggers)) {
       const callback = LoggingPlugin.loggers[eventName]
-      onSafe(bot, eventName, (...args) => {
+      onSafe(this.bot, eventName, (...args) => {
         const data = callback.apply(null, args)
         const line = `[${timestamp()}] ${data}\n`
         stream.write(line)
@@ -171,10 +166,3 @@ class LoggingPlugin {
     }
   }
 }
-
-function init (bot, config) {
-  return new LoggingPlugin(bot, config)
-}
-
-export default init
-export { LoggingPlugin }

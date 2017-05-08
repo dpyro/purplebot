@@ -4,40 +4,33 @@
  */
 
 import 'babel-polyfill'
-import sqlite from 'sqlite'
+import Database from '../src/sqlite'
 
 import Config from '../src/config'
+import PurpleBot from '../src/bot'
+import { Plugin } from '../src/plugins'
 
 /**
  * Plugin for user-defined terms.
  *
- * @implements {module:purplebot.Plugin}
- *
  * @memberof module:purplebot
  */
-class DictPlugin {
-  /**
-   * Creates an instance of DictPlugin.
-   *
-   * @param {module:purplebot.PurpleBot} bot
-   * @param {module:purplebot.Config} config
-   *
-   * @memberof DictPlugin
-   */
-  constructor (bot, config) {
-    this.bot = bot
-    this.config = config || new Config()
-    this.databasePath = this.config.path('dict.db')
-  }
+export default class DictPlugin implements Plugin {
+  bot: PurpleBot
+  config: Config
+  databasePath: string
+  db: Database
 
   /**
    * Asynchronously loads the needed resources for this plugin.
    *
-   * @returns {Promise<void>}
-   *
    * @memberof DictPlugin
    */
-  async load () {
+  async load (bot: PurpleBot, config?: Config): Promise<void> {
+    this.bot = bot
+    this.config = config || new Config()
+    this.databasePath = this.config.path('dict.db')
+
     const sql = `
       CREATE TABLE IF NOT EXISTS definition (
         id          INTEGER PRIMARY KEY,
@@ -51,7 +44,7 @@ class DictPlugin {
     `
 
     await this.config.ensureDir()
-    this.db = await sqlite.open(this.databasePath)
+    this.db = await Database.open(this.databasePath)
     await this.db.exec(sql)
 
     this.bot.on('message#', (nick, to, text, message) => {
@@ -62,15 +55,10 @@ class DictPlugin {
   /**
    *
    *
-   * @param {string} nick
-   * @param {string} to
-   * @param {string} text
-   * @returns {Promise<void>}
-   *
    * @fires PurpleBot#dict.respond
    * @memberof DictPlugin
    */
-  async onMessage (nick, to, text) {
+  async onMessage (nick: string, to: string, text: string): Promise<void> {
     const result = /([\w-]+?)\?+(?!\S)/.exec(text)
     if (result == null) return
 
@@ -84,13 +72,9 @@ class DictPlugin {
   /**
    * Adds a definition for `key`.
    *
-   * @param {string} key
-   * @param {string} value
-   * @param {string} [user=null]
-   *
    * @memberof DictPlugin
    */
-  async add (key, value, user = null) {
+  async add (key: string, value: string, user: string = null) {
     const sql = 'INSERT INTO definition (key, value, user) VALUES (?, ?, ?)'
     return this.db.run(sql, key, value, user)
   }
@@ -98,13 +82,9 @@ class DictPlugin {
   /**
    * Removes a definition for `key`.
    *
-   * @param {string} key
-   * @param {number} valueId
-   * @returns {Promise<boolean>}
-   *
    * @memberof DictPlugin
    */
-  async remove (key, valueId) {
+  async remove (key: string, valueId: number): Promise<boolean> {
     if (valueId <= 0) return false
 
     await this.db.run('BEGIN')
@@ -124,11 +104,9 @@ class DictPlugin {
   /**
    * Retrieve a random definition for `key`, if it exists.
    *
-   * @param {string} key
-   *
    * @memberof DictPlugin
    */
-  async definition (name) {
+  async definition (name: string): Promise<any> {
     const sql = 'SELECT * FROM definition WHERE key = ? ORDER BY RANDOM() LIMIT 1'
     const value = await this.db.get(sql, name)
     return value
@@ -137,22 +115,11 @@ class DictPlugin {
   /**
    * Retrieve all definitions for `key`, if they exist.
    *
-   * @param {string} name
-   *
    * @memberof DictPlugin
    */
-  async definitions (name) {
+  async definitions (name: string): Promise<any> {
     const sql = 'SELECT * FROM definition WHERE key = ? ORDER BY timestamp, value'
     const definitions = await this.db.all(sql, name)
     return definitions
   }
 }
-
-async function init (bot, config) {
-  const plugin = new DictPlugin(bot, config)
-  await plugin.load()
-  return plugin
-}
-
-export default init
-export { DictPlugin }

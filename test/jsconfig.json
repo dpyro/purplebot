@@ -1,8 +1,6 @@
 {
-  "extends": "../jsconfig.json",
-  "typeAcquisition": {
-    "include": [
-      "mocha"
-    ]
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "checkJs": true
   }
 }

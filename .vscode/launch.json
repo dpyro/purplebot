@@ -8,10 +8,11 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceRoot}/node_modules/babel-cli/bin/babel-node.js",
+            "program": "${workspaceRoot}/node_modules/ts-node/dist/_bin.js",
             "args": [
-                "${workspaceRoot}/src/index.js"
-            ]
+                "src/index.ts"
+            ],
+            "protocol": "inspector"
         },
         {
             "type": "node",

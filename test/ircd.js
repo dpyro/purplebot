@@ -1,7 +1,8 @@
+import 'babel-polyfill'
 import { expect } from 'chai'
 
 import MockIrcd from './mock/ircd'
-import initBot from '../src/bot'
+import { init } from '../src/bot'
 
 const nick = 'testnick'
 const channel = '#test'
@@ -25,7 +26,7 @@ describe('mock ircd', function () {
 
   let ircd, bot
 
-  beforeEach(function () {
+  beforeEach(async function () {
     ircd = new MockIrcd(nick, (data) => {
       for (const [regex, action] of responses) {
         const results = regex.exec(data)
@@ -40,11 +41,8 @@ describe('mock ircd', function () {
     expect(ircd).to.exist
     const socket = ircd.socket
 
-    return initBot({server: socket, socket: true})
-      .then(newBot => {
-        expect(newBot).to.exist
-        bot = newBot
-      })
+    bot = await init({server: socket, socket: true})
+    expect(bot).to.exist
   })
 
   it('connect(), disconnect()', () => {

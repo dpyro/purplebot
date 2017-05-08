@@ -31,7 +31,6 @@ describe('config', function () {
 
   it('get()', function () {
     const value = config.get('test')
-
     expect(value).to.equal('valid')
   })
 

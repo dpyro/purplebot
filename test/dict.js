@@ -1,9 +1,9 @@
 import 'babel-polyfill'
 import { expect } from 'chai'
-import EventEmitter from 'events'
+import { EventEmitter } from 'events'
 
 import Config from '../src/config'
-import initDict from '../plugins/dict'
+import DictPlugin from '../plugins/dict'
 
 describe('plugin: dict', function () {
   let config, emitter, plugin
@@ -13,7 +13,8 @@ describe('plugin: dict', function () {
     expect(config).to.exist
 
     emitter = new EventEmitter()
-    plugin = await initDict(emitter, config)
+    plugin = new DictPlugin()
+    await plugin.load(emitter, config)
     expect(plugin).to.exist
   })
 

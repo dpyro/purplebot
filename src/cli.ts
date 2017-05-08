@@ -3,52 +3,42 @@
  * @license MIT
  */
 
-import readline from 'readline'
-import _ from 'lodash'
+import * as readline from 'readline'
+import * as _ from 'lodash'
+
+import PurpleBot from './bot'
+
+export interface CommandMap {
+  commands: {[key in string]: (...any) => void}
+}
 
 /**
  * Encapulates a readline interface.
  *
  * @memberof module:purplebot
  */
-class Cli {
-  /**
-   * Universal commands
-   *
-   * @returns {Map<string, function(...any): void>}
-   *
-   * @static
-   * @readonly
-   * @memberOf Cli
-   */
-  static get globalCommands () {
-    const map = new Map()
-    map.set('quit', (...args) => {
-      console.log('')
-      process.exit(0)
-    })
-    return map
-  }
+export default class Cli {
+  target: PurpleBot
+  input: NodeJS.ReadableStream
+  output: NodeJS.WritableStream
+  readline: readline.ReadLine
 
   /**
    * Creates an active `Cli` instance.
    *
-   * @param {module:purplebot.PurpleBot} target
-   * @param {NodeJS.ReadableStream} [input=process.stdin]
-   * @param {NodeJS.WritableStream} [output=process.stdout]
-   *
    * @memberOf Console
    */
-  constructor (target, input = process.stdin, output = process.stdout) {
+  constructor (target: PurpleBot,
+               input: NodeJS.ReadableStream = process.stdin,
+               output: NodeJS.WritableStream = process.stdout) {
     this.target = target
     this.input = input
     this.output = output
     this.readline = readline.createInterface({
       input: input,
       output: output,
-      completer: this.completer.bind(this),
-      // @ts-ignore
-      prompt: ''
+      completer: this.completer.bind(this)//,
+      //prompt: ''
     })
 
     if (this.target != null) {
@@ -61,7 +51,7 @@ class Cli {
 
       const command = params.shift()
       if (command != null) {
-        const callback = this.target.commands.get(command) || Cli.globalCommands.get(command)
+        const callback = this.target.commands[command] || this.globalCommands[command]
         if (callback != null) {
           callback.apply(null, params)
         }
@@ -73,11 +63,10 @@ class Cli {
    * Attach listeners to `this.target`.
    *
    * @memberOf Cli
-   * @private
    */
-  _attachListeners () {
+  private _attachListeners () {
     this.target.on('error', (message) => {
-      this.readline.clearLine(this.readline, -1)
+      readline.clearLine(this.output, -1)
       this.readline.write(`${message.command}\n`)
     })
 
@@ -97,26 +86,39 @@ class Cli {
   }
 
   /**
-   * Readline completer function
+   * Universal commands
    *
-   * @param {string} line
-   * @param {function(...any): void} callback
+   * @static
+   * @readonly
+   * @memberOf Cli
+   */
+  get globalCommands (): {[key in string]: (...any) => void} {
+    return {
+      'quit': (...args) => {
+        console.log('')
+        process.exit(0)
+      }
+    }
+  }
+
+  commands (line: string): string[] {
+    let results =
+      _.keys(this.target.commands)
+      .concat(_.keys(this.globalCommands))
+    if (line.length > 0) {
+      results = results.filter(key => key.startsWith(line))
+    }
+    return results
+  }
+
+  /**
+   * Readline completer function
    *
    * @memberOf Console
    */
-  completer (line, callback) {
-    let results = []
-
-    if (line.length === 0) {
-      results = [...this.target.commands.keys(), ...Cli.globalCommands.keys()]
-    } else {
-      results = [...this.target.commands.keys(), ...Cli.globalCommands.keys()].filter((key) => {
-        return key.startsWith(line)
-      })
-    }
+  completer (line: string, callback: (...any) => void): void {
+    const results = this.commands(line)
 
     callback(null, [results, line])
   }
 }
-
-export default Cli

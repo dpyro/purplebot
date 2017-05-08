@@ -1,23 +1,19 @@
 import 'babel-polyfill'
 import { expect } from 'chai'
 
-import initBot from '../src/bot'
+import { init } from '../src/bot'
 
 describe('bot', function () {
   this.timeout(5000)
 
   let bot
 
-  beforeEach(function () {
-    return initBot()
-      .then((newBot) => {
-        expect(newBot).to.exist
-        bot = newBot
-        newBot
-      })
+  beforeEach(async function () {
+    bot = await init()
+    expect(bot).to.exist
   })
 
-  it('forwardClientEvent(): 1 ', (done) => {
+  it('forwardClientEvent(): 1 ', done => {
     bot.on('testout', (arg) => {
       expect(arg).to.equal('arg')
       done()
@@ -27,7 +23,7 @@ describe('bot', function () {
     expect(bot.client.emit('test1', 'arg')).is.true
   })
 
-  it('forwardClientEvent(): 2', (done) => {
+  it('forwardClientEvent(): 2', done => {
     bot.on('testout', (arg) => {
       expect(arg).to.equal('arg')
       done()

@@ -1,17 +1,15 @@
+import 'babel-polyfill'
 import { expect } from 'chai'
 
-import initBot from '../src/bot'
+import { init } from '../src/bot'
 
 describe('command', function () {
   let bot
   const channel = '#test'
 
-  beforeEach(function () {
-    return initBot()
-      .then(newBot => {
-        expect(newBot).to.exist
-        bot = newBot
-      })
+  beforeEach(async function () {
+    bot = await init()
+    expect(bot).to.exist
   })
 
   function emitMessage (text) {

@@ -1,3 +1,4 @@
+import 'babel-polyfill'
 import EventEmitter from 'events'
 import { expect } from 'chai'
 import streamBuffers from 'stream-buffers'
@@ -60,12 +61,14 @@ function eventTests () {
 describe('plugin: logging', function () {
   let logger, emitter, output
 
-  beforeEach(function () {
+  beforeEach(async function () {
     emitter = new EventEmitter()
     output = new streamBuffers.WritableStreamBuffer()
-    logger = new LoggingPlugin(emitter, output)
+    logger = new LoggingPlugin(output)
 
     expect(logger).to.exist
+
+    await logger.load(emitter, output)
   })
 
   const tests = eventTests()
@@ -77,7 +80,7 @@ describe('plugin: logging', function () {
       expect(output.size()).to.above(0)
       const line = output.getContentsAsString()
 
-      _.flatMapDeep(args, (arg) => {
+      _.flatMapDeep(args, arg => {
         return (typeof arg !== 'string') ? _.values(arg) : arg
       }).forEach((arg) => {
         expect(line).to.have.string(arg)
