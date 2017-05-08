@@ -58,7 +58,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
     this.installForwards()
   }
 
-  async loadPlugins (): Promise<void> {
+  async load (): Promise<void> {
     this.plugins = await loadPlugins(this)
   }
 
@@ -249,6 +249,6 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
 
 export async function init (options?: any): Promise<PurpleBot> {
   const bot = new PurpleBot(options)
-  await bot.loadPlugins()
+  await bot.load()
   return bot
 }
