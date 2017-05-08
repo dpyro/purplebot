@@ -5,13 +5,10 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
-import * as requireAll from 'require-all'
 import * as _  from 'lodash'
 
 import Config from './config'
 import PurpleBot from './bot'
-
-//require('ts-node/register')
 
 /**
  * Plugin API.
@@ -25,7 +22,7 @@ export interface Plugin {
   load(bot: PurpleBot, config?: Config): Promise<void>
 }
 
-async function readdir(path): Promise<string[]> {
+async function readdir (path): Promise<string[]> {
   return new Promise<string[]>((resolve, reject) => {
     fs.readdir(path, (err, files) => {
       if (err != null) {
