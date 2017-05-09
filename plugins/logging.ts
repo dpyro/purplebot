@@ -39,7 +39,7 @@ export default class LoggingPlugin implements Plugin {
   /**
    * Logger functions.
    */
-  protected static loggers = {
+  protected static loggers: {[key in string]: (...args: any[]) => void} = {
     'connect': (server) =>
       `CONNECT ${server}`,
 
