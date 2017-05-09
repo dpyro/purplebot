@@ -118,7 +118,7 @@ export default class KarmaPlugin implements Plugin {
    *
    * @fires PurpleBot#karma.respond
    */
-  async onMessage (nick: string, to: string, text: string): Promise<void> {
+  async handleMessage (nick: string, to: string, text: string): Promise<void> {
     const result = /(\w+)(\+\+|--)(\d*)(?!\w)/.exec(text)
     if (result === null) return
 
@@ -136,7 +136,7 @@ export default class KarmaPlugin implements Plugin {
    */
   private installHooks (): void {
     this.bot.on('message#', (nick, to, text, message) => {
-      this.onMessage(nick, to, text)
+      this.handleMessage(nick, to, text)
     })
 
     this.bot.on('karma.respond', (nick, to, term, karma) => {
@@ -152,7 +152,7 @@ export default class KarmaPlugin implements Plugin {
     })
 
     this.bot.on('command', async (context, command, ...args) => {
-      if (command !== 'karma') return
+      if (command.toLowerCase() !== 'karma') return
 
       if (args.length < 1) {
         // TODO: print usage or help

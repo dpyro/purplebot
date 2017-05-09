@@ -5,6 +5,7 @@
 
 import { EventEmitter } from 'events'
 import * as irc from 'irc'
+import * as _ from 'lodash'
 
 import { CommandMap } from './cli'
 import Config from './config'
@@ -225,19 +226,16 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * Installs client hooks.
    */
   private installClientHooks (): void {
-    this.client.on('message', (nick, to, text, message) => {
+    this.client.on('message', (nick, to, text: string, message) => {
       const trimmedText = text.trim()
       if (trimmedText.startsWith('.') && trimmedText.substring(1, 2) !== '.') {
         // TODO: accept quoted arguments
-        const words = trimmedText.split(' ')
-        const filteredWords = words.filter((element, index, arr) => {
-          return element != null && element !== ''
-        })
+        const words = _.compact(trimmedText.split(' '))
 
-        if (filteredWords.length >= 1) {
-          const command = filteredWords.shift().substring(1)
-          if (command !== '') {
-            const args = filteredWords
+        if (words.length >= 1) {
+          const command = words.shift().substring(1)
+          if (command.length > 0) {
+            const args = words
             const context = { nick, to, text, message }
             this.emit('command', context, command, ...args)
           }

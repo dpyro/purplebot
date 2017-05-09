@@ -1,5 +1,7 @@
 # TODO
 
+## Features
+
 - [ ] autologin
 - [x] logging
 - [ ] karma
@@ -28,6 +30,10 @@
   - [ ] temperature
   - [ ] height
   - [ ] weight
+
+## Technical
+
+- [ ] Third-party pubsub for `PurpleBot` events
 
 ## Testing
 
