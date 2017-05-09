@@ -17,7 +17,7 @@ export interface Plugin {
   /**
    * Asynchronously loads the resources for this plugin.
    */
-  load (bot: PurpleBot, config?: Config): Promise<void>
+  load? (bot: PurpleBot, config?: Config): Promise<void>
 }
 
 async function readdir (path): Promise<string[]> {
@@ -46,7 +46,9 @@ export default async function loadPlugins (bot: PurpleBot, config?: Config): Pro
       const mod = require(pluginFile)
       const Klass = (mod as any).default
       const plugin = new Klass()
-      await plugin.load(bot, config)
+      if (typeof plugin.load === 'function') {
+        await plugin.load(bot, config)
+      }
     } catch (err) {
       console.error(`Warning: could not load plugin ${pluginFile}`)
       console.error(err.stack)

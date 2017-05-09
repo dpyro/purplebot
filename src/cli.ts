@@ -38,7 +38,7 @@ export default class Cli {
     this.readline.setPrompt('')
 
     if (this.target != null) {
-      this._attachListeners()
+      this.attachListeners()
     }
 
     // More events at: https://nodejs.org/api/readline.html#readline_class_interface
@@ -77,7 +77,7 @@ export default class Cli {
   /**
    * Attach listeners to `this.target`.
    */
-  private _attachListeners () {
+  private attachListeners () {
     this.target.on('error', (message) => {
       readline.clearLine(this.output, -1)
       this.readline.write(`${message.command}\n`)
