@@ -1,50 +1,89 @@
-/**
- * @author Sumant Manne <sumant.manne@gmail.com>
- * @license MIT
- */
-
 import * as fs from 'fs-extra'
+import * as nconf from 'nconf'
 import * as os from 'os'
 import * as path from 'path'
+import * as yargs from 'yargs'
 
-/**
- * Manages configuration and data paths.
- */
 export default class Config {
-  configDir: string
-  json: Object
+  static configFileName = 'config.json'
+  configDirPath: string
+  nconf: nconf.Provider
 
   /**
-   * Creates an instance of Config.
+   * Creates an instance of Conf.
    */
-  constructor (name?: string) {
-    if (!name) {
-      this.configDir = path.join(os.homedir(), '.purplebot')
-    } else {
-      if (path.isAbsolute(name)) {
-        this.configDir = path.normalize(name)
-      } else {
-        this.configDir = path.join(os.homedir(), name)
+  private constructor (configDirPath?: string) {
+    this.configDirPath = configDirPath
+  }
+
+  static get userDirPath (): string {
+    return path.join(os.homedir(), '.purplebot')
+  }
+
+  static automatic (): Config {
+    const yargsOptions = {
+      'c': {
+        alias: 'channels',
+        default: [],
+        describe: 'channels to join upon connect',
+        type: 'array'
+      },
+      'n': {
+        alias: 'nick',
+        default: 'purplebot',
+        nargs: 1,
+        type: 'string'
+      },
+      's': {
+        alias: 'server',
+        default: 'localhost',
+        describe: 'connect to this server',
+        nargs: 1,
+        type: 'string'
+      },
+      'v': {
+        alias: 'verbose',
+        describe: 'Print debugging output',
+        type: 'boolean'
       }
     }
-    this.json = {}
+    yargs.usage('Usage: $0 [-s server.address:port] [-c #channel1 #channel2 ...]')
+      .help()
+
+    const config = new Config(Config.userDirPath)
+    config.nconf = new nconf.Provider({})
+      .argv(yargsOptions)
+      .env()
+      .file('file', config.configFilePath)
+    return config
+  }
+
+  static memory (): Config {
+    const config = new Config(null)
+    config.nconf = new nconf.Provider({})
+      .use('memory')
+    return config
+  }
+
+  static path (configDirPath: string): Config {
+    const config = new Config(configDirPath)
+    config.nconf = new nconf.Provider({})
+      .env()
+      .file('file', config.configFilePath)
+    return config
   }
 
   /**
    * Creates a temporary config directory.
    */
   static async temp (): Promise<Config> {
-    const tempPrefix = path.join(os.tmpdir(), 'purplebot-')
-    return new Promise<Config>((resolve, reject) => {
-      fs.mkdtemp(tempPrefix, (err, folder) => {
-        if (err != null) {
-          reject(err)
-        } else {
-          const config = new Config(folder)
-          resolve(config)
-        }
-      })
-    })
+    const prefix = path.join(os.tmpdir(), 'purplebot-')
+    const configDir = fs.mkdtempSync(prefix)
+    const config = new Config(configDir)
+    config.nconf = new nconf.Provider({})
+      .file('file', config.configFilePath)
+    await config.load()
+    return config
   }
 
   /**
@@ -52,7 +91,7 @@ export default class Config {
    */
   async hasDir (): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
-      fs.access(this.configDir, fs.constants.F_OK | fs.constants.R_OK, (err) => {
+      fs.access(this.configDirPath, fs.constants.F_OK | fs.constants.R_OK, (err) => {
         if (err != null) {
           resolve(false)
         } else {
@@ -67,7 +106,7 @@ export default class Config {
    */
   async ensureDir (): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      fs.ensureDir(this.configDir, (err) => {
+      fs.ensureDir(this.configDirPath, (err) => {
         if (err != null) {
           reject(err)
         } else {
@@ -82,7 +121,7 @@ export default class Config {
    */
   async removeDir (): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      fs.remove(this.configDir, (err) => {
+      fs.remove(this.configDirPath, (err) => {
         if (err != null) {
           reject(err)
         } else {
@@ -93,48 +132,24 @@ export default class Config {
   }
 
   /**
-   * Retrieves the path to the `config.json`.
-   *
-   * @readonly
+   * Returns a path rooted in the local config directory, if one was specified.
    */
-  get configPath (): string {
-    return this.path('config.json')
+  path (...args: string[]): string {
+    return (this.configDirPath != null) ? path.join(this.configDirPath, ...args) : null
   }
 
   /**
-   * Returns a path rooted in the local config directory.
-   *
-   * @memberOf Config
+   * Returns the path to the config file itself, if a config directory was specified.
    */
-  path (...args): string {
-    return path.join(this.configDir, ...args)
+  get configFilePath (): string {
+    return (this.configDirPath != null) ? path.join(this.configDirPath, 'config.json') : null
   }
 
-  /**
-   * Loads this configuration from disk.
-   *
-   * @todo rename to load
-   */
-  async sync (): Promise<any> {
-    return new Promise<any>((resolve, reject) => {
-      fs.readJson(this.configPath, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          this.json = result
-          resolve(result)
-        }
-      })
-    })
-  }
-
-  /**
-   * Saves the configuration to disk.
-   */
-  async flush (): Promise<void> {
+  async clear (): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      fs.writeJson(this.configPath, this.json, (err, result) => {
-        if (err) {
+      this.nconf.reset(err => {
+        console.log('clear')
+        if (err != null) {
           reject(err)
         } else {
           resolve()
@@ -143,17 +158,51 @@ export default class Config {
     })
   }
 
-  /**
-   * Returns an associated value.
-   */
-  get (key?: string): any {
-    return (key == null) ? this.json : this.json[key]
+  async load (): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.nconf.load(err => {
+        if (err != null) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      })
+    })
   }
 
-  /**
-   * Sets an associated value.
-   */
-  set (key: string, value: any): void {
-    this.json[key] = value
+  async save (): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.nconf.save('file', err => {
+        if (err != null) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      })
+    })
+  }
+
+  async get (key: string): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      (this.nconf.get as (err, result) => void)(key, (err, result) => {
+        if (err != null) {
+          reject(err)
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  }
+
+  async set (key: string, value: any): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.nconf.set(key, value, (err) => {
+        if (err != null) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      })
+    })
   }
 }

@@ -4,9 +4,10 @@ import nock from 'nock'
 import { join } from 'path'
 
 import { init } from '../src/bot'
+import Config from '../src/config'
 
 describe('plugin: web', function () {
-  let bot, scope
+  let bot, scope, config
   const channel = '#test'
 
   before(function () {
@@ -31,8 +32,14 @@ describe('plugin: web', function () {
   })
 
   beforeEach(async function () {
-    bot = await init()
+    config = await Config.temp()
+    bot = await init(config)
     expect(bot).to.exist
+  })
+
+  afterEach(async function () {
+    await config.removeDir()
+    config = null
   })
 
   after(function () {

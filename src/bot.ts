@@ -23,30 +23,46 @@ import loadPlugins, { Plugin } from './plugins'
  */
 export default class PurpleBot extends EventEmitter implements CommandMap {
   client: irc.Client
-  server: string
   commands: {[key in string]: (...args: any[]) => void}
+  config: Config
+  debug: boolean
   plugins: Plugin[]
+  server: string
+  socket: boolean
 
   /**
-   * Creates an instance of PurpleBot.
+   * Loads the config and plugins and then connects to the configured server.
+   *
+   * @todo parallelize the awaits
    */
-  constructor (options?: any) {
-    super()
+  async load (config?: Config): Promise<void> {
+    this.config = config || Config.memory()
+    this.config.nconf.defaults({
+      channels: [],
+      debug: false,
+      nick: 'PurpleBot',
+      server: 'localhost',
+      socket: false
+    })
 
-    options = options || {}
-    const nick = options.nick || 'PurpleBot'
+    // tslint:disable-next-line:triple-equals
+    this.debug = !!await this.config.get('debug')
+    this.server = await this.config.get('server')
+    // tslint:disable-next-line:triple-equals
+    this.socket = !!await this.config.get('socket')
+    const nick = await this.config.get('nick') || 'PurpleBot'
+    const channels = await this.config.get('channels') || []
 
-    this.server = options.server || 'localhost'
     const clientOptions = {
-      socket: options.socket || false,
+      socket: this.socket,
       userName: nick,
       realName: nick,
-      channels: options.channels || [],
-      showErrors: options.debug || false,
+      channels: channels,
+      showErrors: this.debug,
       autoConnect: false,
       autoRejoin: true,
       floodProtection: true,
-      debug: options.debug || false
+      debug: this.debug
     }
     this.client = new irc.Client(
       this.server,
@@ -57,10 +73,8 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
     this.installClientHooks()
     this.setupCommandHooks()
     this.installForwards()
-  }
 
-  async load (): Promise<void> {
-    this.plugins = await loadPlugins(this)
+    this.plugins = await loadPlugins(this, this.config)
   }
 
   /**
@@ -145,7 +159,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * @readonly
    */
   get nick (): string {
-    return this.client.nick
+    return (this.client != null) ? this.client.nick : null
   }
 
   /**
@@ -154,7 +168,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * @readonly
    */
   get chans () {
-    return this.client.chans
+    return (this.client != null) ? this.client.chans : null
   }
 
   /**
@@ -245,8 +259,8 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
   }
 }
 
-export async function init (options?: any): Promise<PurpleBot> {
-  const bot = new PurpleBot(options)
-  await bot.load()
+export async function init (config?: Config): Promise<PurpleBot> {
+  const bot = new PurpleBot()
+  await bot.load(config)
   return bot
 }

@@ -3,6 +3,7 @@ import { expect } from 'chai'
 
 import MockIrcd from './mock/ircd'
 import { init } from '../src/bot'
+import Config from '../src/config'
 
 const nick = 'testnick'
 const channel = '#test'
@@ -24,7 +25,7 @@ describe('mock ircd', function () {
   this.timeout(8000)
   this.slow(3000)
 
-  let ircd, bot
+  let ircd, bot, config
 
   beforeEach(async function () {
     ircd = new MockIrcd(nick, (data) => {
@@ -41,8 +42,17 @@ describe('mock ircd', function () {
     expect(ircd).to.exist
     const socket = ircd.socket
 
-    bot = await init({server: socket, socket: true})
+    config = await Config.temp()
+    await config.set('server', socket)
+    await config.set('socket', true)
+
+    bot = await init(config)
     expect(bot).to.exist
+  })
+
+  afterEach(async function () {
+    await config.removeDir()
+    config = null
   })
 
   it('connect(), disconnect()', () => {

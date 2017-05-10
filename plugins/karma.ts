@@ -17,16 +17,24 @@ import Database from '../src/sqlite'
 export default class KarmaPlugin implements Plugin {
   bot: PurpleBot
   config: Config
+  /* Path to the Karma database. */
+  databasePath: string
   db: Database
 
   /**
    * Asynchronously loads the database.
    */
-  async load (bot: PurpleBot, config?: Config): Promise<void> {
+  async load (bot: PurpleBot, config: Config): Promise<boolean> {
     this.bot = bot
-    this.config = config || new Config()
-    this.installHooks()
+    this.config = config
+    this.databasePath = this.config.path('karma.db')
+    if (this.databasePath == null) {
+      return false
+    }
+
     await this.loadDatabase()
+    this.installHooks()
+    return true
   }
 
   /**
@@ -50,30 +58,25 @@ export default class KarmaPlugin implements Plugin {
   }
 
   /**
-   * Return the path to the Karma database.
-   *
-   * @readonly
-   */
-  get databasePath (): string {
-    return this.config.path('karma.db')
-  }
-
-  /**
    * Replaces the current database with an empty one.
    */
   async resetDatabase (): Promise<void> {
-    if (this.db) {
+    if (this.db != null) {
       await this.db.close()
     }
 
-    await fs.unlink(this.databasePath)
-    await this.loadDatabase()
+    if (this.databasePath != null) {
+      await fs.unlink(this.databasePath)
+      await this.loadDatabase()
+    }
   }
 
   /**
    * Retrieves the karma for a `name` if it exists.
    */
   async get (name: string): Promise<any> {
+    if (this.db == null) return null
+
     const sql = 'SELECT * FROM karma_view WHERE name = ?'
     return this.db.get(sql, name)
   }
@@ -85,7 +88,7 @@ export default class KarmaPlugin implements Plugin {
    * @returns the updated number of points
    */
   async updateBy (name: string, points: number): Promise<number> {
-    if (!points) return null
+    if (!points || this.db == null) return null
 
     await this.db.exec('BEGIN')
 
@@ -106,6 +109,8 @@ export default class KarmaPlugin implements Plugin {
   }
 
   async top (limit: number = 5): Promise<any[]> {
+    if (this.db == null) return null
+
     const sql = 'SELECT * FROM karma_view LIMIT ?'
     const results = await this.db.all(sql, limit)
     return results.map(({ name, increased, decreased, points }, index) => {

@@ -142,15 +142,18 @@ export default class LoggingPlugin implements Plugin {
    *
    * @todo set socket server file name to server name
    */
-  async load (bot: PurpleBot, config?: Config): Promise<void> {
+  async load (bot: PurpleBot, config: Config): Promise<boolean> {
     this.bot = bot
-    this.config = config || new Config()
+    this.config = config
 
     let stream
     if (this.output != null) {
       stream = this.output
     } else {
       const filePath = this.config.path(`${this.bot.server}.log`)
+      if (filePath == null) {
+        return false
+      }
       await ensureFile(filePath)
       stream = createWriteStream(filePath, { flags: 'a' })
     }
@@ -163,5 +166,7 @@ export default class LoggingPlugin implements Plugin {
         stream.write(line)
       })
     }
+
+    return true
   }
 }

@@ -5,40 +5,40 @@ import fs from 'fs-extra'
 import Config from '../src/config'
 
 describe('config', function () {
+  /** @type {Config} */
   let config
 
   beforeEach(async function createConfig () {
     config = await Config.temp()
     expect(config).to.be.instanceof(Config)
-
-    await config.ensureDir()
-    expect(() => fs.access(config.configDir)).to.not.throw
-    expect(await config.hasDir()).to.be.true
-
-    const testData = '{ "test": "valid" }'
-    await fs.writeFile(config.configPath, testData)
-
-    expect(config.get()).to.be.empty
-
-    await config.sync()
-    expect(config.get()).to.not.be.empty
+    expect(await config.get('test')).to.not.exist
   })
 
   afterEach(async function deleteConfigDir () {
     await config.removeDir()
-    expect(() => fs.access(config.configDir)).to.throw
+    expect(() => fs.access(config.configDirPath)).to.throw
+    config = null
   })
 
-  it('get()', function () {
-    const value = config.get('test')
+  it('ensureDir(), hasDir()', async function () {
+    await config.ensureDir()
+    expect(() => fs.access(config.configDirPath)).to.not.throw
+    expect(await config.hasDir()).to.be.true
+  })
+
+  it('load()', async function () {
+    const testData = '{ "test": "valid" }'
+    await fs.writeFile(config.configFilePath, testData)
+    await config.load()
+    const value = await config.get('test')
     expect(value).to.equal('valid')
   })
 
-  it('set()', async function () {
-    config.set('test', 'different')
-    await config.flush()
-    await config.sync()
-    const value = config.get('test')
+  it('save()', async function () {
+    await config.set('test', 'different')
+    await config.save()
+    await config.load()
+    const value = await config.get('test')
 
     expect(value).to.equal('different')
   })

@@ -25,10 +25,16 @@ export default class DictPlugin implements Plugin {
   /**
    * Asynchronously loads the needed resources for this plugin.
    */
-  async load (bot: PurpleBot, config?: Config): Promise<void> {
+  async load (bot: PurpleBot, config: Config): Promise<boolean> {
     this.bot = bot
-    this.config = config || new Config()
+    this.config = config
     this.databasePath = this.config.path('dict.db')
+
+    if (this.databasePath == null) {
+      return false
+    }
+
+    await this.loadDatabase()
 
     this.bot.on('message#', (nick, to, text, message) => {
       this.handleMessage(nick, to, text)
@@ -44,7 +50,7 @@ export default class DictPlugin implements Plugin {
       }
     })
 
-    await this.loadDatabase()
+    return true
   }
 
   /**

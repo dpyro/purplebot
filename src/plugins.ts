@@ -17,7 +17,7 @@ export interface Plugin {
   /**
    * Asynchronously loads the resources for this plugin.
    */
-  load? (bot: PurpleBot, config?: Config): Promise<void>
+  load? (bot: PurpleBot, config: Config): Promise<boolean>
 }
 
 async function readdir (path): Promise<string[]> {
@@ -42,15 +42,21 @@ export default async function loadPlugins (bot: PurpleBot, config?: Config): Pro
 
   const plugins = []
   for (const pluginFile of filePaths) {
+    const relativePath = path.relative(__dirname, pluginFile)
     try {
       const mod = require(pluginFile)
       const Klass = (mod as any).default
       const plugin = new Klass()
       if (typeof plugin.load === 'function') {
-        await plugin.load(bot, config)
+        const result = await plugin.load(bot, config)
+        if (result === false) {
+          // TODO: console.error(`${relativePath} load() returned false`)
+        } else {
+          plugins.push(plugin)
+        }
       }
     } catch (err) {
-      console.error(`Warning: could not load plugin ${pluginFile}`)
+      console.error(`Warning: could not load plugin ${relativePath}`)
       console.error(err.stack)
     }
   }

@@ -27,9 +27,10 @@
                 "--colors",
                 "${workspaceRoot}/test",
                 "--compilers",
-                "js:babel-register"
+                "ts:ts-node/register,js:babel-register"
             ],
-            "internalConsoleOptions": "openOnSessionStart"
+            "internalConsoleOptions": "openOnSessionStart",
+            "protocol": "inspector"
         }
     ]
 }
