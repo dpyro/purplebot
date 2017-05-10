@@ -104,8 +104,6 @@ export default class Cli {
 
   /**
    * Universal commands
-   *
-   * @readonly
    */
   get globalCommands (): {[key in string]: (...args: any[]) => void} {
     return {

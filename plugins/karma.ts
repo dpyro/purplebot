@@ -17,8 +17,7 @@ import Database from '../src/sqlite'
 export default class KarmaPlugin implements Plugin {
   bot: PurpleBot
   config: Config
-  /* Path to the Karma database. */
-  databasePath: string
+  databasePath: string /* Path to the Karma database. */
   db: Database
 
   /**
@@ -121,7 +120,7 @@ export default class KarmaPlugin implements Plugin {
   /**
    * Responds to `message#` from the client.
    *
-   * @fires PurpleBot#karma.respond
+   * @fires karma.respond
    */
   async handleMessage (nick: string, to: string, text: string): Promise<void> {
     const result = /(\w+)(\+\+|--)(\d*)(?!\w)/.exec(text)

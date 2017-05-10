@@ -27,6 +27,9 @@ export default class WebPlugin implements Plugin {
     'webp'
   ]
 
+  /**
+   * @fires web.link
+   */
   async load (bot: PurpleBot): Promise<boolean> {
     this.bot = bot
 
@@ -34,14 +37,30 @@ export default class WebPlugin implements Plugin {
       const result = matcher.exec(text)
       if (result != null) {
         const link = result[0]
-        bot.emit('web', nick, to, link)
+        bot.emit('web.link', nick, to, link)
       }
     })
 
-    bot.on('web', (nick, to, link) => {
+    bot.on('web.link', async (nick, to, link) => {
+      try {
+        await this.handleLink(nick, to, link)
+      } catch (err) {
+        // ignore
+      }
+    })
+
+    bot.on('web.title', (channel, link, title) => {
+      bot.say(channel, `${link}: ${title}`)
+    })
+
+    return true
+  }
+
+  async handleLink (nick: string, to: string, link: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
       request.get(link, (err, response, body) => {
-        if (err) {
-          // TODO: log error
+        if (err != null) {
+          reject(err)
         } else if (response.statusCode === 200) {
           const type = response.headers['content-type']
           if (type == null || type === 'text/html') {
@@ -49,23 +68,21 @@ export default class WebPlugin implements Plugin {
             const dom = new JSDOM(body)
             const title = dom.window.document.title
             // TODO: log found link
-            bot.emit('title', to, link, title)
+            this.bot.emit('web.title', to, link, title)
+            resolve()
           } else {
             const ext = extension(type)
             if (typeof ext !== 'boolean' && this.imageExts.indexOf(ext) !== -1) {
               // TODO: save image or somesuch
-              bot.emit('web.image', to, link, ext, body)
+              this.bot.emit('web.image', to, link, ext, body)
+              resolve()
+            } else {
+              reject()
             }
           }
         }
       })
     })
-
-    bot.on('title', (channel, link, title) => {
-      bot.say(channel, `${link}: ${title}`)
-    })
-
-    return true
   }
 
   toString (): string {

@@ -78,7 +78,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
   /**
    * Connect to the IRC server.
    *
-   * @fires PurpleBot#connect
+   * @fires connect
    */
   async connect (): Promise<string> {
     return new Promise<string>((resolve, reject) => {
@@ -92,7 +92,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
   /**
    * Disconnect from the IRC server.
    *
-   * @fires PurpleBot#disconnect
+   * @fires disconnect
    */
   async disconnect (message?: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
@@ -108,7 +108,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    *
    * @returns the joined channel
    *
-   * @fires PurpleBot#join
+   * @fires join
    */
   async join (channel: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
@@ -124,7 +124,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    *
    * @returns the parted channel
    *
-   * @fires PurpleBot#part
+   * @fires part
    */
   async part (channel: string, message?: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
@@ -138,7 +138,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
   /**
    * Sends a message to the target.
    *
-   * @fires PurpleBot#say
+   * @fires say
    */
   say (target: string, message: string): void {
     this.client.say(target, message)
@@ -153,8 +153,6 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
 
   /**
    * Current nick of the bot.
-   *
-   * @readonly
    */
   get nick (): string {
     return (this.client != null) ? this.client.nick : null
@@ -162,8 +160,6 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
 
   /**
    * Updated channel info from the client.
-   *
-   * @readonly
    */
   get chans () {
     return (this.client != null) ? this.client.chans : null

@@ -54,9 +54,7 @@ export default class DictPlugin implements Plugin {
   }
 
   /**
-   *
-   *
-   * @fires PurpleBot#dict.respond
+   * @fires dict.respond
    */
   async handleMessage (nick: string, to: string, text: string): Promise<void> {
     const result = /\s*([\w- ]*[\w-]+?)\?+\s*$/.exec(text)
@@ -70,7 +68,7 @@ export default class DictPlugin implements Plugin {
   }
 
   /**
-   *
+   * @fires dict.respond
    */
   async handleLearnCommand (context: any, ...args: string[]) {
     if (args.length < 3) {
