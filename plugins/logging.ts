@@ -3,34 +3,13 @@
  * @license MIT
  */
 
-import { ensureFile, createWriteStream } from 'fs-extra'
+import * as fs from 'fs-extra'
 import * as _ from 'lodash'
+import * as stream from 'stream'
 
 import Config from '../src/config'
 import PurpleBot from '../src/bot'
 import { Plugin } from '../src/plugins'
-
-/**
- * Adds an exception-catching wrapped listener to an event emitter
- */
-function onSafe (emitter,
-                 eventName: string,
-                 callback: (...args: any[]) => void) {
-  emitter.on(eventName, (...args) => {
-    try {
-      callback.apply(emitter, args)
-    } catch (e) {
-      console.error(e)
-    }
-  })
-}
-
-/**
- * Return the current timestamp.
- */
-function timestamp (): string {
-  return new Date().toUTCString()
-}
 
 /**
  * Plugin for logging sent and recieved messages.
@@ -131,9 +110,9 @@ export default class LoggingPlugin implements Plugin {
 
   bot: PurpleBot
   config: Config
-  output: NodeBuffer
+  output: NodeBuffer | stream.Writable
 
-  constructor (output: NodeBuffer = null) {
+  constructor (output: NodeBuffer | stream.Writable = null) {
     this.output = output
   }
 
@@ -154,16 +133,21 @@ export default class LoggingPlugin implements Plugin {
       if (filePath == null) {
         return false
       }
-      await ensureFile(filePath)
-      stream = createWriteStream(filePath, { flags: 'a' })
+      await fs.ensureFile(filePath)
+      stream = fs.createWriteStream(filePath, { flags: 'a' })
     }
 
     for (let eventName of Object.keys(LoggingPlugin.loggers)) {
       const callback = LoggingPlugin.loggers[eventName]
-      onSafe(this.bot, eventName, (...args) => {
-        const data = callback.apply(null, args)
-        const line = `[${timestamp()}] ${data}\n`
-        stream.write(line)
+      this.bot.on(eventName, (...args) => {
+        try {
+          const data = callback.apply(null, args)
+          const timestamp = new Date().toUTCString()
+          const line = `[${timestamp}] ${data}\n`
+          stream.write(line)
+        } catch (err) {
+          console.error(err)
+        }
       })
     }
 

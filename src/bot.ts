@@ -45,13 +45,11 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
       socket: false
     })
 
-    // tslint:disable-next-line:triple-equals
     this.debug = !!await this.config.get('debug')
     this.server = await this.config.get('server')
-    // tslint:disable-next-line:triple-equals
     this.socket = !!await this.config.get('socket')
-    const nick = await this.config.get('nick') || 'PurpleBot'
-    const channels = await this.config.get('channels') || []
+    const nick = await this.config.get('nick')
+    const channels = await this.config.get('channels')
 
     const clientOptions = {
       socket: this.socket,
