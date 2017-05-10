@@ -9,6 +9,7 @@ import * as request from 'request'
 
 import { Plugin } from '../src/plugins'
 import PurpleBot from '../src/bot'
+import Config from '../src/config'
 
 // http://stackoverflow.com/a/17773849/1440740
 const matcher = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/
@@ -26,7 +27,7 @@ export default class WebPlugin implements Plugin {
     'webp'
   ]
 
-  async load (bot: PurpleBot): Promise<void> {
+  async load (bot: PurpleBot): Promise<boolean> {
     this.bot = bot
 
     bot.on('message#', (nick, to, text, message) => {
@@ -63,5 +64,7 @@ export default class WebPlugin implements Plugin {
     bot.on('title', (channel, link, title) => {
       bot.say(channel, `${link}: ${title}`)
     })
+
+    return true
   }
 }
