@@ -74,6 +74,10 @@ export default class Cli {
     callback(null, [results, line])
   }
 
+  toString (): string {
+    return `[Cli on ${this.target}]`
+  }
+
   /**
    * Attach listeners to `this.target`.
    */

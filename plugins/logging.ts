@@ -153,4 +153,8 @@ export default class LoggingPlugin implements Plugin {
 
     return true
   }
+
+  toString (): string {
+    return `[LoggingPlugin ${this.output}]`
+  }
 }

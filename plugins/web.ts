@@ -67,4 +67,8 @@ export default class WebPlugin implements Plugin {
 
     return true
   }
+
+  toString (): string {
+    return `[WebPlugin ${this.bot}]`
+  }
 }

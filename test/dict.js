@@ -7,6 +7,8 @@ import Config from '../src/config'
 import DictPlugin from '../plugins/dict'
 
 describe('plugin: dict', function () {
+  this.timeout(3000)
+
   let config, emitter, plugin
   const nick = 'chameleon'
   const channel = '#test'

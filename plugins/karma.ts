@@ -136,6 +136,10 @@ export default class KarmaPlugin implements Plugin {
     this.bot.emit('karma.respond', nick, to, term, karma)
   }
 
+  toString (): string {
+    return `[KarmaPlugin ${this.databasePath}]`
+  }
+
   /**
    * Install hooks on the bot.
    */

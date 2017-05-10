@@ -182,4 +182,8 @@ export default class Config {
       })
     })
   }
+
+  toString () {
+    return `[Config ${this.configDirPath}]`
+  }
 }

@@ -137,6 +137,10 @@ export default class DictPlugin implements Plugin {
     return results
   }
 
+  toString (): string {
+    return `[DictPlugin ${this.databasePath}]`
+  }
+
   private async loadDatabase () {
     const sql = `
       CREATE TABLE IF NOT EXISTS dict (
