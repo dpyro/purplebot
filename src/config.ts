@@ -90,45 +90,23 @@ export default class Config {
    * Determine if the config directory already exists.
    */
   async hasDir (): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      fs.access(this.configDirPath, fs.constants.F_OK | fs.constants.R_OK, (err) => {
-        if (err != null) {
-          resolve(false)
-        } else {
-          resolve(true)
-        }
-      })
-    })
+    return fs.access(this.configDirPath)
+      .then(() => true)
+      .catch(() => false)
   }
 
   /**
    * Creates the directory for this `Config`.
    */
   async ensureDir (): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      fs.ensureDir(this.configDirPath, (err) => {
-        if (err != null) {
-          reject(err)
-        } else {
-          resolve()
-        }
-      })
-    })
+    return fs.ensureDir(this.configDirPath)
   }
 
   /**
    * Deletes the config directory.
    */
   async removeDir (): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      fs.remove(this.configDirPath, (err) => {
-        if (err != null) {
-          reject(err)
-        } else {
-          resolve()
-        }
-      })
-    })
+    return fs.remove(this.configDirPath)
   }
 
   /**
@@ -148,8 +126,7 @@ export default class Config {
   async clear (): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.nconf.reset(err => {
-        console.log('clear')
-        if (err != null) {
+        if (err) {
           reject(err)
         } else {
           resolve()

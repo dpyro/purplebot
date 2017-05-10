@@ -3,7 +3,7 @@
  * @license MIT
  */
 
-import * as fs from 'fs'
+import * as fs from 'fs-extra'
 import * as path from 'path'
 import * as _ from 'lodash'
 
@@ -20,22 +20,14 @@ export interface Plugin {
   load? (bot: PurpleBot, config: Config): Promise<boolean>
 }
 
-async function readdir (path): Promise<string[]> {
-  return new Promise<string[]>((resolve, reject) => {
-    fs.readdir(path, (err, files) => {
-      if (err != null) {
-        reject(err)
-      } else {
-        resolve(files)
-      }
-    })
-  })
+async function readdir (dirPath): Promise<string[]> {
+  return fs.readdir(dirPath)
 }
 
 /**
  * Synchronously fetch the available plugins.
  */
-export default async function loadPlugins (bot: PurpleBot, config?: Config): Promise<Plugin[]> {
+export default async function loadPlugins (bot: PurpleBot, config: Config): Promise<Plugin[]> {
   const dirname = path.join(__dirname, '..', 'plugins')
   const files = await readdir(dirname)
   const filePaths = files.map(file => path.join(__dirname, '..', 'plugins', file))
