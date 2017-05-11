@@ -13,10 +13,12 @@ describe('plugin: dict', function () {
   const nick = 'chameleon'
   const channel = '#test'
 
-  beforeEach(async function () {
+  before(async function () {
     config = await Config.temp()
     expect(config).to.exist
+  })
 
+  beforeEach(async function () {
     emitter = new EventEmitter()
     plugin = new DictPlugin()
     await plugin.load(emitter, config)
@@ -24,9 +26,13 @@ describe('plugin: dict', function () {
   })
 
   afterEach(async function () {
-    await config.removeDir()
-    emitter = null
+    await plugin.reset()
     plugin = null
+    emitter = null
+  })
+
+  after(async function () {
+    config.removeDir()
   })
 
   it('value() [empty]', async function () {

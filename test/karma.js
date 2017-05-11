@@ -12,23 +12,29 @@ describe('plugin: karma', async function () {
   const channel = '#test'
   let emitter, plugin, config
 
+  before(async function () {
+    config = await Config.temp()
+  })
+
   // TODO: use custom test config
   beforeEach(async function () {
-    config = await Config.temp()
-
     emitter = new EventEmitter()
-    emitter.say = () => {}
 
     plugin = new KarmaPlugin()
     await plugin.load(emitter, config)
     expect(plugin).to.exist
 
-    await plugin.resetDatabase()
     const output = await plugin.top()
     expect(output).to.be.empty
   })
 
   afterEach(async function () {
+    await plugin.reset()
+    plugin = null
+    emitter = null
+  })
+
+  after(async function () {
     await config.removeDir()
     config = null
   })

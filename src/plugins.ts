@@ -18,6 +18,11 @@ export interface Plugin {
    * Asynchronously loads the resources for this plugin.
    */
   load? (bot: PurpleBot, config: Config): Promise<boolean>
+
+  /**
+   * Resets the data.
+   */
+  reset? (): Promise<void>
 }
 
 async function readdir (dirPath): Promise<string[]> {

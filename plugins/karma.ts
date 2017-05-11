@@ -36,6 +36,10 @@ export default class KarmaPlugin implements Plugin {
     return true
   }
 
+  async reset (): Promise<void> {
+    return this.db.run('DROP TABLE IF EXISTS karma')
+  }
+
   /**
    * Outputs karma for a name.
    */

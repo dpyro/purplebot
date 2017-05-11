@@ -53,6 +53,10 @@ export default class DictPlugin implements Plugin {
     return true
   }
 
+  async reset (): Promise<void> {
+    return this.db.run('DROP TABLE IF EXISTS dict')
+  }
+
   /**
    * @fires dict.respond
    */

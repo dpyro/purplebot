@@ -22,14 +22,14 @@
   - [ ] .list remove \<name\> \<value\>
 - [ ] web
   - [x] url snarfer
-  - [ ] log links
-  - [ ] show last link sent by user
-- [ ] heralds
+  - [.] log links
+  - [.] show last link sent by user
+- [.] heralds
 - [ ] permissions
-- [ ] conversions
-  - [ ] temperature
-  - [ ] height
-  - [ ] weight
+- [.] conversions
+  - [.] temperature
+  - [.] height
+  - [.] weight
 
 ## Technical
 
