@@ -115,11 +115,11 @@ describe('plugin: dict', function () {
   }
 
   for (const [text, key] of _.toPairs(tests)) {
-    it(`lookup: "${text}"`, function (done) {
+    it(`lookup: "${text}"`, async function (done) {
       const value = 'this value'
       const user = 'testuser'
 
-      plugin.add(key, value, user)
+      await plugin.add(key, value, user)
 
       testResponse(text, key, value, done)
     })
