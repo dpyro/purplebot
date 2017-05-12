@@ -112,7 +112,7 @@ export default class LoggingPlugin implements Plugin {
 
   bot: PurpleBot
   config: Config
-  output: NodeBuffer | stream.Writable
+  output: NodeBuffer | stream.Writable | undefined
 
   constructor (output?: NodeBuffer | stream.Writable) {
     this.output = output

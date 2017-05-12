@@ -3,7 +3,9 @@
     "lib": ["es2015", "dom"],
     "preserveConstEnums": true,
     "target": "es5",
-    "inlineSourceMap": true
+    "inlineSourceMap": true,
+    "strictNullChecks": true,
+    "noImplicitThis": true
   },
   "include": [
     "plugins/**/*.ts",

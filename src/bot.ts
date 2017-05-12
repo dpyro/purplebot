@@ -232,7 +232,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * @param to name for forwarding the client event
    */
   private forwardClientEvent (from: string, to: string = from) {
-    this.client.on(from, (...args) => {
+    this.client.on(from, (...args: any[]) => {
       this.emit(to, ...args)
     })
   }
