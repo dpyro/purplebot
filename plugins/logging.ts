@@ -108,6 +108,8 @@ export default class LoggingPlugin implements Plugin {
     }
   }
 
+  readonly name = 'logging'
+
   bot: PurpleBot
   config: Config
   output: NodeBuffer | stream.Writable
@@ -121,7 +123,7 @@ export default class LoggingPlugin implements Plugin {
    *
    * @todo set socket server file name to server name
    */
-  async load (bot: PurpleBot, config: Config): Promise<boolean> {
+  async load (bot: PurpleBot, config: Config): Promise<void> {
     this.bot = bot
     this.config = config
 
@@ -131,7 +133,7 @@ export default class LoggingPlugin implements Plugin {
     } else {
       const filePath = this.config.path(`${this.bot.server}.log`)
       if (filePath == null) {
-        return false
+        throw new Error()
       }
       await fs.ensureFile(filePath)
       stream = fs.createWriteStream(filePath, { flags: 'a' })
@@ -150,8 +152,6 @@ export default class LoggingPlugin implements Plugin {
         }
       })
     }
-
-    return true
   }
 
   toString (): string {

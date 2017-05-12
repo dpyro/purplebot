@@ -2,14 +2,20 @@ import 'babel-polyfill'
 import { expect } from 'chai'
 
 import { init } from '../src/bot'
+import Config from '../src/config'
 
 describe('bot', function () {
   this.timeout(5000)
 
-  let bot
+  let bot, config
+
+  before(function () {
+    config = Config.memory()
+    config.set('plugins', false)
+  })
 
   beforeEach(async function () {
-    bot = await init()
+    bot = await init(config)
     expect(bot).to.exist
   })
 

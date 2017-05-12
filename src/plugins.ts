@@ -17,7 +17,7 @@ export interface Plugin {
   /**
    * Asynchronously loads the resources for this plugin.
    */
-  load? (bot: PurpleBot, config: Config): Promise<boolean>
+  load? (bot: PurpleBot, config: Config): Promise<void>
 
   /**
    * Resets the data.
@@ -27,6 +27,40 @@ export interface Plugin {
 
 async function readdir (dirPath): Promise<string[]> {
   return fs.readdir(dirPath)
+}
+
+/**
+ * @throws {Error}
+ */
+async function loadPlugin (pluginFile: string,
+                           bot: PurpleBot,
+                           config: Config): Promise<Plugin> {
+  const mod: any = require(pluginFile)
+  let Klass
+  // TODO: verify that this actually works with JS, module.exports = Plugin
+  if (typeof mod === 'object' && typeof mod.default === 'function') {
+    Klass = mod.default
+  } else if (typeof mod === 'function') {
+    Klass = mod
+  } else {
+    throw new Error(`Cannot load ${pluginFile}: not a class nor default export.`)
+  }
+
+  if (typeof Klass.name === 'string') {
+    const name = Klass.name
+    const disabled = await config.get(`${name}:enabled`)
+    if (disabled != null && !!disabled === false) {
+      return null
+    }
+    await config.set(`${name}:enabled`, true)
+  }
+
+  const plugin = new Klass()
+  if (typeof plugin.load === 'function') {
+    await plugin.load(bot, config)
+  }
+
+  return plugin
 }
 
 /**
@@ -41,20 +75,13 @@ export default async function loadPlugins (bot: PurpleBot, config: Config): Prom
   for (const pluginFile of filePaths) {
     const relativePath = path.relative(__dirname, pluginFile)
     try {
-      const mod = require(pluginFile)
-      const Klass = (mod as any).default
-      const plugin = new Klass()
-      if (typeof plugin.load === 'function') {
-        const result = await plugin.load(bot, config)
-        if (result === false) {
-          // TODO: console.error(`${relativePath} load() returned false`)
-        } else {
-          plugins.push(plugin)
-        }
+      const plugin = await loadPlugin(pluginFile, bot, config)
+      if (plugin != null) {
+        plugins.push(plugin)
       }
     } catch (err) {
       console.error(`Warning: could not load plugin ${relativePath}`)
-      console.error(err.stack)
+      console.error(err)
     }
   }
 

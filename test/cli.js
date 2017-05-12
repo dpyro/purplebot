@@ -1,20 +1,26 @@
 import { expect } from 'chai'
-import { EventEmitter } from 'events'
 import streamBuffers from 'stream-buffers'
 
+import { init } from '../src/bot'
 import Cli from '../src/cli'
+import Config from '../src/config'
 
 describe('cli', function () {
-  let target, cli, input, output
+  let bot, config, cli, input, output
 
-  beforeEach(function setupConsole () {
-    target = new EventEmitter()
-    target.commands = {}
+  before(function () {
+    config = Config.memory()
+    config.set('plugins', false)
+  })
+
+  beforeEach(async function setupConsole () {
+    bot = await init(config)
+    expect(bot).to.exist
 
     input = new streamBuffers.ReadableStreamBuffer()
     output = new streamBuffers.WritableStreamBuffer()
 
-    cli = new Cli(target, input, output)
+    cli = new Cli(bot, input, output)
 
     expect(cli).to.exist
     expect(input).to.exist
@@ -22,7 +28,7 @@ describe('cli', function () {
   })
 
   it('runs command callback', function (done) {
-    target.commands['test'] = () => done()
+    bot.commands['test'] = () => done()
 
     input.put('test\n')
     input.put(null)

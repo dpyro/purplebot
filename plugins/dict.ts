@@ -17,6 +17,8 @@ import { Plugin } from '../src/plugins'
  * You may use it as a terms dictionary.
  */
 export default class DictPlugin implements Plugin {
+  readonly name = 'dict'
+
   bot: PurpleBot
   config: Config
   databasePath: string
@@ -25,13 +27,13 @@ export default class DictPlugin implements Plugin {
   /**
    * Asynchronously loads the needed resources for this plugin.
    */
-  async load (bot: PurpleBot, config: Config): Promise<boolean> {
+  async load (bot: PurpleBot, config: Config): Promise<void> {
     this.bot = bot
     this.config = config
     this.databasePath = this.config.path('dict.db')
 
     if (this.databasePath == null) {
-      return false
+      throw new Error()
     }
 
     await this.loadDatabase()
@@ -49,8 +51,6 @@ export default class DictPlugin implements Plugin {
         this.handleLearnCommand(context, ...args)
       }
     })
-
-    return true
   }
 
   async reset (): Promise<void> {

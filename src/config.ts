@@ -125,7 +125,7 @@ export default class Config {
 
   async clear (): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this.nconf.reset(err => {
+      this.nconf.reset((err) => {
         if (err) {
           reject(err)
         } else {

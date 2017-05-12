@@ -15,6 +15,8 @@ import Database from '../src/sqlite'
  * Plugin for tracking karma.
  */
 export default class KarmaPlugin implements Plugin {
+  readonly name = 'karma'
+
   bot: PurpleBot
   config: Config
   databasePath: string /* Path to the Karma database. */
@@ -23,17 +25,16 @@ export default class KarmaPlugin implements Plugin {
   /**
    * Asynchronously loads the database.
    */
-  async load (bot: PurpleBot, config: Config): Promise<boolean> {
+  async load (bot: PurpleBot, config: Config): Promise<void> {
     this.bot = bot
     this.config = config
     this.databasePath = this.config.path('karma.db')
     if (this.databasePath == null) {
-      return false
+      throw new Error()
     }
 
     await this.loadDatabase()
     this.installHooks()
-    return true
   }
 
   async reset (): Promise<void> {

@@ -72,7 +72,10 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
     this.setupCommandHooks()
     this.installForwards()
 
-    this.plugins = await loadPlugins(this, this.config)
+    const pluginsEnabled = await this.config.get('plugins')
+    if (pluginsEnabled !== false) {
+      this.plugins = await loadPlugins(this, this.config)
+    }
   }
 
   /**

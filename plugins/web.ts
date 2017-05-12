@@ -18,6 +18,8 @@ const matcher = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9
  * Plugin to snarf URLs and images.
  */
 export default class WebPlugin implements Plugin {
+  readonly name = 'web'
+
   bot: PurpleBot
   imageExts: String[] = [
     'gif',
@@ -30,7 +32,7 @@ export default class WebPlugin implements Plugin {
   /**
    * @fires web.link
    */
-  async load (bot: PurpleBot): Promise<boolean> {
+  async load (bot: PurpleBot): Promise<void> {
     this.bot = bot
 
     bot.on('message#', (nick, to, text, message) => {
@@ -52,8 +54,36 @@ export default class WebPlugin implements Plugin {
     bot.on('web.title', (channel, link, title) => {
       bot.say(channel, `${link}: ${title}`)
     })
+  }
 
-    return true
+  /**
+   * @throws {Error}
+   */
+  handleResponse (response: request.RequestResponse,
+                  nick: string,
+                  to: string,
+                  link: string,
+                  body: any): void {
+    if (response.statusCode !== 200) {
+      throw new Error(`Error fetching ${link} (status code: ${response.statusCode}`)
+    }
+
+    const type = response.headers['content-type']
+    if (type == null || type === 'text/html') {
+      // TODO: handle bad content types
+      const dom = new JSDOM(body)
+      const title = dom.window.document.title
+      // TODO: log found link
+      this.bot.emit('web.title', to, link, title)
+    } else {
+      const ext = extension(type)
+      if (typeof ext !== 'boolean' && this.imageExts.indexOf(ext) !== -1) {
+        // TODO: save image or somesuch
+        this.bot.emit('web.image', to, link, ext, body)
+      } else {
+        throw new Error(`Error fetching ${link} (MIME type: ${type})`)
+      }
+    }
   }
 
   async handleLink (nick: string, to: string, link: string): Promise<void> {
@@ -61,25 +91,13 @@ export default class WebPlugin implements Plugin {
       request.get(link, (err, response, body) => {
         if (err != null) {
           reject(err)
-        } else if (response.statusCode === 200) {
-          const type = response.headers['content-type']
-          if (type == null || type === 'text/html') {
-            // TODO: handle bad content types
-            const dom = new JSDOM(body)
-            const title = dom.window.document.title
-            // TODO: log found link
-            this.bot.emit('web.title', to, link, title)
-            resolve()
-          } else {
-            const ext = extension(type)
-            if (typeof ext !== 'boolean' && this.imageExts.indexOf(ext) !== -1) {
-              // TODO: save image or somesuch
-              this.bot.emit('web.image', to, link, ext, body)
-              resolve()
-            } else {
-              reject()
-            }
-          }
+        }
+
+        try {
+          this.handleResponse(response, nick, to, link, body)
+          resolve()
+        } catch (err) {
+          reject(err)
         }
       })
     })

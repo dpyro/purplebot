@@ -10,7 +10,7 @@ describe('plugin: web', function () {
   let bot, scope, config
   const channel = '#test'
 
-  before(function () {
+  before(async function () {
     scope = nock('http://example.local/')
       .get('/error')
       .replyWithError('Mocked generic error')
@@ -27,22 +27,19 @@ describe('plugin: web', function () {
       .replyWithError('Mocked generic error')
       .get('/image')
       .replyWithFile(200, join(__dirname, '/fixtures/pixel.png'), {'Content-Type': 'image/png'})
-
     expect(scope).to.exist
+
+    config = await Config.temp()
+    expect(config).to.exist
   })
 
   beforeEach(async function () {
-    config = await Config.temp()
     bot = await init(config)
     expect(bot).to.exist
   })
 
-  afterEach(async function () {
+  after(async function () {
     await config.removeDir()
-    config = null
-  })
-
-  after(function () {
     expect(nock.isDone()).to.be.true
   })
 
@@ -79,7 +76,7 @@ describe('plugin: web', function () {
   }
 
   it('does not emit on invalid link', function () {
-    return expectNoEvent('web', () => emitUrl('http://:example.local/valid'))
+    return expectNoEvent('web.link', () => emitUrl('http://:example.local/valid'))
   })
 
   it('title for valid link', function () {
