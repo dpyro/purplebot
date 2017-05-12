@@ -89,20 +89,24 @@ describe('plugin: dict', function () {
     expect(resultAfter).to.not.exist
   })
 
-  function testResponse (text, key, value, done) {
-    emitter.on('dict.respond', (fromNick, to, name, fromValue) => {
-      try {
-        expect(fromNick).to.equal(nick)
-        expect(to).to.equal(channel)
-        expect(name).to.equal(key)
-        expect(fromValue).to.equal(value)
-        done()
-      } catch (err) {
-        done(err)
-      }
+  async function testResponse (text, key, value) {
+    const p = new Promise((resolve, reject) => {
+      emitter.on('dict.respond', (fromNick, to, name, fromValue) => {
+        try {
+          expect(fromNick).to.equal(nick)
+          expect(to).to.equal(channel)
+          expect(name).to.equal(key)
+          expect(fromValue).to.equal(value)
+          resolve()
+        } catch (err) {
+          reject(err)
+        }
+      })
     })
 
     emitter.emit('message#', nick, channel, text)
+
+    return p
   }
 
   const tests = {
@@ -115,13 +119,13 @@ describe('plugin: dict', function () {
   }
 
   for (const [text, key] of _.toPairs(tests)) {
-    it(`lookup: "${text}"`, async function (done) {
+    it(`lookup: "${text}"`, async function () {
       const value = 'this value'
       const user = 'testuser'
 
       await plugin.add(key, value, user)
 
-      testResponse(text, key, value, done)
+      await testResponse(text, key, value)
     })
   }
 })
