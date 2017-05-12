@@ -2,7 +2,7 @@ import 'babel-polyfill'
 import { expect } from 'chai'
 import { EventEmitter } from 'events'
 
-import Config from '../src/config'
+import { FileConfig } from '../src/config'
 import KarmaPlugin from '../plugins/karma'
 
 describe('plugin: karma', async function () {
@@ -13,7 +13,7 @@ describe('plugin: karma', async function () {
   let emitter, plugin, config
 
   before(async function () {
-    config = await Config.temp()
+    config = await FileConfig.temp()
   })
 
   // TODO: use custom test config

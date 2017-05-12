@@ -3,13 +3,13 @@ import streamBuffers from 'stream-buffers'
 
 import { init } from '../src/bot'
 import Cli from '../src/cli'
-import Config from '../src/config'
+import { MemConfig } from '../src/config'
 
 describe('cli', function () {
   let bot, config, cli, input, output
 
   before(function () {
-    config = Config.memory()
+    config = new MemConfig()
     config.set('plugins', false)
   })
 

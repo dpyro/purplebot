@@ -7,7 +7,7 @@ import * as fs from 'fs-extra'
 import * as _ from 'lodash'
 import * as stream from 'stream'
 
-import Config from '../src/config'
+import Config, { FileConfig } from '../src/config'
 import PurpleBot from '../src/bot'
 import { Plugin } from '../src/plugins'
 
@@ -114,7 +114,7 @@ export default class LoggingPlugin implements Plugin {
   config: Config
   output: NodeBuffer | stream.Writable
 
-  constructor (output: NodeBuffer | stream.Writable = null) {
+  constructor (output?: NodeBuffer | stream.Writable) {
     this.output = output
   }
 
@@ -131,10 +131,9 @@ export default class LoggingPlugin implements Plugin {
     if (this.output != null) {
       stream = this.output
     } else {
+      if (!(this.config instanceof FileConfig)) throw new Error()
+
       const filePath = this.config.path(`${this.bot.server}.log`)
-      if (filePath == null) {
-        throw new Error()
-      }
       await fs.ensureFile(filePath)
       stream = fs.createWriteStream(filePath, { flags: 'a' })
     }

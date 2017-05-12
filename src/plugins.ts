@@ -34,7 +34,7 @@ async function readdir (dirPath): Promise<string[]> {
  */
 async function loadPlugin (pluginFile: string,
                            bot: PurpleBot,
-                           config: Config): Promise<Plugin> {
+                           config: Config): Promise<Plugin|null> {
   const mod: any = require(pluginFile)
   let Klass
   // TODO: verify that this actually works with JS, module.exports = Plugin
@@ -71,7 +71,7 @@ export default async function loadPlugins (bot: PurpleBot, config: Config): Prom
   const files = await readdir(dirname)
   const filePaths = files.map(file => path.join(__dirname, '..', 'plugins', file))
 
-  const plugins = []
+  const plugins: Plugin[] = []
   for (const pluginFile of filePaths) {
     const relativePath = path.relative(__dirname, pluginFile)
     try {

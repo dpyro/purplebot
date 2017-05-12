@@ -2,15 +2,14 @@ import 'babel-polyfill'
 import { expect } from 'chai'
 import fs from 'fs-extra'
 
-import Config from '../src/config'
+import { FileConfig } from '../src/config'
 
 describe('config', function () {
-  /** @type {Config} */
   let config
 
   beforeEach(async function createConfig () {
-    config = await Config.temp()
-    expect(config).to.be.instanceof(Config)
+    config = await FileConfig.temp()
+    expect(config).to.be.exist
     expect(await config.get('test')).to.not.exist
   })
 

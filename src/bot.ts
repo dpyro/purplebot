@@ -8,7 +8,7 @@ import * as irc from 'irc'
 import * as _ from 'lodash'
 
 import { CommandMap } from './cli'
-import Config from './config'
+import Config, { MemConfig } from './config'
 import loadPlugins, { Plugin } from './plugins'
 
 /**
@@ -36,7 +36,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * @todo parallelize the awaits
    */
   async load (config?: Config): Promise<void> {
-    this.config = config || Config.memory()
+    this.config = config || new MemConfig()
     this.config.nconf.defaults({
       channels: [],
       debug: false,
@@ -99,7 +99,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    */
   async disconnect (message?: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-      this.client.disconnect(message, () => {
+      this.client.disconnect(message!, () => {
         this.emit('disconnect', this.server, message)
         resolve(this.server)
       })
@@ -131,7 +131,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    */
   async part (channel: string, message?: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-      this.client.part(channel, message, () => {
+      this.client.part(channel, message!, () => {
         this.emit('part', channel, message)
         resolve(channel)
       })
@@ -161,7 +161,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
   /**
    * Current nick of the bot.
    */
-  get nick (): string {
+  get nick (): string | null {
     return (this.client != null) ? this.client.nick : null
   }
 
@@ -248,7 +248,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
         const words = _.compact(trimmedText.split(' '))
 
         if (words.length >= 1) {
-          const command = words.shift().substring(1)
+          const command = words.shift()!.substring(1)
           if (command.length > 0) {
             const args = words
             const context = { nick, to, text, message }

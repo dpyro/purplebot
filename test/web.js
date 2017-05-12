@@ -4,7 +4,7 @@ import nock from 'nock'
 import { join } from 'path'
 
 import { init } from '../src/bot'
-import Config from '../src/config'
+import { FileConfig } from '../src/config'
 
 describe('plugin: web', function () {
   let bot, scope, config
@@ -29,7 +29,7 @@ describe('plugin: web', function () {
       .replyWithFile(200, join(__dirname, '/fixtures/pixel.png'), {'Content-Type': 'image/png'})
     expect(scope).to.exist
 
-    config = await Config.temp()
+    config = await FileConfig.temp()
     expect(config).to.exist
   })
 

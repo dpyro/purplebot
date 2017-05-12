@@ -2,14 +2,14 @@ import 'babel-polyfill'
 import { expect } from 'chai'
 
 import { init } from '../src/bot'
-import Config from '../src/config'
+import { MemConfig } from '../src/config'
 
 describe('command', function () {
   let bot, config
   const channel = '#test'
 
   before(function () {
-    config = Config.memory()
+    config = new MemConfig()
     config.set('plugins', false)
   })
 

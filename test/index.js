@@ -9,7 +9,7 @@ describe('index', function () {
     return new Promise(function (resolve) {
       exec('npm start -- --help', (error, stdout, stderr) => {
         expect(error).to.not.exist
-        expect(stdout + stderr).to.have.a.string('help')
+        expect(stdout + stderr).to.have.string('help')
         resolve()
       })
     })

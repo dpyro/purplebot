@@ -4,6 +4,7 @@ import { expect } from 'chai'
 import streamBuffers from 'stream-buffers'
 import _ from 'lodash'
 
+import { MemConfig } from '../src/config'
 import LoggingPlugin from '../plugins/logging'
 
 /**
@@ -68,7 +69,7 @@ describe('plugin: logging', function () {
 
     expect(logger).to.exist
 
-    await logger.load(emitter, output)
+    await logger.load(emitter, new MemConfig())
   })
 
   const tests = eventTests()
@@ -82,7 +83,7 @@ describe('plugin: logging', function () {
 
       _.flatMapDeep(args, arg => {
         return (typeof arg !== 'string') ? _.values(arg) : arg
-      }).forEach((arg) => {
+      }).forEach(arg => {
         expect(line).to.have.string(arg)
       })
     })

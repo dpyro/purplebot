@@ -7,7 +7,7 @@ import 'babel-polyfill'
 import Database from '../src/sqlite'
 import * as _ from 'lodash'
 
-import Config from '../src/config'
+import Config, { FileConfig } from '../src/config'
 import PurpleBot from '../src/bot'
 import { Plugin } from '../src/plugins'
 
@@ -20,7 +20,7 @@ export default class DictPlugin implements Plugin {
   readonly name = 'dict'
 
   bot: PurpleBot
-  config: Config
+  config: FileConfig
   databasePath: string
   db: Database
 
@@ -28,13 +28,11 @@ export default class DictPlugin implements Plugin {
    * Asynchronously loads the needed resources for this plugin.
    */
   async load (bot: PurpleBot, config: Config): Promise<void> {
+    if (!(config instanceof FileConfig)) throw new Error()
+
     this.bot = bot
     this.config = config
     this.databasePath = this.config.path('dict.db')
-
-    if (this.databasePath == null) {
-      throw new Error()
-    }
 
     await this.loadDatabase()
 
@@ -96,7 +94,7 @@ export default class DictPlugin implements Plugin {
   /**
    * Adds a value for `key`.
    */
-  async add (key: string, value: string, user: string = null) {
+  async add (key: string, value: string, user?: string) {
     const sql = 'INSERT INTO dict (key, value, user) VALUES (?, ?, ?)'
     await this.db.run(sql, key, value, user)
   }

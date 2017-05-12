@@ -2,7 +2,7 @@ import 'babel-polyfill'
 import { expect } from 'chai'
 
 import { init } from '../src/bot'
-import Config from '../src/config'
+import { MemConfig } from '../src/config'
 
 describe('bot', function () {
   this.timeout(5000)
@@ -10,7 +10,7 @@ describe('bot', function () {
   let bot, config
 
   before(function () {
-    config = Config.memory()
+    config = new MemConfig()
     config.set('plugins', false)
   })
 

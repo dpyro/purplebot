@@ -6,7 +6,7 @@
 import 'babel-polyfill'
 import * as fs from 'fs-extra'
 
-import Config from '../src/config'
+import Config, { FileConfig } from '../src/config'
 import PurpleBot from '../src/bot'
 import { Plugin } from '../src/plugins'
 import Database from '../src/sqlite'
@@ -18,7 +18,7 @@ export default class KarmaPlugin implements Plugin {
   readonly name = 'karma'
 
   bot: PurpleBot
-  config: Config
+  config: FileConfig
   databasePath: string /* Path to the Karma database. */
   db: Database
 
@@ -26,6 +26,8 @@ export default class KarmaPlugin implements Plugin {
    * Asynchronously loads the database.
    */
   async load (bot: PurpleBot, config: Config): Promise<void> {
+    if (!(config instanceof FileConfig)) throw new Error()
+
     this.bot = bot
     this.config = config
     this.databasePath = this.config.path('karma.db')
@@ -91,7 +93,7 @@ export default class KarmaPlugin implements Plugin {
    *
    * @returns the updated number of points
    */
-  async updateBy (name: string, points: number): Promise<number> {
+  async updateBy (name: string, points: number): Promise<number|null> {
     if (!points || this.db == null) return null
 
     await this.db.exec('BEGIN')
@@ -112,7 +114,7 @@ export default class KarmaPlugin implements Plugin {
     return result.points
   }
 
-  async top (limit: number = 5): Promise<any[]> {
+  async top (limit: number = 5): Promise<any[]|null> {
     if (this.db == null) return null
 
     const sql = 'SELECT * FROM karma_view LIMIT ?'

@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import { EventEmitter } from 'events'
 import _ from 'lodash'
 
-import Config from '../src/config'
+import { FileConfig } from '../src/config'
 import DictPlugin from '../plugins/dict'
 
 describe('plugin: dict', function () {
@@ -14,7 +14,7 @@ describe('plugin: dict', function () {
   const channel = '#test'
 
   before(async function () {
-    config = await Config.temp()
+    config = await FileConfig.temp()
     expect(config).to.exist
   })
 

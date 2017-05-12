@@ -15,10 +15,10 @@ import * as yargs from 'yargs'
 
 import { init } from './bot'
 import Cli from './cli'
-import Config from './config'
+import { FileConfig } from './config'
 
 if (require.main === module) {
-  const config = Config.automatic()
+  const config = FileConfig.automatic()
 
   if (yargs.argv.help) {
     yargs.showHelp()

@@ -3,7 +3,7 @@ import { expect } from 'chai'
 
 import MockIrcd from './mock/ircd'
 import { init } from '../src/bot'
-import Config from '../src/config'
+import { FileConfig } from '../src/config'
 
 const nick = 'testnick'
 const channel = '#test'
@@ -42,7 +42,7 @@ describe('mock ircd', function () {
     expect(ircd).to.exist
     const socket = ircd.socket
 
-    config = await Config.temp()
+    config = await FileConfig.temp()
     await config.set('server', socket)
     await config.set('socket', true)
 
