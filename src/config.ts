@@ -180,7 +180,7 @@ export class FileConfig extends Config {
   /**
    * Returns a path rooted in the config directory.
    */
-  path (...args: string[]): string {
+  directory (...args: string[]): string {
     return path.join(this.configDirPath, ...args)
   }
 

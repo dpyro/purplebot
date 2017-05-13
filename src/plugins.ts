@@ -94,3 +94,11 @@ export default async function loadPlugins (bot: PurpleBot, config: Config): Prom
 
   return plugins
 }
+
+export async function resetPlugins (plugins: Plugin[]): Promise<void[]> {
+  return Promise.all(plugins.map(plugin => {
+    if (typeof plugin.reset === 'function') {
+      return plugin.reset()
+    }
+  }))
+}

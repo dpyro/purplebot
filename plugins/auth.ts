@@ -8,7 +8,7 @@ import PurpleBot from '../src/bot'
 import Config from '../src/config'
 
 /**
- * Plugin to authenticate with NickServ
+ * Plugin to authenticate with NickServ.
  */
 export default class AuthPlugin implements Plugin {
   readonly name = 'auth'
@@ -16,6 +16,9 @@ export default class AuthPlugin implements Plugin {
   bot: PurpleBot
   config: Config
 
+  /**
+   * @listens connect
+   */
   async load (bot: PurpleBot, config: Config): Promise<void> {
     this.bot = bot
     this.config = config

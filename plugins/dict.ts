@@ -26,13 +26,17 @@ export default class DictPlugin implements Plugin {
 
   /**
    * Asynchronously loads the needed resources for this plugin.
+   *
+   * @listens message#
+   * @listens pm
+   * @listens command
    */
   async load (bot: PurpleBot, config: Config): Promise<void> {
     if (!(config instanceof FileConfig)) throw new Error()
 
     this.bot = bot
     this.config = config
-    this.databasePath = this.config.path('dict.db')
+    this.databasePath = this.config.directory('dict.db')
 
     await this.loadDatabase()
 

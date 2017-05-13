@@ -23,6 +23,8 @@ export default class Cli {
 
   /**
    * Creates an active `Cli` instance.
+   *
+   * @listens line
    */
   constructor (target: PurpleBot,
                input: NodeJS.ReadableStream = process.stdin,
@@ -80,6 +82,14 @@ export default class Cli {
 
   /**
    * Attach listeners to `this.target`.
+   *
+   * @listens error
+   * @listens connect
+   * @listens disconnect
+   * @listens join
+   * @listens names
+   * @listens part
+   * @listens topic
    */
   private attachListeners () {
     this.target.on('error', (message) => {

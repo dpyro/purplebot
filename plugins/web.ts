@@ -11,8 +11,6 @@ import { Plugin } from '../src/plugins'
 import PurpleBot from '../src/bot'
 import Config from '../src/config'
 
-// http://stackoverflow.com/a/17773849/1440740
-const matcher = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/
 
 /**
  * Plugin to snarf URLs and images.
@@ -29,14 +27,20 @@ export default class WebPlugin implements Plugin {
     'webp'
   ]
 
+  // http://stackoverflow.com/a/17773849/1440740
+  matcher = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/
+
   /**
+   * @listens message#
+   * @listens web.link
+   * @listens web.title
    * @fires web.link
    */
   async load (bot: PurpleBot): Promise<void> {
     this.bot = bot
 
     bot.on('message#', (nick, to, text, message) => {
-      const result = matcher.exec(text)
+      const result = this.matcher.exec(text)
       if (result != null) {
         const link = result[0]
         bot.emit('web.link', nick, to, link)
@@ -57,7 +61,9 @@ export default class WebPlugin implements Plugin {
   }
 
   /**
-   * @throws {Error}
+   * @fires web.title
+   * @fires web.image
+   * @throws Error
    */
   handleResponse (response: request.RequestResponse,
                   nick: string,

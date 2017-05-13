@@ -239,6 +239,9 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
 
   /**
    * Installs client hooks.
+   *
+   * @listens message
+   * @fires command
    */
   private installClientHooks (): void {
     this.client.on('message', (nick, to, text: string, message) => {

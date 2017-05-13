@@ -30,7 +30,7 @@ export default class KarmaPlugin implements Plugin {
 
     this.bot = bot
     this.config = config
-    this.databasePath = this.config.path('karma.db')
+    this.databasePath = this.config.directory('karma.db')
     if (this.databasePath == null) {
       throw new Error()
     }
@@ -148,6 +148,12 @@ export default class KarmaPlugin implements Plugin {
 
   /**
    * Install hooks on the bot.
+   *
+   * @listens message#
+   * @listens karma.respond
+   * @listens karma.get
+   * @listens command
+   * @fires karma.get
    */
   private installHooks (): void {
     this.bot.on('message#', (nick, to, text, message) => {

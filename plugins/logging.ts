@@ -133,7 +133,7 @@ export default class LoggingPlugin implements Plugin {
     } else {
       if (!(this.config instanceof FileConfig)) throw new Error()
 
-      const filePath = this.config.path(`${this.bot.server}.log`)
+      const filePath = this.config.directory(`${this.bot.server}.log`)
       await fs.ensureFile(filePath)
       stream = fs.createWriteStream(filePath, { flags: 'a' })
     }
