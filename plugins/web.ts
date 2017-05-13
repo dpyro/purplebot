@@ -11,7 +11,6 @@ import { Plugin } from '../src/plugins'
 import PurpleBot from '../src/bot'
 import Config from '../src/config'
 
-
 /**
  * Plugin to snarf URLs and images.
  */

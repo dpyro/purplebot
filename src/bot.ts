@@ -78,6 +78,15 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
     }
   }
 
+  getPlugin (name: string): Plugin | null {
+    for (const plugin of this.plugins) {
+      if (name === plugin.name) {
+        return plugin
+      }
+    }
+    return null
+  }
+
   /**
    * Connect to the IRC server.
    *

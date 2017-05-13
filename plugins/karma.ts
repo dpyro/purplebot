@@ -81,10 +81,30 @@ export default class KarmaPlugin implements Plugin {
    * Retrieves the karma for a `name` if it exists.
    */
   async get (name: string): Promise<any> {
-    if (this.db == null) return null
+    if (this.db == null) throw new Error('karma: database unavailable')
 
     const sql = 'SELECT * FROM karma_view WHERE name = ?'
     return this.db.get(sql, name)
+  }
+
+  /**
+   * Set the karma for a `name` or delete it if it exists.
+   */
+  async set (name: string, value: number): Promise<void> {
+    if (this.db == null) throw new Error('karma: database unavailable')
+
+    if (value > 0) {
+      const sql = 'UPDATE karma SET increased = ?, decreased = 0 WHERE name = ?'
+      await this.db.run(sql, name, value, name)
+    } else if (value < 0) {
+      const sql = 'UPDATE karma SET increased = 0, decreased = ? WHERE name = ?'
+      await this.db.run(sql, name, value, name)
+    } else {
+      const sql = 'DELETE FROM karma WHERE name = ?'
+      await this.db.run(sql, name, name)
+    }
+
+    this.bot.emit('karma.set', name, value)
   }
 
   /**
@@ -94,7 +114,7 @@ export default class KarmaPlugin implements Plugin {
    * @returns the updated number of points
    */
   async updateBy (name: string, points: number): Promise<number|null> {
-    if (!points || this.db == null) return null
+    if (this.db == null) throw new Error('karma: database unavailable')
 
     await this.db.exec('BEGIN')
 
@@ -111,11 +131,13 @@ export default class KarmaPlugin implements Plugin {
 
     await this.db.exec('END')
 
+    this.bot.emit('karma.update', name, points)
+
     return result.points
   }
 
   async top (limit: number = 5): Promise<any[]|null> {
-    if (this.db == null) return null
+    if (this.db == null) throw new Error('karma: database unavailable')
 
     const sql = 'SELECT * FROM karma_view LIMIT ?'
     const results = await this.db.all(sql, limit)
@@ -130,7 +152,7 @@ export default class KarmaPlugin implements Plugin {
    * @fires karma.respond
    */
   async handleMessage (nick: string, to: string, text: string): Promise<void> {
-    const result = /(\w+)(\+\+|--)(\d*)(?!\w)/.exec(text)
+    const result = /\s*([\w ]+)(\+\+|--)(\d*)(?!\w)/.exec(text)
     if (result === null) return
 
     const term = result[1]
@@ -152,6 +174,7 @@ export default class KarmaPlugin implements Plugin {
    * @listens message#
    * @listens karma.respond
    * @listens karma.get
+   * @listens karma.set
    * @listens command
    * @fires karma.get
    */
@@ -172,21 +195,52 @@ export default class KarmaPlugin implements Plugin {
       }
     })
 
-    this.bot.on('command', async (context, command, ...args) => {
+    this.bot.on('karma.set', (nick, to, term, value) => {
+      this.respond(nick, to, term, value)
+    })
+
+    this.bot.on('command', async (context, command, ...args: string[]) => {
       if (command.toLowerCase() !== 'karma') return
 
-      if (args.length < 1) {
+      if (args.length === 0) {
         // TODO: print usage or help
         return
       }
 
-      const term = args.shift()
-      const result = await this.get(term)
-      const { nick, to } = context
-
-      const karma = (result != null) ? result.points : null
-      this.bot.emit('karma.get', nick, to, term, karma)
+      // TODO: handle quoted args here as term
+      const term = args.shift() as string
+      if (term.toLowerCase() === 'set') {
+        if (args.length === 0 || isNaN(Number(args[0]))) {
+          // TODO: print usage or help
+          return
+        }
+        const value = Number(args.shift())
+        await this.handleCommandSet(context, term, value)
+      } else {
+        await this.handleCommandInfo(context, term)
+      }
     })
+  }
+
+  /**
+   * @fires karma.get
+   */
+  private async handleCommandInfo (context, term: string): Promise<void> {
+    const result = await this.get(term)
+    const { nick, to } = context
+
+    const karma = (result != null) ? result.points : null
+    this.bot.emit('karma.get', nick, to, term, karma)
+  }
+
+  /**
+   * @fires karma.set
+   */
+  private async handleCommandSet (context, term: string, value: number): Promise<void> {
+    const result = await this.set(term, value)
+    const { nick, to } = context
+
+    this.bot.emit('karma.set', nick, to, term, value)
   }
 
   private async loadDatabase (): Promise<void> {
@@ -194,9 +248,14 @@ export default class KarmaPlugin implements Plugin {
       CREATE TABLE IF NOT EXISTS karma (
         id        INTEGER PRIMARY KEY,
         name      TEXT    NOT NULL UNIQUE COLLATE NOCASE,
+        hostmask  TEXT CHECK (hostmask IS NULL OR hostmask GLOB "*@*"),
         increased INTEGER NOT NULL DEFAULT 0 CHECK (increased >= 0),
         decreased INTEGER NOT NULL DEFAULT 0 CHECK (decreased >= 0)
       );
+
+      CREATE UNIQUE INDEX IF NOT EXISTS karma_hostmask
+        ON karma(hostmask)
+        WHERE hostmask IS NOT NULL;
 
       CREATE VIEW IF NOT EXISTS karma_view AS
         SELECT *, increased-decreased AS points

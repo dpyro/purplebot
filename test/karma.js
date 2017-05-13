@@ -1,8 +1,8 @@
 import 'babel-polyfill'
 import { expect } from 'chai'
-import { EventEmitter } from 'events'
 
 import { FileConfig } from '../src/config'
+import { init } from '../src/bot'
 import KarmaPlugin from '../plugins/karma'
 
 describe('plugin: karma', async function () {
@@ -10,7 +10,7 @@ describe('plugin: karma', async function () {
 
   const nick = 'chameleon'
   const channel = '#test'
-  let emitter, plugin, config
+  let bot, plugin, config
 
   before(async function () {
     config = await FileConfig.temp()
@@ -18,11 +18,10 @@ describe('plugin: karma', async function () {
 
   // TODO: use custom test config
   beforeEach(async function () {
-    emitter = new EventEmitter()
-
-    plugin = new KarmaPlugin()
-    await plugin.load(emitter, config)
+    bot = await init(config)
+    plugin = bot.getPlugin('karma')
     expect(plugin).to.exist
+    expect(plugin).to.be.instanceOf(KarmaPlugin)
 
     const output = await plugin.top()
     expect(output).to.be.empty
@@ -31,7 +30,7 @@ describe('plugin: karma', async function () {
   afterEach(async function () {
     await plugin.reset()
     plugin = null
-    emitter = null
+    bot = null
   })
 
   after(async function () {
@@ -49,31 +48,61 @@ describe('plugin: karma', async function () {
     expect(result).to.not.exist
   })
 
-  const checkValid = (name, message, result) => {
+  function checkValid (name, message, term, result) {
     it(`${name}: "${message}"`, function (done) {
-      emitter.on('karma.respond', (fromNick, to, term, karma) => {
+      let toCheck = 2
+
+      bot.on('karma.respond', (fromNick, to, term, karma) => {
         try {
           expect(fromNick).to.equal(nick)
           expect(to).to.equal(channel)
-          expect(term).to.equal('term')
+          expect(term).to.equal(term)
           expect(karma).to.equal(result)
-          done()
+
+          toCheck--
+          if (toCheck === 0) {
+            done()
+          }
         } catch (error) {
           done(error)
         }
       })
 
-      emitter.emit('message#', nick, channel, message)
+      bot.on('self', (to, text) => {
+        try {
+          expect(to).to.equal(channel)
+          expect(text).to.contain(term)
+
+          toCheck--
+          if (toCheck === 0) {
+            done()
+          }
+        } catch (err) {
+          done(err)
+        }
+      })
+
+      bot.emit('message#', nick, channel, message)
     })
   }
 
-  const increments = ['term++', ' term++', 'term++ ', 'this term++']
-  for (const increment of increments) {
-    checkValid('increments', increment, 1)
+  const increments = [
+    ['test++', 'test'],
+    [' test++', 'test'],
+    ['test++ ', 'test'],
+    ['this test++', 'this test']
+  ]
+  for (const [message, term] of increments) {
+    checkValid('increments', message, term, 1)
   }
 
-  const decrements = ['term--', ' term--', 'term-- ', 'another term--']
-  for (const decrement of decrements) {
-    checkValid('decrements', decrement, -1)
+  const decrements = [
+    ['test--', 'test'],
+    [' test--', 'test'],
+    ['test-- ', 'test'],
+    ['another test--', 'another test']
+  ]
+  for (const [message, term] of decrements) {
+    checkValid('decrements', message, term, -1)
   }
 })

@@ -9,6 +9,7 @@
   - [ ] .karma set / clear
   - [x] thing++ / ++thing
   - [x] thing-- / --thing
+  - [ ] if nick, attach karma to account
 - [ ] dict
   - [ ] .learn
   - [ ] .info
