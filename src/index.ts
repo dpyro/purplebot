@@ -18,7 +18,7 @@ import Cli from './cli'
 import { FileConfig } from './config'
 
 if (require.main === module) {
-  const config = FileConfig.automatic()
+  const config = FileConfig.standard()
 
   if (yargs.argv.help) {
     yargs.showHelp()

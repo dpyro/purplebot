@@ -15,12 +15,17 @@ import PurpleBot from './bot'
  */
 export interface Plugin {
   /**
-   * Asynchronously loads the resources for this plugin.
+   * Plugin name used for identification and configuration.
+   */
+  readonly name: string
+
+  /**
+   * Asynchronously load the resources for this plugin.
    */
   load? (bot: PurpleBot, config: Config): Promise<void>
 
   /**
-   * Resets the data.
+   * Reset the plugin's data.
    */
   reset? (): Promise<void>
 }
@@ -30,6 +35,8 @@ async function readdir (dirPath): Promise<string[]> {
 }
 
 /**
+ * Load a plugin from a file.
+ *
  * @throws {Error}
  */
 async function loadPlugin (pluginFile: string,
@@ -64,7 +71,7 @@ async function loadPlugin (pluginFile: string,
 }
 
 /**
- * Synchronously fetch the available plugins.
+ * Fetch available plugins.
  */
 export default async function loadPlugins (bot: PurpleBot, config: Config): Promise<Plugin[]> {
   const dirname = path.join(__dirname, '..', 'plugins')

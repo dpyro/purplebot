@@ -260,6 +260,9 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
   }
 }
 
+/**
+ * Create and load a `PurpleBot` with the given configuration.
+ */
 export async function init (config?: Config): Promise<PurpleBot> {
   const bot = new PurpleBot()
   await bot.load(config)

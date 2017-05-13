@@ -11,6 +11,9 @@ export default abstract class Config {
     this.nconf = new nconf.Provider({})
   }
 
+  /**
+   * Asynchronously delete all the keys.
+   */
   async clear (): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.nconf.reset((err) => {
@@ -23,6 +26,9 @@ export default abstract class Config {
     })
   }
 
+  /**
+   * Asynchronously retrieve the value for a given `key`.
+   */
   async get (key: string): Promise<any> {
     return new Promise<any>((resolve, reject) => {
       (this.nconf.get as (err, result) => void)(key, (err, result) => {
@@ -35,6 +41,9 @@ export default abstract class Config {
     })
   }
 
+  /**
+   * Asynchronously store `value` for a given `key`.
+   */
   async set (key: string, value: any): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.nconf.set(key, value, (err) => {
@@ -62,13 +71,15 @@ export class MemConfig extends Config {
   }
 }
 
+/**
+ * Configuration and data from disk.
+ */
 export class FileConfig extends Config {
   static configFileName = 'config.json'
   configDirPath: string
-  nconf: nconf.Provider
 
   /**
-   * Creates an instance of Conf.
+   * Create an instance of Config.
    */
   private constructor (configDirPath: string) {
     super()
@@ -80,7 +91,19 @@ export class FileConfig extends Config {
     return path.join(os.homedir(), '.purplebot')
   }
 
-  static automatic (): Config {
+  /**
+   * Creates a `Config` from the a given path to a configuration,
+   * or from the user directory if none is given.
+   */
+  static standard (configDirPath?: string): FileConfig {
+    if (configDirPath != null) {
+      const config = new FileConfig(configDirPath)
+      config.nconf
+        .env()
+        .file('file', config.configFilePath)
+      return config
+    }
+
     const yargsOptions = {
       'c': {
         alias: 'channels',
@@ -118,18 +141,10 @@ export class FileConfig extends Config {
     return config
   }
 
-  static path (configDirPath: string): Config {
-    const config = new FileConfig(configDirPath)
-    config.nconf
-      .env()
-      .file('file', config.configFilePath)
-    return config
-  }
-
   /**
    * Creates a temporary config directory.
    */
-  static async temp (): Promise<Config> {
+  static async temp (): Promise<FileConfig> {
     const prefix = path.join(os.tmpdir(), 'purplebot-')
     const configDir = fs.mkdtempSync(prefix)
     const config = new FileConfig(configDir)
@@ -176,6 +191,9 @@ export class FileConfig extends Config {
     return path.join(this.configDirPath, 'config.json')
   }
 
+  /**
+   * Load the configuration from disk.
+   */
   async load (): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.nconf.load(err => {
@@ -188,6 +206,9 @@ export class FileConfig extends Config {
     })
   }
 
+  /**
+   * Store the current configuration to disk.
+   */
   async save (): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.nconf.save('file', err => {
@@ -201,6 +222,6 @@ export class FileConfig extends Config {
   }
 
   toString () {
-    return `[FileConfig ${this.configDirPath}]`
+    return `[FileConfig ${this.configFilePath}]`
   }
 }

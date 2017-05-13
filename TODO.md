@@ -2,7 +2,7 @@
 
 ## Features
 
-- [ ] autologin
+- [x] autologin
 - [x] logging
 - [ ] karma
   - [x] .karma
@@ -15,12 +15,12 @@
   - [ ] .forget
   - [x] thing?
   - [ ] save images
-- [ ] list
-  - [ ] .list create \<name\>
-  - [ ] .list delete \<name\>
-  - [ ] .list add \<name\> \<value\>
-  - [ ] .list remove \<name\> \<value\>
-- [ ] web
+- [.] list
+  - [.] .list create \<name\>
+  - [.] .list delete \<name\>
+  - [.] .list add \<name\> \<value\>
+  - [.] .list remove \<name\> \<value\>
+- [.] web
   - [x] url snarfer
   - [.] log links
   - [.] show last link sent by user
