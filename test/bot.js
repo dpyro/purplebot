@@ -19,7 +19,7 @@ describe('bot', function () {
     expect(bot).to.exist
   })
 
-  it('forwardClientEvent(): 1 ', done => {
+  it('forwardClientEvent() (1)', function (done) {
     bot.on('testout', (arg) => {
       expect(arg).to.equal('arg')
       done()
@@ -29,7 +29,7 @@ describe('bot', function () {
     expect(bot.client.emit('test1', 'arg')).is.true
   })
 
-  it('forwardClientEvent(): 2', done => {
+  it('forwardClientEvent() (2)', function (done) {
     bot.on('testout', (arg) => {
       expect(arg).to.equal('arg')
       done()

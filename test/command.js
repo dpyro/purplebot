@@ -23,27 +23,21 @@ describe('command', function () {
   }
 
   async function validateCommandResult (argResults, message) {
-    let error
-
-    bot.on('command', (context, command, ...args) => {
-      try {
-        expect(context).to.exist
-        expect(context.nick).to.exist
-        expect(context.to).to.exist
-        expect(command).to.equal('test')
-        expect(args).to.deep.equal(argResults)
-      } catch (err) {
-        error = err
-      }
-    })
-
     return new Promise((resolve, reject) => {
-      emitMessage(message)
+      bot.on('command', (context, command, ...args) => {
+        try {
+          expect(context).to.exist
+          expect(context.nick).to.exist
+          expect(context.to).to.exist
+          expect(command).to.equal('test')
+          expect(args).to.deep.equal(argResults)
+          resolve()
+        } catch (err) {
+          reject(err)
+        }
+      })
 
-      if (error) {
-        reject(error)
-      }
-      resolve()
+      emitMessage(message)
     })
   }
 
@@ -59,7 +53,7 @@ describe('command', function () {
     return validateCommandResult(['arg'], ' .test    arg ')
   })
 
-  async function expectNoEvent (bot, event, message) {
+  async function expectNoEvent (event, message) {
     let error
 
     bot.on(event, (nick, command, ...args) => {
@@ -77,14 +71,14 @@ describe('command', function () {
   }
 
   it('ignores empty command', function () {
-    return expectNoEvent(bot, 'command', '.')
+    return expectNoEvent('command', '.')
   })
 
   it('ignores ellipses', function () {
-    return expectNoEvent(bot, 'command', '...')
+    return expectNoEvent('command', '...')
   })
 
   it('ignores ellipses with whitespace', function () {
-    return expectNoEvent(bot, 'command', ' ...  ')
+    return expectNoEvent('command', ' ...  ')
   })
 })

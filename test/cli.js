@@ -19,12 +19,11 @@ describe('cli', function () {
 
     input = new streamBuffers.ReadableStreamBuffer()
     output = new streamBuffers.WritableStreamBuffer()
-
     cli = new Cli(bot, input, output)
 
-    expect(cli).to.exist
     expect(input).to.exist
     expect(output).to.exist
+    expect(cli).to.exist
   })
 
   it('runs command callback', function (done) {

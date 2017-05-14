@@ -118,4 +118,10 @@ describe('plugin: karma', async function () {
   it('decrements: "test----"', async function () {
     await checkValid('test----', 'test', -3)
   })
+
+  it('.karma info')
+
+  it('.karma set')
+
+  it('.karma clear')
 })

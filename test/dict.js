@@ -90,7 +90,7 @@ describe('plugin: dict', function () {
   })
 
   async function testResponse (text, key, value) {
-    const p = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       emitter.on('dict.respond', (fromNick, to, name, fromValue) => {
         try {
           expect(fromNick).to.equal(nick)
@@ -102,11 +102,9 @@ describe('plugin: dict', function () {
           reject(err)
         }
       })
+
+      emitter.emit('message#', nick, channel, text)
     })
-
-    emitter.emit('message#', nick, channel, text)
-
-    return p
   }
 
   const tests = {
