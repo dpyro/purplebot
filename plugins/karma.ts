@@ -15,6 +15,8 @@ import Database from '../src/sqlite'
  * Plugin for tracking karma.
  */
 export default class KarmaPlugin implements Plugin {
+  static matchModify: RegExp = /\s*([\w ]+)(\+{2,}|-{2,})(\d*)(?!\w)/
+
   readonly name = 'karma'
 
   bot: PurpleBot
@@ -89,6 +91,8 @@ export default class KarmaPlugin implements Plugin {
 
   /**
    * Set the karma for a `name` or delete it if it exists.
+   *
+   * @fires karma.set
    */
   async set (name: string, value: number): Promise<void> {
     if (this.db == null) throw new Error('karma: database unavailable')
@@ -112,6 +116,7 @@ export default class KarmaPlugin implements Plugin {
    * The `name` will be automatically created if it does not already exist.
    *
    * @returns the updated number of points
+   * @fires karma.update
    */
   async updateBy (name: string, points: number): Promise<number> {
     if (this.db == null) throw new Error('karma: database unavailable')
@@ -144,24 +149,6 @@ export default class KarmaPlugin implements Plugin {
     return results.map(({ name, increased, decreased, points }, index) => {
       return { index, name, increased, decreased, points }
     })
-  }
-
-  /**
-   * Responds to `message#` from the client.
-   *
-   * @fires karma.respond
-   */
-  async handleMessage (nick: string, to: string, text: string): Promise<void> {
-    const result = /\s*([\w ]+)(\+\+|--)(\d*)(?!\w)/.exec(text)
-    if (result === null) return
-
-    const term = result[1]
-    const dir = (result[2][0] === '-') ? -1 : +1
-    const points = (result[3] != null) ? Number.parseInt(result[3]) || 1 : 1
-
-    const karma = await this.updateBy(term, dir * points)
-
-    this.bot.emit('karma.respond', nick, to, term, karma)
   }
 
   toString (): string {
@@ -214,12 +201,41 @@ export default class KarmaPlugin implements Plugin {
           // TODO: print usage or help
           return
         }
+
         const value = Number(args.shift())
+        if (isNaN(value) || value === null) {
+          // TODO: print usage
+          return
+        }
+
         await this.handleCommandSet(context, term, value)
       } else {
         await this.handleCommandInfo(context, term)
       }
     })
+  }
+
+  /**
+   * Responds to `message#` from the client.
+   *
+   * @fires karma.respond
+   */
+  private async handleMessage (nick: string, to: string, text: string): Promise<void> {
+    const result = KarmaPlugin.matchModify.exec(text)
+    if (result === null) return
+
+    const term = result[1]
+    const dir = (result[2][0] === '-') ? -1 : +1
+    let points = dir
+
+    if (result[3] != null && result[3] !== '') {
+      points *= Number.parseInt(result[3])
+    } else {
+      points *= Math.min(1, result[2].length - 1)
+    }
+    const karma = await this.updateBy(term, points)
+
+    this.bot.emit('karma.respond', nick, to, term, karma)
   }
 
   /**

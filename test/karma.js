@@ -2,7 +2,7 @@ import 'babel-polyfill'
 import { expect } from 'chai'
 
 import { FileConfig } from '../src/config'
-import { init } from '../src/bot'
+import PurpleBot, { init } from '../src/bot'
 import KarmaPlugin from '../plugins/karma'
 
 describe('plugin: karma', async function () {
@@ -19,6 +19,7 @@ describe('plugin: karma', async function () {
   // TODO: use custom test config
   beforeEach(async function () {
     bot = await init(config)
+    expect(bot).to.be.instanceOf(PurpleBot)
     plugin = bot.getPlugin('karma')
     expect(plugin).to.exist
     expect(plugin).to.be.instanceOf(KarmaPlugin)
@@ -48,10 +49,8 @@ describe('plugin: karma', async function () {
     expect(result).to.not.exist
   })
 
-  function checkValid (name, message, term, result) {
-    it(`${name}: "${message}"`, function (done) {
-      let toCheck = 2
-
+  async function checkValid (message, term, result) {
+    return new Promise((resolve, reject) => {
       bot.on('karma.respond', (fromNick, to, term, karma) => {
         try {
           expect(fromNick).to.equal(nick)
@@ -59,12 +58,9 @@ describe('plugin: karma', async function () {
           expect(term).to.equal(term)
           expect(karma).to.equal(result)
 
-          toCheck--
-          if (toCheck === 0) {
-            done()
-          }
-        } catch (error) {
-          done(error)
+          resolve()
+        } catch (err) {
+          reject(err)
         }
       })
 
@@ -73,12 +69,9 @@ describe('plugin: karma', async function () {
           expect(to).to.equal(channel)
           expect(text).to.contain(term)
 
-          toCheck--
-          if (toCheck === 0) {
-            done()
-          }
+          resolve()
         } catch (err) {
-          done(err)
+          reject(err)
         }
       })
 
@@ -93,8 +86,18 @@ describe('plugin: karma', async function () {
     ['this test++', 'this test']
   ]
   for (const [message, term] of increments) {
-    checkValid('increments', message, term, 1)
+    it(`increments: "${message}"`, async function () {
+      await checkValid(message, term, 1)
+    })
   }
+
+  it(`increments: "test++99"`, async function () {
+    await checkValid('test++9', 'test', 99)
+  })
+
+  it(`increments: "test++++"`, async function () {
+    await checkValid('test++++', 'test', 3)
+  })
 
   const decrements = [
     ['test--', 'test'],
@@ -103,6 +106,16 @@ describe('plugin: karma', async function () {
     ['another test--', 'another test']
   ]
   for (const [message, term] of decrements) {
-    checkValid('decrements', message, term, -1)
+    it(`decrements: "${message}"`, async function () {
+      await checkValid(message, term, -1)
+    })
   }
+
+  it(`decrements: "test--99"`, async function () {
+    await checkValid('test--9', 'test', -99)
+  })
+
+  it(`decrements: "test----"`, async function () {
+    await checkValid('test----', 'test', -3)
+  })
 })
