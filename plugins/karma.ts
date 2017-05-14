@@ -15,7 +15,7 @@ import Database from '../src/sqlite'
  * Plugin for tracking karma.
  */
 export default class KarmaPlugin implements Plugin {
-  static matchModify: RegExp = /\s*([\w ]+)(\+{2,}|-{2,})(\d*)(?!\w)/
+  static matchModify = /\s*([\w ]+)(\+{2,}|-{2,})(\d*)(?!\w)/
 
   readonly name = 'karma'
 

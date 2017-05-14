@@ -96,7 +96,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
     return new Promise<string>((resolve, reject) => {
       this.client.connect(() => {
         this.emit('connect', this.server)
-        return resolve(this.server)
+        resolve(this.server)
       })
     })
   }
@@ -126,7 +126,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
     return new Promise<string>((resolve, reject) => {
       this.client.join(channel, () => {
         this.emit('join', channel)
-        return resolve(channel)
+        resolve(channel)
       })
     })
   }

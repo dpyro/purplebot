@@ -111,11 +111,11 @@ describe('plugin: karma', async function () {
     })
   }
 
-  it(`decrements: "test--99"`, async function () {
+  it('decrements: "test--99"', async function () {
     await checkValid('test--9', 'test', -99)
   })
 
-  it(`decrements: "test----"`, async function () {
+  it('decrements: "test----"', async function () {
     await checkValid('test----', 'test', -3)
   })
 })

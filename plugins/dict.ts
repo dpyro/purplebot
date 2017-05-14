@@ -17,6 +17,8 @@ import { Plugin } from '../src/plugins'
  * You may use it as a terms dictionary.
  */
 export default class DictPlugin implements Plugin {
+  static matchQuery = /\s*([\w- ]*[\w-]+?)\?+\s*$/
+
   readonly name = 'dict'
 
   bot: PurpleBot
@@ -63,7 +65,7 @@ export default class DictPlugin implements Plugin {
    * @fires dict.respond
    */
   async handleMessage (nick: string, to: string, text: string): Promise<void> {
-    const result = /\s*([\w- ]*[\w-]+?)\?+\s*$/.exec(text)
+    const result = DictPlugin.matchQuery.exec(text)
     if (result == null) return
 
     const key = result[1]

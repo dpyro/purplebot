@@ -47,7 +47,7 @@ describe('plugin: web', function () {
     expect(bot.client.emit('message#', 'someone', channel, link)).is.true
   }
 
-  async function validateResult (test) {
+  async function validateUrlResult (url) {
     return new Promise((resolve, reject) => {
       bot.on('self', (target, text) => {
         try {
@@ -59,48 +59,48 @@ describe('plugin: web', function () {
         }
       })
 
-      test()
+      emitUrl(url)
     })
   }
 
-  async function expectNoEvent (event, test) {
+  async function expectNoUrlEvent (event, url) {
     return new Promise((resolve, reject) => {
       bot.on(event, (nick, to, link) => {
         reject(new Error(`Expected no emit for event ${event}`))
       })
 
-      test()
+      emitUrl(url)
 
       resolve()
     })
   }
 
   it('does not emit on invalid link', function () {
-    return expectNoEvent('web.link', () => emitUrl('http://:example.local/valid'))
+    return expectNoUrlEvent('web.link', 'http://:example.local/valid')
   })
 
   it('title for valid link', function () {
-    return validateResult(() => emitUrl('http://example.local/valid'))
+    return validateUrlResult('http://example.local/valid')
   })
 
   it('title for valid link (html4)', function () {
-    return validateResult(() => emitUrl('http://example.local/valid4'))
+    return validateUrlResult('http://example.local/valid4')
   })
 
   it('ignores erroneous replies', function () {
-    return expectNoEvent('self', () => emitUrl('http://example.local/error'))
+    return expectNoUrlEvent('self', 'http://example.local/error')
   })
 
   it('follows redirect', function () {
-    return validateResult(() => emitUrl('http://example.local/redirect'))
+    return validateUrlResult('http://example.local/redirect')
   })
 
   it('ignores erroneous redirect', function () {
-    return expectNoEvent('self', () => emitUrl('http://example.local/redirect/error'))
+    return expectNoUrlEvent('self', 'http://example.local/redirect/error')
   })
 
   it('image', function () {
-    return expectNoEvent('self', () => emitUrl('http://example.local/image'))
+    return expectNoUrlEvent('self', 'http://example.local/image')
   })
 
   it('ignores timeout')
@@ -110,8 +110,6 @@ describe('plugin: web', function () {
       .get('/valid')
       .replyWithFile(200, join(__dirname, '/fixtures/valid.html'))
 
-    return validateResult(() => {
-      emitUrl('https://example.local/valid')
-    })
+    return validateUrlResult('https://example.local/valid')
   })
 })

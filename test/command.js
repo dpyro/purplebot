@@ -22,7 +22,7 @@ describe('command', function () {
     expect(bot.client.emit('message', 'someone', channel, text)).is.true
   }
 
-  async function validateCommandResult (argResults, test) {
+  async function validateCommandResult (argResults, message) {
     let error
 
     bot.on('command', (context, command, ...args) => {
@@ -38,34 +38,28 @@ describe('command', function () {
     })
 
     return new Promise((resolve, reject) => {
-      test()
+      emitMessage(message)
 
       if (error) {
-        return reject(error)
+        reject(error)
       }
-      return resolve()
+      resolve()
     })
   }
 
   it('emits', function () {
-    return validateCommandResult([], () => {
-      emitMessage('.test')
-    })
+    return validateCommandResult([], '.test')
   })
 
   it('emits with arg', function () {
-    return validateCommandResult(['arg'], () => {
-      emitMessage('.test arg')
-    })
+    return validateCommandResult(['arg'], '.test arg')
   })
 
   it('emits trimmed whitespace with arg', function () {
-    return validateCommandResult(['arg'], () => {
-      emitMessage(' .test    arg ')
-    })
+    return validateCommandResult(['arg'], ' .test    arg ')
   })
 
-  async function expectNoEvent (bot, event, test) {
+  async function expectNoEvent (bot, event, message) {
     let error
 
     bot.on(event, (nick, command, ...args) => {
@@ -73,30 +67,24 @@ describe('command', function () {
     })
 
     return new Promise((resolve, reject) => {
-      test()
+      emitMessage(message)
 
       if (error) {
-        return reject(error)
+        reject(error)
       }
-      return resolve()
+      resolve()
     })
   }
 
   it('ignores empty command', function () {
-    return expectNoEvent(bot, 'command', () => {
-      emitMessage('.')
-    })
+    return expectNoEvent(bot, 'command', '.')
   })
 
   it('ignores ellipses', function () {
-    return expectNoEvent(bot, 'command', () => {
-      emitMessage('...')
-    })
+    return expectNoEvent(bot, 'command', '...')
   })
 
   it('ignores ellipses with whitespace', function () {
-    return expectNoEvent(bot, 'command', () => {
-      emitMessage(' ...  ')
-    })
+    return expectNoEvent(bot, 'command', ' ...  ')
   })
 })
