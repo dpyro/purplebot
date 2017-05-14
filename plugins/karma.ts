@@ -113,7 +113,7 @@ export default class KarmaPlugin implements Plugin {
    *
    * @returns the updated number of points
    */
-  async updateBy (name: string, points: number): Promise<number|null> {
+  async updateBy (name: string, points: number): Promise<number> {
     if (this.db == null) throw new Error('karma: database unavailable')
 
     await this.db.exec('BEGIN')
@@ -136,7 +136,7 @@ export default class KarmaPlugin implements Plugin {
     return result.points
   }
 
-  async top (limit: number = 5): Promise<any[]|null> {
+  async top (limit: number = 5): Promise<any[]> {
     if (this.db == null) throw new Error('karma: database unavailable')
 
     const sql = 'SELECT * FROM karma_view LIMIT ?'

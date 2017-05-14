@@ -23,18 +23,20 @@ export default class AuthPlugin implements Plugin {
     this.bot = bot
     this.config = config
 
-    bot.on('connect', async (server) => {
-      const nickname = await config.get(`${this.name}:nickname`)
-      if (nickname == null) return false
-      const password = await config.get(`${this.name}:password`)
+    if (await config.get(`auth:enabled`) !== false) {
+      bot.on('connect', async (server) => {
+        const nickname = await config.get(`${this.name}:nick`)
+        if (nickname == null) return false
+        const password = await config.get(`${this.name}:pass`)
 
-      if (password != null) {
-        bot.say('NickServ', `GHOST ${nickname} ${password}`)
-      }
-      bot.setNick(nickname)
-      if (password != null) {
-        bot.say('NickServ', `IDENTIFY ${password}`)
-      }
-    })
+        if (password != null) {
+          bot.say('NickServ', `GHOST ${nickname} ${password}`)
+        }
+        bot.setNick(nickname)
+        if (password != null) {
+          bot.say('NickServ', `IDENTIFY ${password}`)
+        }
+      })
+    }
   }
 }

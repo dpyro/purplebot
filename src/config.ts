@@ -91,6 +91,10 @@ export class FileConfig extends Config {
     return path.join(os.homedir(), '.purplebot')
   }
 
+  static get userPluginDirPath (): string {
+    return path.join(FileConfig.userDirPath, 'plugins')
+  }
+
   /**
    * Creates a `Config` from the a given path to a configuration,
    * or from the user directory if none is given.

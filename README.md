@@ -31,6 +31,18 @@ This project conforms to [JavaScript Standard Style](https://github.com/feross/s
 npm run lint
 ```
 
+## Config
+
+### Settings
+
+- server
+- socket
+- channels
+- auth:enabled
+- auth:nick
+- auth:pass
+- plugins:enabled
+
 ## References
 
 * [RFC 2812](https://tools.ietf.org/html/rfc2812)

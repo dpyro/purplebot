@@ -7,7 +7,7 @@ import * as fs from 'fs-extra'
 import * as path from 'path'
 import * as _ from 'lodash'
 
-import Config from './config'
+import Config, { FileConfig } from './config'
 import PurpleBot from './bot'
 
 /**
@@ -37,11 +37,11 @@ async function readdir (dirPath): Promise<string[]> {
 /**
  * Load a plugin from a file.
  *
- * @throws {Error}
+ * @throws Error
  */
-async function loadPlugin (pluginFile: string,
-                           bot: PurpleBot,
-                           config: Config): Promise<Plugin|null> {
+async function loadPluginFile (pluginFile: string,
+                               bot: PurpleBot,
+                               config: Config): Promise<Plugin|null> {
   const mod: any = require(pluginFile)
   let Klass
   // TODO: verify that this actually works with JS, module.exports = Plugin
@@ -73,16 +73,15 @@ async function loadPlugin (pluginFile: string,
 /**
  * Fetch available plugins.
  */
-export default async function loadPlugins (bot: PurpleBot, config: Config): Promise<Plugin[]> {
-  const dirname = path.join(__dirname, '..', 'plugins')
-  const files = await readdir(dirname)
+export async function loadPluginDirectory (dirPath: string, bot: PurpleBot, config: Config): Promise<Plugin[]> {
+  const files = await readdir(dirPath)
   const filePaths = files.map(file => path.join(__dirname, '..', 'plugins', file))
 
   const plugins: Plugin[] = []
   for (const pluginFile of filePaths) {
     const relativePath = path.relative(__dirname, pluginFile)
     try {
-      const plugin = await loadPlugin(pluginFile, bot, config)
+      const plugin = await loadPluginFile(pluginFile, bot, config)
       if (plugin != null) {
         plugins.push(plugin)
       }
@@ -90,6 +89,22 @@ export default async function loadPlugins (bot: PurpleBot, config: Config): Prom
       console.error(`Warning: could not load plugin ${relativePath}`)
       console.error(err)
     }
+  }
+
+  return plugins
+}
+
+/**
+ * Fetch available plugins.
+ */
+export default async function loadPlugins (bot: PurpleBot, config: Config): Promise<Plugin[]> {
+  const builtinDirPath = path.join(__dirname, '..', 'plugins')
+  const plugins = await loadPluginDirectory(builtinDirPath, bot, config)
+
+  const userPluginDirPath = FileConfig.userPluginDirPath
+  if (await fs.pathExists(userPluginDirPath)) {
+    const userPlugins = await loadPluginDirectory(userPluginDirPath, bot, config)
+    plugins.push(...userPlugins)
   }
 
   return plugins

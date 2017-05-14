@@ -35,6 +35,7 @@
 ## Technical
 
 - [ ] Third-party pubsub for `PurpleBot` events
+- [ ] Convert `server` + `socket` option into `socket://`
 
 ## Testing
 
