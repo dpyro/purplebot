@@ -1,10 +1,13 @@
 import 'babel-polyfill'
 import { expect } from 'chai'
 import { EventEmitter } from 'events'
+import sqlite from 'sqlite3'
 import _ from 'lodash'
 
 import { FileConfig } from '../src/config'
 import DictPlugin from '../plugins/dict'
+
+sqlite.verbose()
 
 describe('plugin: dict', function () {
   this.timeout(3000)

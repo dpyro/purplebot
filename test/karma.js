@@ -1,9 +1,12 @@
 import 'babel-polyfill'
 import { expect } from 'chai'
+import sqlite from 'sqlite3'
 
 import { FileConfig } from '../src/config'
 import PurpleBot, { init } from '../src/bot'
 import KarmaPlugin from '../plugins/karma'
+
+sqlite.verbose()
 
 describe('plugin: karma', async function () {
   this.timeout(4000)
