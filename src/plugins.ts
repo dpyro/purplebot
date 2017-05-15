@@ -39,9 +39,9 @@ async function readdir (dirPath): Promise<string[]> {
  *
  * @throws Error
  */
-async function loadPluginFile (pluginFile: string,
-                               bot: PurpleBot,
-                               config: Config): Promise<Plugin|null> {
+export async function loadPluginFile (pluginFile: string,
+                                      bot: PurpleBot,
+                                      config: Config): Promise<Plugin|null> {
   const mod: any = require(pluginFile)
   let Klass
   // TODO: verify that this actually works with JS, module.exports = Plugin

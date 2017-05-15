@@ -42,6 +42,32 @@ npm run lint
 - auth:pass
 - plugins:enabled
 
+## Plugins
+
+To create a plugin, implement the following interface in either TypeScript or JavaScript in `plugins` or `~/.purplebot/plugins`.
+
+```typescript
+/**
+ * Plugin API.
+ */
+export interface Plugin {
+  /**
+   * Plugin name used for identification and configuration.
+   */
+  readonly name: string
+
+  /**
+   * Asynchronously load the resources for this plugin.
+   */
+  load? (bot: PurpleBot, config: Config): Promise<void>
+
+  /**
+   * Reset the plugin's data.
+   */
+  reset? (): Promise<void>
+}
+```
+
 ## References
 
 * [RFC 2812](https://tools.ietf.org/html/rfc2812)
