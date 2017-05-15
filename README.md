@@ -38,7 +38,6 @@ npm run lint
 - server
 - socket
 - channels
-- auth:enabled
 - auth:nick
 - auth:pass
 - plugins:enabled

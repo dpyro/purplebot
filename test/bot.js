@@ -9,12 +9,10 @@ describe('bot', function () {
 
   let bot, config
 
-  before(function () {
+  beforeEach(async function () {
     config = new MemConfig()
     config.set('plugins', false)
-  })
 
-  beforeEach(async function () {
     bot = await init(config)
     expect(bot).to.exist
   })

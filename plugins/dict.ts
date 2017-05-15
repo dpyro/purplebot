@@ -17,7 +17,7 @@ import { Plugin } from '../src/plugins'
  * You may use it as a terms dictionary.
  */
 export default class DictPlugin implements Plugin {
-  static matchQuery = /\s*([\w- ]*[\w-]+?)\?+\s*$/
+  static matchQuery = /^\s*([\w- ]*[\w-]+?)\?+\s*$/
 
   readonly name = 'dict'
 

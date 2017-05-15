@@ -253,7 +253,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * @fires command
    */
   private installClientHooks (): void {
-    this.client.on('message', (nick, to, text: string, message) => {
+    this.on('message', (nick, to, text: string, message) => {
       const trimmedText = text.trim()
       if (trimmedText.startsWith('.') && trimmedText.substring(1, 2) !== '.') {
         // TODO: accept quoted arguments
@@ -267,6 +267,20 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
             this.emit('command', context, command, ...args)
           }
         }
+      }
+    })
+
+    this.on('connect', async (server) => {
+      const nickname = await this.config.get('auth:nick')
+      if (nickname == null) return false
+      const password = await this.config.get('auth:pass')
+
+      if (password != null && password !== '') {
+        this.say('NickServ', `GHOST ${nickname} ${password}`)
+      }
+      this.setNick(nickname)
+      if (password != null && password !== '') {
+        this.say('NickServ', `IDENTIFY ${password}`)
       }
     })
   }

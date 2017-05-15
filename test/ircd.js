@@ -83,4 +83,33 @@ describe('mock ircd', function () {
     expect(gotTopic).to.be.true
     expect(gotNames).to.be.true
   })
+
+  it('auth', async function () {
+    const nick = 'testnick'
+    const pass = 'testpass'
+    await config.set('auth:nick', nick)
+    await config.set('auth:pass', pass)
+
+    const responses = [
+      `GHOST ${nick} ${pass}`,
+      `IDENTIFY ${pass}`
+    ]
+
+    return new Promise(async (resolve, reject) => {
+      bot.on('self', (to, text) => {
+        try {
+          expect(to).to.equal('NickServ')
+          expect(text).to.equal(responses.shift())
+
+          if (responses.length === 0) {
+            resolve()
+          }
+        } catch (err) {
+          reject(err)
+        }
+      })
+
+      await bot.connect()
+    })
+  })
 })
