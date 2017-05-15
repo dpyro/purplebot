@@ -35,7 +35,8 @@
 ## Technical
 
 - [ ] Third-party pubsub for `PurpleBot` events
-- [ ] Convert `server` + `socket` option into `socket://`
+- [x] Convert `server` + `socket` option into `socket://`
+- [ ] Use something simpler than `nconf`.
 
 ## Testing
 

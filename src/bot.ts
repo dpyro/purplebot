@@ -47,12 +47,10 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
 
     this.debug = !!await this.config.get('debug')
     this.server = await this.config.get('server')
-    this.socket = !!await this.config.get('socket')
     const nick = await this.config.get('nick')
     const channels = await this.config.get('channels')
 
     const clientOptions = {
-      socket: this.socket,
       userName: nick,
       realName: nick,
       channels: channels,

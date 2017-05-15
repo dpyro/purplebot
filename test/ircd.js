@@ -43,8 +43,7 @@ describe('mock ircd', function () {
     const socket = ircd.socket
 
     config = await FileConfig.temp()
-    await config.set('server', socket)
-    await config.set('socket', true)
+    await config.set('server', `socket://${socket}`)
 
     bot = await init(config)
     expect(bot).to.exist
