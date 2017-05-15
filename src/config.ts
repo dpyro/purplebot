@@ -81,7 +81,7 @@ export class FileConfig extends Config {
   /**
    * Create an instance of Config.
    */
-  private constructor (configDirPath: string) {
+  protected constructor (configDirPath: string) {
     super()
 
     this.configDirPath = configDirPath

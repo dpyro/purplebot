@@ -17,14 +17,14 @@ import { Plugin } from '../src/plugins'
  * You may use it as a terms dictionary.
  */
 export default class DictPlugin implements Plugin {
-  static matchQuery = /^\s*([\w- ]*[\w-]+?)\?+\s*$/
-
   readonly name = 'dict'
 
   bot: PurpleBot
   config: FileConfig
   databasePath: string
   db: Database
+
+  protected matchQuery = /^\s*([\w- ]*[\w-]+?)\?+\s*$/
 
   /**
    * Asynchronously loads the needed resources for this plugin.
@@ -52,7 +52,7 @@ export default class DictPlugin implements Plugin {
 
     this.bot.on('command', (context, command, ...args) => {
       if (command.toLowerCase() === 'learn') {
-        this.handleLearnCommand(context, ...args)
+        this.handleLearn(context, ...args)
       }
     })
   }
@@ -62,45 +62,9 @@ export default class DictPlugin implements Plugin {
   }
 
   /**
-   * @fires dict.respond
-   */
-  async handleMessage (nick: string, to: string, text: string): Promise<void> {
-    const result = DictPlugin.matchQuery.exec(text)
-    if (result == null) return
-
-    const key = result[1]
-    const term = await this.value(key)
-    if (term == null) return
-
-    this.bot.emit('dict.respond', nick, to, key, term.value)
-  }
-
-  /**
-   * @fires dict.respond
-   */
-  async handleLearnCommand (context: any, ...args: string[]) {
-    if (args.length < 3) {
-      // TODO: print usage info
-      return
-    }
-
-    const isIndex = _.findIndex(args, arg => arg.toLowerCase() === 'is')
-    if (isIndex < 1 || isIndex === args.length - 1) {
-      // TODO: print usage info
-      return
-    }
-
-    const key = args.slice(0, isIndex).join(' ')
-    const value = args.slice(isIndex + 1).join(' ')
-    await this.add(key, value, context.nick)
-    // TODO: use a specific response
-    this.bot.emit('dict.respond', context.nick, context.to, key, value)
-  }
-
-  /**
    * Adds a value for `key`.
    */
-  async add (key: string, value: string, user?: string) {
+  async add (key: string, value: string, user?: string): Promise<void> {
     const sql = 'INSERT INTO dict (key, value, user) VALUES (?, ?, ?)'
     await this.db.run(sql, key, value, user)
   }
@@ -145,6 +109,42 @@ export default class DictPlugin implements Plugin {
 
   toString (): string {
     return `[DictPlugin ${this.databasePath}]`
+  }
+
+  /**
+   * @fires dict.respond
+   */
+  protected async handleMessage (nick: string, to: string, text: string): Promise<void> {
+    const result = this.matchQuery.exec(text)
+    if (result == null) return
+
+    const key = result[1]
+    const term = await this.value(key)
+    if (term == null) return
+
+    this.bot.emit('dict.respond', nick, to, key, term.value)
+  }
+
+  /**
+   * @fires dict.respond
+   */
+  protected async handleLearn (context: any, ...args: string[]): Promise<void> {
+    if (args.length < 3) {
+      // TODO: print usage info
+      return
+    }
+
+    const isIndex = _.findIndex(args, arg => arg.toLowerCase() === 'is')
+    if (isIndex < 1 || isIndex === args.length - 1) {
+      // TODO: print usage info
+      return
+    }
+
+    const key = args.slice(0, isIndex).join(' ')
+    const value = args.slice(isIndex + 1).join(' ')
+    await this.add(key, value, context.nick)
+    // TODO: use a specific response
+    this.bot.emit('dict.respond', context.nick, context.to, key, value)
   }
 
   private async loadDatabase () {

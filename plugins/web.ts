@@ -27,7 +27,8 @@ export default class WebPlugin implements Plugin {
   ]
 
   // http://stackoverflow.com/a/17773849/1440740
-  matcher = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/
+  protected matcher =
+    /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/
 
   /**
    * @listens message#
@@ -59,16 +60,20 @@ export default class WebPlugin implements Plugin {
     })
   }
 
+  toString (): string {
+    return `[WebPlugin ${this.bot}]`
+  }
+
   /**
    * @fires web.title
    * @fires web.image
    * @throws Error
    */
-  handleResponse (response: request.RequestResponse,
-                  nick: string,
-                  to: string,
-                  link: string,
-                  body: any): void {
+  protected handleResponse (response: request.RequestResponse,
+                            nick: string,
+                            to: string,
+                            link: string,
+                            body: any): void {
     if (response.statusCode !== 200) {
       throw new Error(`Error fetching ${link} (status code: ${response.statusCode}`)
     }
@@ -91,7 +96,7 @@ export default class WebPlugin implements Plugin {
     }
   }
 
-  async handleLink (nick: string, to: string, link: string): Promise<void> {
+  protected async handleLink (nick: string, to: string, link: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       request.get(link, (err, response, body) => {
         if (err != null) {
@@ -106,9 +111,5 @@ export default class WebPlugin implements Plugin {
         }
       })
     })
-  }
-
-  toString (): string {
-    return `[WebPlugin ${this.bot}]`
   }
 }

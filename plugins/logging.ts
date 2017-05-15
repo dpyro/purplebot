@@ -15,10 +15,16 @@ import { Plugin } from '../src/plugins'
  * Plugin for logging sent and recieved messages.
  */
 export default class LoggingPlugin implements Plugin {
+  readonly name = 'logging'
+
+  bot: PurpleBot
+  config: Config
+  output: NodeBuffer | stream.Writable | undefined
+
   /**
    * Logger functions.
    */
-  protected static loggers: {[key in string]: (...args: any[]) => void} = {
+  protected loggers: {[key in string]: (...args: any[]) => void} = {
     'connect': (server) =>
       `CONNECT ${server}`,
 
@@ -108,12 +114,6 @@ export default class LoggingPlugin implements Plugin {
     }
   }
 
-  readonly name = 'logging'
-
-  bot: PurpleBot
-  config: Config
-  output: NodeBuffer | stream.Writable | undefined
-
   constructor (output?: NodeBuffer | stream.Writable) {
     this.output = output
   }
@@ -138,8 +138,8 @@ export default class LoggingPlugin implements Plugin {
       stream = fs.createWriteStream(filePath, { flags: 'a' })
     }
 
-    for (let eventName of Object.keys(LoggingPlugin.loggers)) {
-      const callback = LoggingPlugin.loggers[eventName]
+    for (let eventName of Object.keys(this.loggers)) {
+      const callback = this.loggers[eventName]
       this.bot.on(eventName, (...args) => {
         try {
           const data = callback.apply(null, args)

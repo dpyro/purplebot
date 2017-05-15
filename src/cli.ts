@@ -91,7 +91,7 @@ export default class Cli {
    * @listens part
    * @listens topic
    */
-  private attachListeners () {
+  protected attachListeners () {
     this.target.on('error', (message) => {
       readline.clearLine(this.output, -1)
       this.readline.write(`${message.command}\n`)

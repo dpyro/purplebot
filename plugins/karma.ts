@@ -46,40 +46,6 @@ export default class KarmaPlugin implements Plugin {
   }
 
   /**
-   * Outputs karma for a name.
-   */
-  respond (nick: string, to: string, term: string, karma: number): void {
-    if (typeof this.bot.say === 'function') {
-      const response = `${nick}: karma for ${term} is now ${karma}.`
-      this.bot.say(to, response)
-    }
-  }
-
-  /**
-   * Outputs for a name without karma.
-   */
-  respondNoKarma (nick: string, to: string, term: string): void {
-    if (typeof this.bot.say === 'function') {
-      const response = `${nick}: There is no karma for ${term}.`
-      this.bot.say(to, response)
-    }
-  }
-
-  /**
-   * Replaces the current database with an empty one.
-   */
-  async resetDatabase (): Promise<void> {
-    if (this.db != null) {
-      await this.db.close()
-    }
-
-    if (this.databasePath != null) {
-      await fs.unlink(this.databasePath)
-      await this.loadDatabase()
-    }
-  }
-
-  /**
    * Retrieves the karma for a `name` if it exists.
    */
   async get (name: string): Promise<any> {
@@ -118,7 +84,7 @@ export default class KarmaPlugin implements Plugin {
    * @returns the updated number of points
    * @fires karma.update
    */
-  async updateBy (name: string, points: number): Promise<number> {
+  async award (name: string, points: number): Promise<number> {
     if (this.db == null) throw new Error('karma: database unavailable')
 
     await this.db.exec('BEGIN')
@@ -156,63 +122,23 @@ export default class KarmaPlugin implements Plugin {
   }
 
   /**
-   * Install hooks on the bot.
-   *
-   * @listens message#
-   * @listens karma.respond
-   * @listens karma.get
-   * @listens karma.set
-   * @listens command
-   * @fires karma.get
+   * Outputs karma for a name.
    */
-  private installHooks (): void {
-    this.bot.on('message#', (nick, to, text, message) => {
-      this.handleMessage(nick, to, text)
-    })
+  protected handleUpdate (nick: string, to: string, term: string, karma: number): void {
+    if (typeof this.bot.say === 'function') {
+      const response = `${nick}: karma for ${term} is now ${karma}.`
+      this.bot.say(to, response)
+    }
+  }
 
-    this.bot.on('karma.respond', (nick, to, term, karma) => {
-      this.respond(nick, to, term, karma)
-    })
-
-    this.bot.on('karma.get', (nick, to, term, karma) => {
-      if (karma != null) {
-        this.respond(nick, to, term, karma)
-      } else {
-        this.respondNoKarma(nick, to, term)
-      }
-    })
-
-    this.bot.on('karma.set', (nick, to, term, value) => {
-      this.respond(nick, to, term, value)
-    })
-
-    this.bot.on('command', async (context, command, ...args: string[]) => {
-      if (command.toLowerCase() !== 'karma') return
-
-      if (args.length === 0) {
-        // TODO: print usage or help
-        return
-      }
-
-      // TODO: handle quoted args here as term
-      const term = args.shift() as string
-      if (term.toLowerCase() === 'set') {
-        if (args.length === 0 || isNaN(Number(args[0]))) {
-          // TODO: print usage or help
-          return
-        }
-
-        const value = Number(args.shift())
-        if (isNaN(value) || value === null) {
-          // TODO: print usage
-          return
-        }
-
-        await this.handleCommandSet(context, term, value)
-      } else {
-        await this.handleCommandInfo(context, term)
-      }
-    })
+  /**
+   * Outputs for a name without karma.
+   */
+  protected handleMissing (nick: string, to: string, term: string): void {
+    if (typeof this.bot.say === 'function') {
+      const response = `${nick}: There is no karma for ${term}.`
+      this.bot.say(to, response)
+    }
   }
 
   /**
@@ -220,7 +146,7 @@ export default class KarmaPlugin implements Plugin {
    *
    * @fires karma.respond
    */
-  private async handleMessage (nick: string, to: string, text: string): Promise<void> {
+  protected async handleMessage (nick: string, to: string, text: string): Promise<void> {
     const result = KarmaPlugin.matchModify.exec(text)
     if (result === null) return
 
@@ -233,7 +159,7 @@ export default class KarmaPlugin implements Plugin {
     } else {
       points *= Math.min(1, result[2].length - 1)
     }
-    const karma = await this.updateBy(term, points)
+    const karma = await this.award(term, points)
 
     this.bot.emit('karma.respond', nick, to, term, karma)
   }
@@ -241,7 +167,7 @@ export default class KarmaPlugin implements Plugin {
   /**
    * @fires karma.get
    */
-  private async handleCommandInfo (context, term: string): Promise<void> {
+  protected async handleGet (context, term: string): Promise<void> {
     const result = await this.get(term)
     const { nick, to } = context
 
@@ -252,14 +178,14 @@ export default class KarmaPlugin implements Plugin {
   /**
    * @fires karma.set
    */
-  private async handleCommandSet (context, term: string, value: number): Promise<void> {
+  protected async handleSet (context, term: string, value: number): Promise<void> {
     const result = await this.set(term, value)
     const { nick, to } = context
 
     this.bot.emit('karma.set', nick, to, term, value)
   }
 
-  private async loadDatabase (): Promise<void> {
+  protected async loadDatabase (): Promise<void> {
     const sql = `
       CREATE TABLE IF NOT EXISTS karma (
         id        INTEGER PRIMARY KEY,
@@ -285,5 +211,65 @@ export default class KarmaPlugin implements Plugin {
 
     this.db = await Database.open(this.databasePath)
     await this.db.exec(sql)
+  }
+
+  /**
+   * Install hooks on the bot.
+   *
+   * @listens message#
+   * @listens karma.respond
+   * @listens karma.get
+   * @listens karma.set
+   * @listens command
+   * @fires karma.get
+   */
+  private installHooks (): void {
+    this.bot.on('message#', (nick, to, text, message) => {
+      this.handleMessage(nick, to, text)
+    })
+
+    this.bot.on('karma.respond', (nick, to, term, karma) => {
+      this.handleUpdate(nick, to, term, karma)
+    })
+
+    this.bot.on('karma.get', (nick, to, term, karma) => {
+      if (karma != null) {
+        this.handleUpdate(nick, to, term, karma)
+      } else {
+        this.handleMissing(nick, to, term)
+      }
+    })
+
+    this.bot.on('karma.set', (nick, to, term, value) => {
+      this.handleUpdate(nick, to, term, value)
+    })
+
+    this.bot.on('command', async (context, command, ...args: string[]) => {
+      if (command.toLowerCase() !== 'karma') return
+
+      if (args.length === 0) {
+        // TODO: print usage or help
+        return
+      }
+
+      // TODO: handle quoted args here as term
+      const term = args.shift() as string
+      if (term.toLowerCase() === 'set') {
+        if (args.length === 0 || isNaN(Number(args[0]))) {
+          // TODO: print usage or help
+          return
+        }
+
+        const value = Number(args.shift())
+        if (isNaN(value) || value === null) {
+          // TODO: print usage
+          return
+        }
+
+        await this.handleSet(context, term, value)
+      } else {
+        await this.handleGet(context, term)
+      }
+    })
   }
 }

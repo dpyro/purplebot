@@ -184,7 +184,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
   /**
    * Creates and populates `this.commands`.
    */
-  private loadCommandHooks (): void {
+  protected loadCommandHooks (): void {
     this.commands = {
       'connect': this.connect.bind(this),
       'disconnect': this.disconnect.bind(this),
@@ -214,7 +214,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
   /**
    * Applies event forwarding.
    */
-  private loadForwards () {
+  protected loadForwards () {
     this.forwardClientEvent('error')
 
     this.forwardClientEvent('action')
@@ -240,7 +240,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * @param from event name to listen for in client
    * @param to name for forwarding the client event
    */
-  private forwardClientEvent (from: string, to: string = from) {
+  protected forwardClientEvent (from: string, to: string = from) {
     this.client.on(from, (...args: any[]) => {
       this.emit(to, ...args)
     })
@@ -252,7 +252,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * @listens message
    * @fires command
    */
-  private loadClientHooks (): void {
+  protected loadClientHooks (): void {
     this.on('message', (nick, to, text: string, message) => {
       const trimmedText = text.trim()
       if (trimmedText.startsWith('.') && trimmedText.substring(1, 2) !== '.') {
