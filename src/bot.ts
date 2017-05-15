@@ -9,7 +9,7 @@ import * as _ from 'lodash'
 
 import { CommandMap } from './cli'
 import Config, { MemConfig } from './config'
-import loadPlugins, { Plugin } from './plugins'
+import loadAll, { Plugin } from './plugins'
 
 /**
  * A library to provide IRC functionality.
@@ -74,7 +74,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
 
     const pluginsEnabled = await this.config.get('plugins')
     if (pluginsEnabled !== false) {
-      this.plugins = await loadPlugins(this, this.config)
+      this.plugins = await loadAll(this, this.config)
     }
   }
 

@@ -35,13 +35,55 @@ async function readdir (dirPath): Promise<string[]> {
 }
 
 /**
+ * Fetch available plugins.
+ */
+export default async function loadAll (bot: PurpleBot, config: Config): Promise<Plugin[]> {
+  const builtinDirPath = path.join(__dirname, '..', 'plugins')
+  const plugins = await loadDirectory(builtinDirPath, bot, config)
+
+  const userPluginDirPath = FileConfig.userPluginDirPath
+  if (await fs.pathExists(userPluginDirPath)) {
+    const userPlugins = await loadDirectory(userPluginDirPath, bot, config)
+    plugins.push(...userPlugins)
+  }
+
+  return plugins
+}
+
+/**
+ * Fetch available plugins.
+ */
+export async function loadDirectory (dirPath: string,
+                                     bot: PurpleBot,
+                                     config: Config): Promise<Plugin[]> {
+  const files = await readdir(dirPath)
+  const filePaths = files.map(file => path.join(__dirname, '..', 'plugins', file))
+
+  const plugins: Plugin[] = []
+  for (const pluginFile of filePaths) {
+    const relativePath = path.relative(__dirname, pluginFile)
+    try {
+      const plugin = await loadFile(pluginFile, bot, config)
+      if (plugin != null) {
+        plugins.push(plugin)
+      }
+    } catch (err) {
+      console.error(`Warning: could not load plugin ${relativePath}`)
+      console.error(err)
+    }
+  }
+
+  return plugins
+}
+
+/**
  * Load a plugin from a file.
  *
  * @throws Error
  */
-export async function loadPluginFile (pluginFile: string,
-                                      bot: PurpleBot,
-                                      config: Config): Promise<Plugin|null> {
+export async function loadFile (pluginFile: string,
+                                bot: PurpleBot,
+                                config: Config): Promise<Plugin> {
   const mod: any = require(pluginFile)
   let Klass
   // TODO: verify that this actually works with JS, module.exports = Plugin
@@ -57,7 +99,7 @@ export async function loadPluginFile (pluginFile: string,
     const name = Klass.name
     const disabled = await config.get(`${name}:enabled`)
     if (disabled != null && !!disabled === false) {
-      return null
+      throw new Error(`Did not load ${pluginFile}: disabled by Config.`)
     }
     await config.set(`${name}:enabled`, true)
   }
@@ -68,52 +110,4 @@ export async function loadPluginFile (pluginFile: string,
   }
 
   return plugin
-}
-
-/**
- * Fetch available plugins.
- */
-export async function loadPluginDirectory (dirPath: string, bot: PurpleBot, config: Config): Promise<Plugin[]> {
-  const files = await readdir(dirPath)
-  const filePaths = files.map(file => path.join(__dirname, '..', 'plugins', file))
-
-  const plugins: Plugin[] = []
-  for (const pluginFile of filePaths) {
-    const relativePath = path.relative(__dirname, pluginFile)
-    try {
-      const plugin = await loadPluginFile(pluginFile, bot, config)
-      if (plugin != null) {
-        plugins.push(plugin)
-      }
-    } catch (err) {
-      console.error(`Warning: could not load plugin ${relativePath}`)
-      console.error(err)
-    }
-  }
-
-  return plugins
-}
-
-/**
- * Fetch available plugins.
- */
-export default async function loadPlugins (bot: PurpleBot, config: Config): Promise<Plugin[]> {
-  const builtinDirPath = path.join(__dirname, '..', 'plugins')
-  const plugins = await loadPluginDirectory(builtinDirPath, bot, config)
-
-  const userPluginDirPath = FileConfig.userPluginDirPath
-  if (await fs.pathExists(userPluginDirPath)) {
-    const userPlugins = await loadPluginDirectory(userPluginDirPath, bot, config)
-    plugins.push(...userPlugins)
-  }
-
-  return plugins
-}
-
-export async function resetPlugins (plugins: Plugin[]): Promise<void[]> {
-  return Promise.all(plugins.map(plugin => {
-    if (typeof plugin.reset === 'function') {
-      return plugin.reset()
-    }
-  }))
 }
