@@ -14,7 +14,7 @@
     "doc": "rm -rf doc/* && ./node_modules/typedoc/bin/typedoc"
   },
   "dependencies": {
-    "@types/fs-extra": "^3.0.0",
+    "@types/fs-extra": "^3.0.1",
     "@types/irc": "^0.3.32",
     "@types/lodash": "^4.14.64",
     "@types/mime-types": "^2.1.0",
