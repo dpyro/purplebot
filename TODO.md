@@ -5,15 +5,16 @@
 - [x] autologin
 - [x] logging
 - [ ] karma
-  - [x] .karma
-  - [ ] .karma set / clear
+  - [x] .karma info
+  - [ ] .karma set
+  - [ ] .karma clear
   - [x] thing++ / ++thing
   - [x] thing-- / --thing
   - [ ] if nick, attach karma to account
 - [ ] dict
-  - [ ] .learn
-  - [ ] .info
-  - [ ] .forget
+  - [ ] .learn / .dict add
+  - [ ] .info / .dict info
+  - [ ] .forget / .dict remove
   - [x] thing?
   - [ ] save images
 - [.] list

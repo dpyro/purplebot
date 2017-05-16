@@ -12,4 +12,4 @@ notifications:
     template:
       - "🤖 %{repository_slug}: %{commit_subject}"
       - "🏁 %{message} (%{build_url})"
-      - "❤️ Byte DG69!"
+      - "❤️ Bye DG69!"
