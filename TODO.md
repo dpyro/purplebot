@@ -37,6 +37,8 @@
 - [ ] Third-party pubsub for `PurpleBot` events
 - [x] Convert `server` + `socket` option into `socket://`
 - [ ] Use something simpler than `nconf`.
+- [ ] Create `CommandMap` module.
+- [ ] Add decorators.
 
 ## Testing
 

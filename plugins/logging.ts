@@ -104,7 +104,7 @@ export default class LoggingPlugin implements Plugin {
 
     'whois': (info) => {
       const output = _.toPairs(info).map(([key, value]) => {
-        if (_.isArray(value)) {
+        if (Array.isArray(value)) {
           value = value.join(' ')
         }
         return `\t${key}: ${value}`
