@@ -12,8 +12,9 @@ import { Plugin } from '../src/plugins'
 import Database from '../src/sqlite'
 
 /**
- * http://stackoverflow.com/a/29837695/1440740
  * https://github.com/arolson101/typescript-decorators
+ *
+ * @decorator
  */
 function requireDb (
   target: KarmaPlugin,
@@ -33,7 +34,7 @@ function requireDb (
  * Plugin for tracking karma.
  */
 export default class KarmaPlugin implements Plugin {
-  static matchModify = /\s*([\w ]+)(\+{2,}|-{2,})(\d*)(?!\w)/
+  protected static matchAward = /\s*([\w ]+)(\+{2,}|-{2,})(\d*)(?!\w)/
 
   readonly name = 'karma'
 
@@ -133,7 +134,7 @@ export default class KarmaPlugin implements Plugin {
    * Responds to `message#` from the client.
    */
   protected async handleMessage (context: Context, text: string): Promise<void> {
-    const result = KarmaPlugin.matchModify.exec(text)
+    const result = KarmaPlugin.matchAward.exec(text)
     if (result === null) return
 
     const term = result[1]
@@ -193,7 +194,48 @@ export default class KarmaPlugin implements Plugin {
     this.handleUpdate(context, term, value)
   }
 
-  protected async loadDatabase (): Promise<void> {
+  /**
+   * Install hooks on the bot.
+   *
+   * @listens message#
+   * @listens command
+   */
+  private installHooks (): void {
+    this.bot.on('message#', (nick, to, text, message) => {
+      this.handleMessage({nick, to}, text)
+    })
+
+    this.bot.on('command', async (context: Context, command: string, ...args: string[]) => {
+      if (command.toLowerCase() !== 'karma') return
+
+      // TODO: handle quoted args here as term
+      const term = args.shift()
+
+      if (term == null) {
+        // TODO: print usage or help
+        return
+      }
+
+      if (term.toLowerCase() === 'set') {
+        if (args.length === 0 || isNaN(Number(args[0]))) {
+          // TODO: print usage or help
+          return
+        }
+
+        const value = Number(args.shift())
+        if (isNaN(value) || value === null) {
+          // TODO: print usage
+          return
+        }
+
+        await this.handleSet(context, term, value)
+      } else {
+        await this.handleGet(context, term)
+      }
+    })
+  }
+
+  private async loadDatabase (): Promise<void> {
     const sql = `
       PRAGMA busy_timeout = 0;
       PRAGMA foreign_keys = ON;
@@ -229,48 +271,7 @@ export default class KarmaPlugin implements Plugin {
     `
 
     await this.config.ensureDir()
-
     this.db = await Database.open(this.databasePath)
     await this.db.exec(sql)
-  }
-
-  /**
-   * Install hooks on the bot.
-   *
-   * @listens message#
-   * @listens command
-   */
-  private installHooks (): void {
-    this.bot.on('message#', (nick, to, text, message) => {
-      this.handleMessage({nick, to}, text)
-    })
-
-    this.bot.on('command', async (context: Context, command: string, ...args: string[]) => {
-      if (command.toLowerCase() !== 'karma') return
-
-      if (args.length === 0) {
-        // TODO: print usage or help
-        return
-      }
-
-      // TODO: handle quoted args here as term
-      const term = args.shift() as string
-      if (term.toLowerCase() === 'set') {
-        if (args.length === 0 || isNaN(Number(args[0]))) {
-          // TODO: print usage or help
-          return
-        }
-
-        const value = Number(args.shift())
-        if (isNaN(value) || value === null) {
-          // TODO: print usage
-          return
-        }
-
-        await this.handleSet(context, term, value)
-      } else {
-        await this.handleGet(context, term)
-      }
-    })
   }
 }

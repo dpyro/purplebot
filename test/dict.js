@@ -1,9 +1,9 @@
 import 'babel-polyfill'
 import { expect } from 'chai'
-import { EventEmitter } from 'events'
 import sqlite from 'sqlite3'
 import _ from 'lodash'
 
+import PurpleBot, { init } from '../src/bot'
 import { FileConfig } from '../src/config'
 import DictPlugin from '../plugins/dict'
 
@@ -12,7 +12,7 @@ sqlite.verbose()
 describe('plugin: dict', function () {
   this.timeout(3000)
 
-  let config, emitter, plugin
+  let config, bot, plugin
   const nick = 'chameleon'
   const channel = '#test'
 
@@ -22,16 +22,16 @@ describe('plugin: dict', function () {
   })
 
   beforeEach(async function () {
-    emitter = new EventEmitter()
-    plugin = new DictPlugin()
-    await plugin.load(emitter, config)
-    expect(plugin).to.exist
+    bot = await init(config)
+    expect(bot).to.be.instanceOf(PurpleBot)
+
+    plugin = bot.getPlugin('dict')
+    expect(plugin).to.be.instanceOf(DictPlugin)
   })
 
   afterEach(async function () {
     await plugin.reset()
-    plugin = null
-    emitter = null
+    bot = null
   })
 
   after(async function () {
@@ -94,7 +94,7 @@ describe('plugin: dict', function () {
 
   async function testResponse (text, key, value) {
     return new Promise((resolve, reject) => {
-      emitter.on('dict.respond', (context, name, fromValue) => {
+      bot.on('dict.respond', (context, name, fromValue) => {
         try {
           expect(context.nick).to.equal(nick)
           expect(context.to).to.equal(channel)
@@ -106,7 +106,7 @@ describe('plugin: dict', function () {
         }
       })
 
-      emitter.emit('message#', nick, channel, text)
+      bot.emit('message#', nick, channel, text)
     })
   }
 
