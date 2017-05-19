@@ -30,7 +30,7 @@ export interface Plugin {
   reset? (): Promise<void>
 }
 
-async function readdir (dirPath): Promise<string[]> {
+async function readDir (dirPath): Promise<string[]> {
   return fs.readdir(dirPath)
 }
 
@@ -56,10 +56,10 @@ export default async function loadAll (bot: PurpleBot, config: Config): Promise<
 export async function loadDirectory (dirPath: string,
                                      bot: PurpleBot,
                                      config: Config): Promise<Plugin[]> {
-  const files = await readdir(dirPath)
+  const files = await readDir(dirPath)
   const filePaths = files.map(file => path.join(__dirname, '..', 'plugins', file))
 
-  const plugins: Plugin[] = []
+  const plugins = new Array<Plugin>()
   for (const pluginFile of filePaths) {
     const relativePath = path.relative(__dirname, pluginFile)
     try {

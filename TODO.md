@@ -40,7 +40,7 @@
 - [ ] Use something simpler than `nconf`.
 - [ ] Create `CommandMap` module.
 - [ ] Add decorators.
-- [ ] Unified user tracking.
+- [ ] Unified user permissions.
 
 ## Testing
 
