@@ -41,20 +41,7 @@ export default class DictPlugin implements Plugin {
     this.databasePath = this.config.directory('dict.db')
 
     await this.loadDatabase()
-
-    this.bot.on('message#', (nick, to, text, message) => {
-      this.handleMessage({nick, to}, text)
-    })
-
-    this.bot.on('pm', (nick, text, message) => {
-      this.handleMessage({nick, to: nick}, text)
-    })
-
-    this.bot.on('command', (context, command, ...args) => {
-      if (command.toLowerCase() === 'learn') {
-        this.handleLearn(context, ...args)
-      }
-    })
+    this.installHooks()
   }
 
   async reset (): Promise<void> {
@@ -111,9 +98,6 @@ export default class DictPlugin implements Plugin {
     return `[DictPlugin ${this.databasePath}]`
   }
 
-  /**
-   * @fires dict.respond
-   */
   protected async handleMessage (context: Context, text: string): Promise<void> {
     const result = DictPlugin.matchQuery.exec(text)
     if (result == null) return
@@ -121,8 +105,6 @@ export default class DictPlugin implements Plugin {
     const key = result[1]
     const term = await this.value(key)
     if (term == null) return
-
-    this.bot.emit('dict.respond', context, key, term.value)
   }
 
   /**
@@ -145,10 +127,9 @@ export default class DictPlugin implements Plugin {
     await this.add(key, value, context.nick)
 
     // TODO: use a specific response
-    this.bot.emit('dict.respond', context, key, value)
   }
 
-  private async loadDatabase () {
+  private async loadDatabase (): Promise<void> {
     const sql = `
       CREATE TABLE IF NOT EXISTS dict (
         id          INTEGER PRIMARY KEY,
@@ -164,5 +145,21 @@ export default class DictPlugin implements Plugin {
     await this.config.ensureDir()
     this.db = await Database.open(this.databasePath)
     await this.db.exec(sql)
+  }
+
+  private installHooks (): void {
+    this.bot.on('message#', (nick, to, text, message) => {
+      this.handleMessage({nick, to}, text)
+    })
+
+    this.bot.on('pm', (nick, text, message) => {
+      this.handleMessage({nick, to: nick}, text)
+    })
+
+    this.bot.on('command', (context, command, ...args) => {
+      if (command.toLowerCase() === 'learn') {
+        this.handleLearn(context, ...args)
+      }
+    })
   }
 }

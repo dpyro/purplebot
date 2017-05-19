@@ -33,7 +33,6 @@ export default class WebPlugin implements Plugin {
   /**
    * @listens message#
    * @listens web.title
-   * @fires web.link
    */
   async load (bot: PurpleBot): Promise<void> {
     this.bot = bot
