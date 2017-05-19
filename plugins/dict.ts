@@ -46,7 +46,9 @@ export default class DictPlugin implements Plugin {
   }
 
   async reset (): Promise<void> {
-    return this.db.run('DROP TABLE IF EXISTS dict')
+    if (this.db != null) {
+      return this.db.run('DROP TABLE IF EXISTS dict')
+    }
   }
 
   /**
@@ -115,7 +117,6 @@ export default class DictPlugin implements Plugin {
    * @fires dict.respond
    */
   protected async handleLearn (context: Context, ...args: string[]): Promise<void> {
-    console.log('handling learn')
     if (args.length < 3) {
       // TODO: print usage info
       return

@@ -11,12 +11,12 @@ import { CommandMap } from './cli'
 import Config, { MemConfig } from './config'
 import loadAll, { Plugin } from './plugins'
 
-/**
- * A library to provide IRC functionality.
- *
- * @external irc
- * @see {@link https://github.com/martynsmith/node-irc node-irc}
- */
+export type Context = {
+  nick: string,
+  to: string,
+  text?: string,
+  message?: any
+}
 
 /**
  * Configurable bot that wraps `node-irc`.
@@ -282,13 +282,6 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
       }
     })
   }
-}
-
-export type Context = {
-  nick: string,
-  to: string,
-  text?: string,
-  message?: any
 }
 
 /**

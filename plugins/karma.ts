@@ -60,9 +60,10 @@ export default class KarmaPlugin implements Plugin {
     this.installHooks()
   }
 
-  @requireDb
   async reset (): Promise<void> {
-    return this.db.run('DROP TABLE IF EXISTS karma')
+    if (this.db != null) {
+      return this.db.run('DROP TABLE IF EXISTS karma')
+    }
   }
 
   /**
