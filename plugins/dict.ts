@@ -132,7 +132,6 @@ export default class DictPlugin implements Plugin {
     await this.add(key, value, context.nick)
 
     // TODO: use a specific response
-    console.log('emitting respond')
     this.bot.emit('dict.respond', context, key, value)
   }
 
