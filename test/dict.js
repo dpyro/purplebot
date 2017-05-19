@@ -94,10 +94,10 @@ describe('plugin: dict', function () {
 
   async function testResponse (text, key, value) {
     return new Promise((resolve, reject) => {
-      emitter.on('dict.respond', (fromNick, to, name, fromValue) => {
+      emitter.on('dict.respond', (context, name, fromValue) => {
         try {
-          expect(fromNick).to.equal(nick)
-          expect(to).to.equal(channel)
+          expect(context.nick).to.equal(nick)
+          expect(context.to).to.equal(channel)
           expect(name).to.equal(key)
           expect(fromValue).to.equal(value)
           resolve()

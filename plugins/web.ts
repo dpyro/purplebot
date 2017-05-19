@@ -8,13 +8,17 @@ import { extension } from 'mime-types'
 import * as request from 'request'
 
 import { Plugin } from '../src/plugins'
-import PurpleBot from '../src/bot'
+import PurpleBot, { Context } from '../src/bot'
 import Config from '../src/config'
 
 /**
  * Plugin to snarf URLs and images.
  */
 export default class WebPlugin implements Plugin {
+  // http://stackoverflow.com/a/17773849/1440740
+  protected static matcher =
+    /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/
+
   readonly name = 'web'
 
   bot: PurpleBot
@@ -26,37 +30,24 @@ export default class WebPlugin implements Plugin {
     'webp'
   ]
 
-  // http://stackoverflow.com/a/17773849/1440740
-  protected matcher =
-    /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})/
-
   /**
    * @listens message#
-   * @listens web.link
    * @listens web.title
    * @fires web.link
    */
   async load (bot: PurpleBot): Promise<void> {
     this.bot = bot
 
-    bot.on('message#', (nick, to, text, message) => {
-      const result = this.matcher.exec(text)
+    bot.on('message#', async (nick, to, text, message) => {
+      const result = WebPlugin.matcher.exec(text)
       if (result != null) {
         const link = result[0]
-        bot.emit('web.link', nick, to, link)
+        await this.handleLink({ nick, to }, link)
       }
     })
 
-    bot.on('web.link', async (nick, to, link) => {
-      try {
-        await this.handleLink(nick, to, link)
-      } catch (err) {
-        // ignore
-      }
-    })
-
-    bot.on('web.title', (channel, link, title) => {
-      bot.say(channel, `${link}: ${title}`)
+    bot.on('web.title', (context: Context, link, title) => {
+      bot.say(context.to, `${link}: ${title}`)
     })
   }
 
@@ -69,9 +60,8 @@ export default class WebPlugin implements Plugin {
    * @fires web.image
    * @throws Error
    */
-  protected handleResponse (response: request.RequestResponse,
-                            nick: string,
-                            to: string,
+  protected handleResponse (context: Context,
+                            response: request.RequestResponse,
                             link: string,
                             body: any): void {
     if (response.statusCode !== 200) {
@@ -84,30 +74,30 @@ export default class WebPlugin implements Plugin {
       const dom = new JSDOM(body)
       const title = dom.window.document.title
       // TODO: log found link
-      this.bot.emit('web.title', to, link, title)
+      this.bot.emit('web.title', context, link, title)
     } else {
       const ext = extension(type)
       if (typeof ext !== 'boolean' && this.imageExts.indexOf(ext) !== -1) {
         // TODO: save image or somesuch
-        this.bot.emit('web.image', to, link, ext, body)
+        this.bot.emit('web.image', context, link, ext, body)
       } else {
         throw new Error(`Error fetching ${link} (MIME type: ${type})`)
       }
     }
   }
 
-  protected async handleLink (nick: string, to: string, link: string): Promise<void> {
+  protected async handleLink (context: Context, link: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       request.get(link, (err, response, body) => {
         if (err != null) {
-          reject(err)
-        }
-
-        try {
-          this.handleResponse(response, nick, to, link, body)
-          resolve()
-        } catch (err) {
-          reject(err)
+          // reject(err)
+        } else {
+          try {
+            this.handleResponse(context, response, link, body)
+            resolve()
+          } catch (err) {
+            reject(err)
+          }
         }
       })
     })

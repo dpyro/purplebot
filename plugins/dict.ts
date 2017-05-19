@@ -8,7 +8,7 @@ import Database from '../src/sqlite'
 import * as _ from 'lodash'
 
 import Config, { FileConfig } from '../src/config'
-import PurpleBot from '../src/bot'
+import PurpleBot, { Context } from '../src/bot'
 import { Plugin } from '../src/plugins'
 
 /**
@@ -17,14 +17,14 @@ import { Plugin } from '../src/plugins'
  * You may use it as a terms dictionary.
  */
 export default class DictPlugin implements Plugin {
+  protected static matchQuery = /^\s*([\w- ]*[\w-]+?)\?+\s*$/
+
   readonly name = 'dict'
 
   bot: PurpleBot
   config: FileConfig
   databasePath: string
   db: Database
-
-  protected matchQuery = /^\s*([\w- ]*[\w-]+?)\?+\s*$/
 
   /**
    * Asynchronously loads the needed resources for this plugin.
@@ -43,11 +43,11 @@ export default class DictPlugin implements Plugin {
     await this.loadDatabase()
 
     this.bot.on('message#', (nick, to, text, message) => {
-      this.handleMessage(nick, to, text)
+      this.handleMessage({nick, to}, text)
     })
 
     this.bot.on('pm', (nick, text, message) => {
-      this.handleMessage(nick, nick, text)
+      this.handleMessage({nick, to: nick}, text)
     })
 
     this.bot.on('command', (context, command, ...args) => {
@@ -114,21 +114,21 @@ export default class DictPlugin implements Plugin {
   /**
    * @fires dict.respond
    */
-  protected async handleMessage (nick: string, to: string, text: string): Promise<void> {
-    const result = this.matchQuery.exec(text)
+  protected async handleMessage (context: Context, text: string): Promise<void> {
+    const result = DictPlugin.matchQuery.exec(text)
     if (result == null) return
 
     const key = result[1]
     const term = await this.value(key)
     if (term == null) return
 
-    this.bot.emit('dict.respond', nick, to, key, term.value)
+    this.bot.emit('dict.respond', context, key, term.value)
   }
 
   /**
    * @fires dict.respond
    */
-  protected async handleLearn (context: any, ...args: string[]): Promise<void> {
+  protected async handleLearn (context: Context, ...args: string[]): Promise<void> {
     if (args.length < 3) {
       // TODO: print usage info
       return
@@ -143,8 +143,9 @@ export default class DictPlugin implements Plugin {
     const key = args.slice(0, isIndex).join(' ')
     const value = args.slice(isIndex + 1).join(' ')
     await this.add(key, value, context.nick)
+
     // TODO: use a specific response
-    this.bot.emit('dict.respond', context.nick, context.to, key, value)
+    this.bot.emit('dict.respond', context, key, value)
   }
 
   private async loadDatabase () {
