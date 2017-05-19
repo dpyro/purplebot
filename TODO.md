@@ -16,7 +16,7 @@
   - [ ] .info / .dict info
   - [ ] .forget / .dict remove
   - [x] thing?
-  - [ ] save images
+  - [.] save images
 - [.] list
   - [.] .list create \<name\>
   - [.] .list delete \<name\>
@@ -40,6 +40,7 @@
 - [ ] Use something simpler than `nconf`.
 - [ ] Create `CommandMap` module.
 - [ ] Add decorators.
+- [ ] Unified user tracking.
 
 ## Testing
 

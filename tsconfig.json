@@ -5,7 +5,8 @@
     "target": "es5",
     "inlineSourceMap": true,
     "strictNullChecks": true,
-    "noImplicitThis": true
+    "noImplicitThis": true,
+    "experimentalDecorators": true
   },
   "include": [
     "plugins/**/*.ts",

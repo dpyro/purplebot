@@ -284,6 +284,13 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
   }
 }
 
+export type Context = {
+  nick: string,
+  to: string,
+  text?: string,
+  message?: any
+}
+
 /**
  * Create and load a `PurpleBot` with the given configuration.
  */

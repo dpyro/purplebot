@@ -23,8 +23,8 @@ describe('plugin: karma', async function () {
   beforeEach(async function () {
     bot = await init(config)
     expect(bot).to.be.instanceOf(PurpleBot)
+
     plugin = bot.getPlugin('karma')
-    expect(plugin).to.exist
     expect(plugin).to.be.instanceOf(KarmaPlugin)
 
     const output = await plugin.top()
@@ -54,19 +54,6 @@ describe('plugin: karma', async function () {
 
   async function checkValid (message, term, result) {
     return new Promise((resolve, reject) => {
-      bot.on('karma.respond', (fromNick, to, term, karma) => {
-        try {
-          expect(fromNick).to.equal(nick)
-          expect(to).to.equal(channel)
-          expect(term).to.equal(term)
-          expect(karma).to.equal(result)
-
-          resolve()
-        } catch (err) {
-          reject(err)
-        }
-      })
-
       bot.on('self', (to, text) => {
         try {
           expect(to).to.equal(channel)

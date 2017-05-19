@@ -7,9 +7,27 @@ import 'babel-polyfill'
 import * as fs from 'fs-extra'
 
 import Config, { FileConfig } from '../src/config'
-import PurpleBot from '../src/bot'
+import PurpleBot, { Context } from '../src/bot'
 import { Plugin } from '../src/plugins'
 import Database from '../src/sqlite'
+
+/**
+ * http://stackoverflow.com/a/29837695/1440740
+ * https://github.com/arolson101/typescript-decorators
+ */
+function requireDb (
+  target: KarmaPlugin,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<any>) {
+  const originalMethod = descriptor.value
+
+  descriptor.value = function (this: KarmaPlugin, ...args: any[]) {
+    if (this.db == null) throw new Error('karma: database unavailable')
+    return originalMethod.apply(this, args)
+  }
+
+  return descriptor
+}
 
 /**
  * Plugin for tracking karma.
@@ -41,6 +59,7 @@ export default class KarmaPlugin implements Plugin {
     this.installHooks()
   }
 
+  @requireDb
   async reset (): Promise<void> {
     return this.db.run('DROP TABLE IF EXISTS karma')
   }
@@ -48,21 +67,17 @@ export default class KarmaPlugin implements Plugin {
   /**
    * Retrieves the karma for a `name` if it exists.
    */
+  @requireDb
   async get (name: string): Promise<any> {
-    if (this.db == null) throw new Error('karma: database unavailable')
-
-    const sql = 'SELECT * FROM karma_view WHERE name = ?'
+    const sql = 'SELECT * FROM view WHERE name = ?'
     return this.db.get(sql, name)
   }
 
   /**
    * Set the karma for a `name` or delete it if it exists.
-   *
-   * @fires karma.set
    */
+  @requireDb
   async set (name: string, value: number): Promise<void> {
-    if (this.db == null) throw new Error('karma: database unavailable')
-
     if (value > 0) {
       const sql = 'UPDATE karma SET increased = ?, decreased = 0 WHERE name = ?'
       await this.db.run(sql, name, value, name)
@@ -73,8 +88,6 @@ export default class KarmaPlugin implements Plugin {
       const sql = 'DELETE FROM karma WHERE name = ?'
       await this.db.run(sql, name, name)
     }
-
-    this.bot.emit('karma.set', name, value)
   }
 
   /**
@@ -82,11 +95,9 @@ export default class KarmaPlugin implements Plugin {
    * The `name` will be automatically created if it does not already exist.
    *
    * @returns the updated number of points
-   * @fires karma.update
    */
+  @requireDb
   async award (name: string, points: number): Promise<number> {
-    if (this.db == null) throw new Error('karma: database unavailable')
-
     await this.db.exec('BEGIN')
 
     const sqlInsert = 'INSERT OR IGNORE INTO karma (name) VALUES (?1)'
@@ -97,23 +108,20 @@ export default class KarmaPlugin implements Plugin {
       : 'UPDATE karma SET decreased = decreased+?2 WHERE name = ?1'
     await this.db.run(sqlUpdate, name, Math.abs(points))
 
-    const sqlSelect = 'SELECT points FROM karma_view WHERE name = ?1'
+    const sqlSelect = 'SELECT points FROM view WHERE name = ?1'
     const result = await this.db.get(sqlSelect, name)
 
     await this.db.exec('END')
 
-    this.bot.emit('karma.update', name, points)
-
     return result.points
   }
 
+  @requireDb
   async top (limit: number = 5): Promise<any[]> {
-    if (this.db == null) throw new Error('karma: database unavailable')
-
-    const sql = 'SELECT * FROM karma_view LIMIT ?'
+    const sql = 'SELECT * FROM view ORDER BY points DESC LIMIT ? '
     const results = await this.db.all(sql, limit)
-    return results.map(({ name, increased, decreased, points }, index) => {
-      return { index, name, increased, decreased, points }
+    return results.map((columns, index) => {
+      return { index, ...columns }
     })
   }
 
@@ -122,31 +130,9 @@ export default class KarmaPlugin implements Plugin {
   }
 
   /**
-   * Outputs karma for a name.
-   */
-  protected handleUpdate (nick: string, to: string, term: string, karma: number): void {
-    if (typeof this.bot.say === 'function') {
-      const response = `${nick}: karma for ${term} is now ${karma}.`
-      this.bot.say(to, response)
-    }
-  }
-
-  /**
-   * Outputs for a name without karma.
-   */
-  protected handleMissing (nick: string, to: string, term: string): void {
-    if (typeof this.bot.say === 'function') {
-      const response = `${nick}: There is no karma for ${term}.`
-      this.bot.say(to, response)
-    }
-  }
-
-  /**
    * Responds to `message#` from the client.
-   *
-   * @fires karma.respond
    */
-  protected async handleMessage (nick: string, to: string, text: string): Promise<void> {
+  protected async handleMessage (context: Context, text: string): Promise<void> {
     const result = KarmaPlugin.matchModify.exec(text)
     if (result === null) return
 
@@ -159,52 +145,87 @@ export default class KarmaPlugin implements Plugin {
     } else {
       points *= Math.min(1, result[2].length - 1)
     }
-    const karma = await this.award(term, points)
 
-    this.bot.emit('karma.respond', nick, to, term, karma)
+    await this.handleAward(context, term, points)
+  }
+
+  protected async handleAward (context: Context, name: string, points: number): Promise<void> {
+    const value = await this.award(name, points)
+    this.handleUpdate(context, name, value)
   }
 
   /**
-   * @fires karma.get
+   * Outputs karma for a name.
    */
-  protected async handleGet (context, term: string): Promise<void> {
+  protected handleUpdate (context: Context, term: string, karma: number): void {
+    if (typeof this.bot.say === 'function') {
+      const response = `${context.nick}: karma for ${term} is now ${karma}.`
+      this.bot.say(context.to, response)
+    }
+  }
+
+  /**
+   * Outputs for a name without karma.
+   */
+  protected handleMissing (context: Context, term: string): void {
+    if (typeof this.bot.say === 'function') {
+      const response = `${context.nick}: There is no karma for ${term}.`
+      this.bot.say(context.to, response)
+    }
+  }
+
+  protected async handleGet (context: Context, term: string): Promise<void> {
     const result = await this.get(term)
     const { nick, to } = context
 
     const karma = (result != null) ? result.points : null
-    this.bot.emit('karma.get', nick, to, term, karma)
+
+    if (karma != null) {
+      this.handleUpdate(context, term, karma)
+    } else {
+      this.handleMissing(context, term)
+    }
   }
 
-  /**
-   * @fires karma.set
-   */
-  protected async handleSet (context, term: string, value: number): Promise<void> {
+  protected async handleSet (context: Context, term: string, value: number): Promise<void> {
     const result = await this.set(term, value)
-    const { nick, to } = context
 
-    this.bot.emit('karma.set', nick, to, term, value)
+    this.handleUpdate(context, term, value)
   }
 
   protected async loadDatabase (): Promise<void> {
     const sql = `
+      PRAGMA busy_timeout = 0;
+      PRAGMA foreign_keys = ON;
+
       CREATE TABLE IF NOT EXISTS karma (
         id        INTEGER PRIMARY KEY,
         name      TEXT    NOT NULL UNIQUE COLLATE NOCASE,
-        hostmask  TEXT CHECK (hostmask IS NULL OR hostmask GLOB "*@*"),
+        user      INTEGER REFERENCES user(id) ON DELETE SET NULL,
         increased INTEGER NOT NULL DEFAULT 0 CHECK (increased >= 0),
         decreased INTEGER NOT NULL DEFAULT 0 CHECK (decreased >= 0)
       );
 
-      CREATE UNIQUE INDEX IF NOT EXISTS karma_hostmask
-        ON karma(hostmask)
-        WHERE hostmask IS NOT NULL;
+      CREATE TABLE IF NOT EXISTS user (
+        id        INTEGER PRIMARY KEY,
+        username  TEXT    NOT NULL UNIQUE,
+        nickname  TEXT,
+        hostname  TEXT,
+        timestamp TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
 
-      CREATE VIEW IF NOT EXISTS karma_view AS
+      CREATE UNIQUE INDEX IF NOT EXISTS karma_name
+        ON karma(name);
+
+      CREATE UNIQUE INDEX IF NOT EXISTS karma_user
+        ON karma(user)
+        WHERE user IS NOT NULL;
+
+      CREATE VIEW IF NOT EXISTS view AS
         SELECT *, increased-decreased AS points
         FROM karma
-        ORDER BY points, name DESC;
-
-      PRAGMA busy_timeout = 0;
+          LEFT OUTER JOIN user
+          ON karma.user = user.id;
     `
 
     await this.config.ensureDir()
@@ -217,34 +238,14 @@ export default class KarmaPlugin implements Plugin {
    * Install hooks on the bot.
    *
    * @listens message#
-   * @listens karma.respond
-   * @listens karma.get
-   * @listens karma.set
    * @listens command
-   * @fires karma.get
    */
   private installHooks (): void {
     this.bot.on('message#', (nick, to, text, message) => {
-      this.handleMessage(nick, to, text)
+      this.handleMessage({nick, to}, text)
     })
 
-    this.bot.on('karma.respond', (nick, to, term, karma) => {
-      this.handleUpdate(nick, to, term, karma)
-    })
-
-    this.bot.on('karma.get', (nick, to, term, karma) => {
-      if (karma != null) {
-        this.handleUpdate(nick, to, term, karma)
-      } else {
-        this.handleMissing(nick, to, term)
-      }
-    })
-
-    this.bot.on('karma.set', (nick, to, term, value) => {
-      this.handleUpdate(nick, to, term, value)
-    })
-
-    this.bot.on('command', async (context, command, ...args: string[]) => {
+    this.bot.on('command', async (context: Context, command: string, ...args: string[]) => {
       if (command.toLowerCase() !== 'karma') return
 
       if (args.length === 0) {
