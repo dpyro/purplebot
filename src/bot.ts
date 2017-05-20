@@ -147,8 +147,6 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
 
   /**
    * Sends a message to the target.
-   *
-   * @fires say
    */
   say (target: string, message: string): void {
     this.client.say(target, message)

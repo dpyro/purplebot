@@ -20,7 +20,6 @@ export default class DictPlugin implements Plugin {
   protected static matchQuery = /^\s*([\w- ]*[\w-]+?)\?+\s*$/
 
   readonly name = 'dict'
-
   bot: PurpleBot
   config: FileConfig
   databasePath: string

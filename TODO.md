@@ -40,7 +40,12 @@
 - [ ] Use something simpler than `nconf`.
 - [ ] Create `CommandMap` module.
 - [ ] Add decorators.
-- [ ] Unified user permissions.
+- [ ] Unified users.
+  - [ ] Last nick / aliases
+  - [ ] Hostmask
+  - [ ] Plugin custom data
+  - [ ] Bot admin permission
+  - [.] Last seen
 
 ## Testing
 

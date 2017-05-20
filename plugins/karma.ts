@@ -37,7 +37,6 @@ export default class KarmaPlugin implements Plugin {
   protected static matchAward = /\s*([\w ]+)(\+{2,}|-{2,})(\d*)(?!\w)/
 
   readonly name = 'karma'
-
   bot: PurpleBot
   config: FileConfig
   databasePath: string /* Path to the Karma database. */
