@@ -45,11 +45,11 @@ export default class KarmaPlugin implements Plugin {
   /**
    * Asynchronously loads the database.
    */
-  async load (bot: PurpleBot, config: Config): Promise<void> {
-    if (!(config instanceof FileConfig)) throw new Error()
+  async load (bot: PurpleBot): Promise<void> {
+    if (!(bot.config instanceof FileConfig)) throw new Error()
 
     this.bot = bot
-    this.config = config
+    this.config = bot.config
     this.databasePath = this.config.directory('karma.db')
     if (this.databasePath == null) {
       throw new Error()

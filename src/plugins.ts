@@ -21,8 +21,10 @@ export interface Plugin {
 
   /**
    * Asynchronously load the resources for this plugin.
+   *
+   * Access the relevant `Config` from `bot.config`.
    */
-  load? (bot: PurpleBot, config: Config): Promise<void>
+  load? (bot: PurpleBot): Promise<void>
 
   /**
    * Reset the plugin's data.
@@ -35,55 +37,11 @@ async function readDir (dirPath): Promise<string[]> {
 }
 
 /**
- * Fetch available plugins.
- */
-export default async function loadAll (bot: PurpleBot, config: Config): Promise<Plugin[]> {
-  const builtinDirPath = path.join(__dirname, '..', 'plugins')
-  const plugins = await loadDirectory(builtinDirPath, bot, config)
-
-  const userPluginDirPath = FileConfig.userPluginDirPath
-  if (await fs.pathExists(userPluginDirPath)) {
-    const userPlugins = await loadDirectory(userPluginDirPath, bot, config)
-    plugins.push(...userPlugins)
-  }
-
-  return plugins
-}
-
-/**
- * Fetch available plugins.
- */
-export async function loadDirectory (dirPath: string,
-                                     bot: PurpleBot,
-                                     config: Config): Promise<Plugin[]> {
-  const files = await readDir(dirPath)
-  const filePaths = files.map(file => path.join(__dirname, '..', 'plugins', file))
-
-  const plugins = new Array<Plugin>()
-  for (const pluginFile of filePaths) {
-    const relativePath = path.relative(__dirname, pluginFile)
-    try {
-      const plugin = await loadFile(pluginFile, bot, config)
-      if (plugin != null) {
-        plugins.push(plugin)
-      }
-    } catch (err) {
-      console.error(`Warning: could not load plugin ${relativePath}`)
-      console.error(err)
-    }
-  }
-
-  return plugins
-}
-
-/**
  * Load a plugin from a file.
  *
  * @throws Error
  */
-export async function loadFile (pluginFile: string,
-                                bot: PurpleBot,
-                                config: Config): Promise<Plugin> {
+export async function loadFile (pluginFile: string, bot: PurpleBot): Promise<Plugin> {
   const mod: any = require(pluginFile)
   let Klass
   // TODO: verify that this actually works with JS, module.exports = Plugin
@@ -95,6 +53,7 @@ export async function loadFile (pluginFile: string,
     throw new Error(`Cannot load ${pluginFile}: not a class nor default export.`)
   }
 
+  const config = bot.config
   if (typeof Klass.name === 'string') {
     const name = Klass.name
     const disabled = await config.get(`${name}:enabled`)
@@ -111,3 +70,44 @@ export async function loadFile (pluginFile: string,
 
   return plugin
 }
+
+/**
+ * Fetch available plugins.
+ */
+export async function loadDirectory (dirPath: string, bot: PurpleBot): Promise<Plugin[]> {
+  const files = await readDir(dirPath)
+  const filePaths = files.map(file => path.join(__dirname, '..', 'plugins', file))
+
+  const plugins = new Array<Plugin>()
+  for (const pluginFile of filePaths) {
+    const relativePath = path.relative(__dirname, pluginFile)
+    try {
+      const plugin = await loadFile(pluginFile, bot)
+      if (plugin != null) {
+        plugins.push(plugin)
+      }
+    } catch (err) {
+      console.error(`Warning: could not load plugin ${relativePath}`)
+      console.error(err)
+    }
+  }
+
+  return plugins
+}
+
+/**
+ * Fetch available plugins.
+ */
+export default async function loadAll (bot: PurpleBot): Promise<Plugin[]> {
+  const builtinDirPath = path.join(__dirname, '..', 'plugins')
+  const plugins = await loadDirectory(builtinDirPath, bot)
+
+  const userPluginDirPath = FileConfig.userPluginDirPath
+  if (await fs.pathExists(userPluginDirPath)) {
+    const userPlugins = await loadDirectory(userPluginDirPath, bot)
+    plugins.push(...userPlugins)
+  }
+
+  return plugins
+}
+

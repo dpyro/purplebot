@@ -16,7 +16,6 @@ import { Plugin } from '../src/plugins'
  */
 export default class LoggingPlugin implements Plugin {
   readonly name = 'logging'
-
   bot: PurpleBot
   config: Config
   output: NodeBuffer | stream.Writable | undefined
@@ -123,9 +122,9 @@ export default class LoggingPlugin implements Plugin {
    *
    * @todo set socket server file name to server name
    */
-  async load (bot: PurpleBot, config: Config): Promise<void> {
+  async load (bot: PurpleBot): Promise<void> {
     this.bot = bot
-    this.config = config
+    this.config = bot.config
 
     let stream
     if (this.output != null) {
