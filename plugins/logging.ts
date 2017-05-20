@@ -137,11 +137,19 @@ export default class LoggingPlugin implements Plugin {
       stream = fs.createWriteStream(filePath, { flags: 'a' })
     }
 
+    this.installHooks(stream)
+  }
+
+  toString (): string {
+    return `[LoggingPlugin ${this.output}]`
+  }
+
+  private installHooks (stream: fs.WriteStream): void {
     for (let eventName of Object.keys(this.loggers)) {
       const callback = this.loggers[eventName]
       this.bot.on(eventName, (...args) => {
         try {
-          const data = callback.apply(null, args)
+          const data = callback.apply(this.bot, args)
           const timestamp = new Date().toUTCString()
           const line = `[${timestamp}] ${data}\n`
           stream.write(line)
@@ -150,9 +158,5 @@ export default class LoggingPlugin implements Plugin {
         }
       })
     }
-  }
-
-  toString (): string {
-    return `[LoggingPlugin ${this.output}]`
   }
 }

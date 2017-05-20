@@ -7,8 +7,6 @@ import PurpleBot, { init } from '../src/bot'
 import { FileConfig } from '../src/config'
 
 describe('plugin: web', function () {
-  this.timeout(3000)
-
   let bot, scope, config
   const channel = '#test'
 
@@ -38,10 +36,6 @@ describe('plugin: web', function () {
   beforeEach(async function () {
     bot = await init(config)
     expect(bot).to.be.instanceOf(PurpleBot)
-  })
-
-  afterEach(function () {
-    bot = null
   })
 
   after(async function () {

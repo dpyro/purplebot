@@ -36,17 +36,7 @@ export default class WebPlugin implements Plugin {
   async load (bot: PurpleBot): Promise<void> {
     this.bot = bot
 
-    bot.on('message#', async (nick, to, text, message) => {
-      const result = WebPlugin.matcher.exec(text)
-      if (result != null) {
-        const link = result[0]
-        await this.handleLink({ nick, to }, link)
-      }
-    })
-
-    bot.on('web.title', (context: Context, link, title) => {
-      bot.say(context.to, `${link}: ${title}`)
-    })
+    this.installHooks()
   }
 
   toString (): string {
@@ -98,6 +88,20 @@ export default class WebPlugin implements Plugin {
           }
         }
       })
+    })
+  }
+
+  private installHooks (): void {
+    this.bot.on('message#', async (nick, to, text, message) => {
+      const result = WebPlugin.matcher.exec(text)
+      if (result != null) {
+        const link = result[0]
+        await this.handleLink({ nick, to }, link)
+      }
+    })
+
+    this.bot.on('web.title', (context: Context, link, title) => {
+      this.bot.say(context.to, `${link}: ${title}`)
     })
   }
 }

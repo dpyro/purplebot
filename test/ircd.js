@@ -51,7 +51,6 @@ describe('mock ircd', function () {
 
   afterEach(async function () {
     await config.removeDir()
-    config = null
   })
 
   it('connect(), disconnect()', async function () {

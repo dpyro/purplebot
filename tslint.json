@@ -1,6 +1,10 @@
 {
   "extends": "tslint-config-standard",
   "rules": {
-    "handle-callback-err": false
+    "adjacent-overload-signatures": true,
+    "arrow-return-shorthand": true,
+    "handle-callback-err": false,
+    "no-empty-interface": true,
+    "prefer-const": true
   }
 }

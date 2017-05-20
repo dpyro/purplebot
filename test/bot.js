@@ -5,8 +5,6 @@ import { init } from '../src/bot'
 import { MemConfig } from '../src/config'
 
 describe('bot', function () {
-  this.timeout(5000)
-
   let bot, config
 
   beforeEach(async function () {

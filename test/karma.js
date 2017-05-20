@@ -9,8 +9,6 @@ import KarmaPlugin from '../plugins/karma'
 sqlite.verbose()
 
 describe('plugin: karma', async function () {
-  this.timeout(4000)
-
   const nick = 'chameleon'
   const channel = '#test'
   let bot, plugin, config
@@ -33,8 +31,6 @@ describe('plugin: karma', async function () {
 
   afterEach(async function () {
     await plugin.reset()
-    plugin = null
-    bot = null
   })
 
   after(async function () {

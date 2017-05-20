@@ -16,7 +16,6 @@ describe('config', function () {
   afterEach(async function deleteConfigDir () {
     await config.removeDir()
     expect(() => fs.access(config.configDirPath)).to.throw
-    config = null
   })
 
   it('ensureDir(), hasDir()', async function () {

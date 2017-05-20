@@ -137,6 +137,8 @@ export default class DictPlugin implements Plugin {
 
   private async loadDatabase (): Promise<void> {
     const sql = `
+      PRAGMA busy_timeout = 0;
+
       CREATE TABLE IF NOT EXISTS dict (
         id          INTEGER PRIMARY KEY,
         key         TEXT    NOT NULL UNIQUE COLLATE NOCASE,
@@ -144,8 +146,6 @@ export default class DictPlugin implements Plugin {
         user        TEXT                    COLLATE NOCASE,
         timestamp   TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
-
-      PRAGMA busy_timeout = 0;
     `
 
     await this.config.ensureDir()

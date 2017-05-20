@@ -10,8 +10,6 @@ import DictPlugin from '../plugins/dict'
 sqlite.verbose()
 
 describe('plugin: dict', function () {
-  this.timeout(3000)
-
   let config, bot, plugin
   const nick = 'chameleon'
   const channel = '#test'
@@ -31,7 +29,6 @@ describe('plugin: dict', function () {
 
   afterEach(async function () {
     await plugin.reset()
-    bot = null
   })
 
   after(async function () {
