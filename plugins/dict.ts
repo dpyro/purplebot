@@ -45,9 +45,7 @@ export default class DictPlugin implements Plugin {
   }
 
   async reset (): Promise<void> {
-    if (this.db != null) {
-      return this.db.run('DROP TABLE IF EXISTS dict')
-    }
+    return this.db.run('DROP TABLE IF EXISTS dict')
   }
 
   /**
@@ -102,7 +100,7 @@ export default class DictPlugin implements Plugin {
 
   protected async handleMessage (context: Context, text: string): Promise<void> {
     const result = DictPlugin.matchQuery.exec(text)
-    if (result == null) return
+    if (result === null) return
 
     const key = result[1]
     const term = await this.value(key)
@@ -155,16 +153,16 @@ export default class DictPlugin implements Plugin {
 
   private installHooks (): void {
     this.bot.on('message#', (nick, to, text, message) => {
-      this.handleMessage({nick, to}, text)
+      return this.handleMessage({nick, to}, text)
     })
 
     this.bot.on('pm', (nick, text, message) => {
-      this.handleMessage({nick, to: nick}, text)
+      return this.handleMessage({nick, to: nick}, text)
     })
 
     this.bot.on('command', (context, command, ...args) => {
       if (command.toLowerCase() === 'learn') {
-        this.handleLearn(context, ...args)
+        return this.handleLearn(context, ...args)
       }
     })
   }

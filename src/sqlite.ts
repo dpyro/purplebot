@@ -11,7 +11,7 @@ export default class Database {
     let db
     return new Promise<void>((resolve, reject) => {
       db = new SQLDatabase(path, err => {
-        if (err != null) {
+        if (err !== null) {
           reject(err)
         } else {
           resolve()
@@ -23,7 +23,7 @@ export default class Database {
   async close (): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.db.close(err => {
-        if (err != null) {
+        if (err !== null) {
           reject(err)
         } else {
           resolve()
@@ -35,7 +35,7 @@ export default class Database {
   async run (sql: string, ...params: any[]): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.db.run(sql, params, (err) => {
-        if (err != null) {
+        if (err !== null) {
           reject(err)
         } else {
           resolve()
@@ -47,7 +47,7 @@ export default class Database {
   async exec (sql: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.db.exec(sql, err => {
-        if (err != null) {
+        if (err !== null) {
           reject(err)
         } else {
           resolve()
@@ -59,7 +59,7 @@ export default class Database {
   async get (sql: string, ...params: any[]): Promise<any> {
     return new Promise<any>((resolve, reject) => {
       this.db.get(sql, params, (err, row) => {
-        if (err != null) {
+        if (err !== null) {
           reject(err)
         } else {
           resolve(row)
@@ -71,7 +71,7 @@ export default class Database {
   async all (sql: string, ...params: any[]): Promise<any[]> {
     return new Promise<any[]>((resolve, reject) => {
       this.db.all(sql, params, (err, rows) => {
-        if (err != null) {
+        if (err !== null) {
           reject(err)
         } else {
           resolve(rows)

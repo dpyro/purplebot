@@ -51,18 +51,14 @@ export default class KarmaPlugin implements Plugin {
     this.bot = bot
     this.config = bot.config
     this.databasePath = this.config.directory('karma.db')
-    if (this.databasePath == null) {
-      throw new Error()
-    }
 
     await this.loadDatabase()
     this.installHooks()
   }
 
+  @requireDb
   async reset (): Promise<void> {
-    if (this.db != null) {
-      return this.db.run('DROP TABLE IF EXISTS karma')
-    }
+    return this.db.run('DROP TABLE IF EXISTS karma')
   }
 
   /**
@@ -159,20 +155,16 @@ export default class KarmaPlugin implements Plugin {
    * Outputs karma for a name.
    */
   protected handleUpdate (context: Context, term: string, karma: number): void {
-    if (typeof this.bot.say === 'function') {
-      const response = `${context.nick}: karma for ${term} is now ${karma}.`
-      this.bot.say(context.to, response)
-    }
+    const response = `${context.nick}: karma for ${term} is now ${karma}.`
+    this.bot.say(context.to, response)
   }
 
   /**
    * Outputs for a name without karma.
    */
   protected handleMissing (context: Context, term: string): void {
-    if (typeof this.bot.say === 'function') {
-      const response = `${context.nick}: There is no karma for ${term}.`
-      this.bot.say(context.to, response)
-    }
+    const response = `${context.nick}: There is no karma for ${term}.`
+    this.bot.say(context.to, response)
   }
 
   protected async handleGet (context: Context, term: string): Promise<void> {

@@ -94,7 +94,7 @@ export default class WebPlugin implements Plugin {
   private installHooks (): void {
     this.bot.on('message#', async (nick, to, text, message) => {
       const result = WebPlugin.matcher.exec(text)
-      if (result != null) {
+      if (result !== null) {
         const link = result[0]
         await this.handleLink({ nick, to }, link)
       }

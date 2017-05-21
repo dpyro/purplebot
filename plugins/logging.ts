@@ -145,7 +145,7 @@ export default class LoggingPlugin implements Plugin {
   }
 
   private installHooks (stream: fs.WriteStream): void {
-    for (let eventName of Object.keys(this.loggers)) {
+    for (const eventName of Object.keys(this.loggers)) {
       const callback = this.loggers[eventName]
       this.bot.on(eventName, (...args) => {
         try {

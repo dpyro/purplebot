@@ -72,7 +72,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
 
     const pluginsEnabled = await this.config.get('plugins')
     if (pluginsEnabled !== false) {
-      this.plugins = await loadAll(this, this.config)
+      this.plugins = await loadAll(this)
     }
   }
 
@@ -167,14 +167,14 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * Current nick of the bot.
    */
   get nick (): string | null {
-    return (this.client != null) ? this.client.nick : null
+    return this.client.nick
   }
 
   /**
    * Updated channel info from the client.
    */
   get chans () {
-    return (this.client != null) ? this.client.chans : null
+    return this.client.chans
   }
 
   /**

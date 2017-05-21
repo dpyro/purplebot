@@ -83,9 +83,7 @@ export async function loadDirectory (dirPath: string, bot: PurpleBot): Promise<P
     const relativePath = path.relative(__dirname, pluginFile)
     try {
       const plugin = await loadFile(pluginFile, bot)
-      if (plugin != null) {
-        plugins.push(plugin)
-      }
+      plugins.push(plugin)
     } catch (err) {
       console.error(`Warning: could not load plugin ${relativePath}`)
       console.error(err)
@@ -110,4 +108,3 @@ export default async function loadAll (bot: PurpleBot): Promise<Plugin[]> {
 
   return plugins
 }
-
