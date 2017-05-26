@@ -50,7 +50,7 @@ export default class KarmaPlugin implements Plugin {
 
     this.bot = bot
     this.config = bot.config
-    this.databasePath = this.config.directory('karma.db')
+    this.databasePath = this.config.path('karma.db')
 
     await this.loadDatabase()
     this.installHooks()

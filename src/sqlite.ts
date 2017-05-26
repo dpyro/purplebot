@@ -1,16 +1,16 @@
-import { Database as SQLDatabase } from 'sqlite3'
+import * as sqlite from 'sqlite3'
 
 export default class Database {
-  db: SQLDatabase
+  db: sqlite.Database
 
-  constructor (db: SQLDatabase) {
+  constructor (db: sqlite.Database) {
     this.db = db
   }
 
   static async open (path: string): Promise<Database> {
     let db
     return new Promise<void>((resolve, reject) => {
-      db = new SQLDatabase(path, err => {
+      db = new sqlite.Database(path, err => {
         if (err !== null) {
           reject(err)
         } else {
@@ -32,13 +32,16 @@ export default class Database {
     })
   }
 
-  async run (sql: string, ...params: any[]): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      this.db.run(sql, params, (err) => {
+  async run (sql: string, ...params: any[]): Promise<sqlite.RunResult> {
+    return new Promise<sqlite.RunResult>((resolve, reject) => {
+      this.db.run(sql, ...params, function (this: any, err) {
         if (err !== null) {
           reject(err)
         } else {
-          resolve()
+          resolve({
+            lastID: this.lastID,
+            changes: this.changes
+          })
         }
       })
     })
@@ -58,7 +61,7 @@ export default class Database {
 
   async get (sql: string, ...params: any[]): Promise<any> {
     return new Promise<any>((resolve, reject) => {
-      this.db.get(sql, params, (err, row) => {
+      this.db.get(sql, ...params, (err, row) => {
         if (err !== null) {
           reject(err)
         } else {
@@ -70,7 +73,7 @@ export default class Database {
 
   async all (sql: string, ...params: any[]): Promise<any[]> {
     return new Promise<any[]>((resolve, reject) => {
-      this.db.all(sql, params, (err, rows) => {
+      this.db.all(sql, ...params, (err, rows) => {
         if (err !== null) {
           reject(err)
         } else {

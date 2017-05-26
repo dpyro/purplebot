@@ -66,7 +66,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
       clientOptions
     )
 
-    this.loadClientHooks()
+    this.loadHooks()
     this.loadCommandHooks()
     this.loadForwards()
 
@@ -177,6 +177,11 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
     return this.client.chans
   }
 
+  // TODO: expand beyond user's irc channel mode
+  getUser (nick: string, channel: string): string {
+    return this.client.chans[channel].users[nick]
+  }
+
   /**
    * Creates and populates `this.commands`.
    */
@@ -248,7 +253,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * @listens message
    * @fires command
    */
-  protected loadClientHooks (): void {
+  private loadHooks (): void {
     this.on('message', (nick, to, text: string, message) => {
       const trimmedText = text.trim()
       if (trimmedText.startsWith('.') && trimmedText.substring(1, 2) !== '.') {
@@ -266,6 +271,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
       }
     })
 
+    // Auth
     this.on('connect', async (server) => {
       const nickname = await this.config.get('auth:nick')
       if (nickname == null) return false
