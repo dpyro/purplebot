@@ -2,9 +2,11 @@ import 'babel-polyfill'
 import { expect } from 'chai'
 
 import { FileConfig } from '../src/config'
-import User, { UserDatabase } from '../src/user'
+import User, { Hostmask, UserDatabase } from '../src/user'
 
 describe('user', function () {
+  const username = 'testuser'
+  const hostname = 'testhost'
   let config, db
 
   beforeEach(async function () {
@@ -29,14 +31,45 @@ describe('user', function () {
     let user = new User()
     user.name = 'testname'
 
-    const id = await db.set(user)
+    const id = await db.setUser(user)
     expect(id).to.be.at.least(0)
 
     const results = await db.db.all('SELECT * FROM view')
     expect(results).to.exist
     expect(results.length).to.equal(1)
 
-    user = await User.get(db, id)
+    user = await db.getUser(id)
     expect(user).to.exist
+  })
+
+  it('set & get user by hostmask', async function () {
+    let user = new User()
+    user.name = 'testname'
+
+    const id = await db.setUser(user)
+    expect(id).to.be.at.least(0)
+
+    let hostmask = new Hostmask(id)
+    hostmask.username = username
+    hostmask.hostname = 'testhost'
+
+    const hostmaskId = await db.setHostmask(hostmask)
+    expect(hostmaskId).to.be.at.least(0)
+
+    const results = await db.db.all('SELECT * FROM view')
+    expect(results).to.exist
+    expect(results.length).to.equal(1)
+
+    hostmask = await db.getHostmask(hostmaskId)
+    expect(hostmask).to.exist
+    expect(hostmask.username).to.equal(username)
+    expect(hostmask.hostname).to.equal(hostname)
+
+    let users = await db.matchHostmask()
+    expect(users).to.not.be.empty
+    expect(users[0].id).to.equal(id)
+
+    users = await db.matchHostmask('*', username, 'dontmatchthis')
+    expect(users).to.be.empty
   })
 })

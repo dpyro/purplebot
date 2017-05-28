@@ -26,7 +26,6 @@ export class UserDatabase {
       PRAGMA auto_vacuum = FULL;
       PRAGMA busy_timeout = 0;
       PRAGMA foreign_keys = ON;
-      PRAGMA synchronous = FULL;
       PRAGMA user_version = 1;
 
       CREATE TABLE IF NOT EXISTS user (
@@ -39,9 +38,9 @@ export class UserDatabase {
       CREATE TABLE IF NOT EXISTS hostmask (
         hostmask_id INTEGER   PRIMARY KEY NOT NULL,
         user_id     INTEGER   NOT NULL REFERENCES user(user_id) ON UPDATE CASCADE,
-        nickname    TEXT      UNIQUE,
-        username    TEXT      UNIQUE,
-        hostname    TEXT      UNIQUE,
+        nickname    TEXT      NOT NULL UNIQUE DEFAULT "*",
+        username    TEXT      NOT NULL UNIQUE DEFAULT "*",
+        hostname    TEXT      NOT NULL UNIQUE DEFAULT "*",
         timestamp   DATETIME  NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
@@ -56,83 +55,33 @@ export class UserDatabase {
     await this.db.exec(sql)
   }
 
-  /**
-   * Glob-based matching.
-   */
-  async getUser (nickname?: string, username?: string, hostname?: string): Promise<User | null> {
+  async getHostmask (id: number): Promise<Hostmask | null> {
     const sql = `
-      SELECT * FROM hostmask
-      NATURAL JOIN user
-      WHERE nickname GLOB ? AND username GLOB ? AND hostname GLOB ?
-      GROUP BY user_id
+      SELECT * FROM view
+      WHERE hostmask_id = ?
     `
     // TODO: consider using this.db.run
-    const rows = await this.db.all(sql, [nickname, username, hostname])
-    if (rows.length === 0) return null
+    const result = await this.db.get(sql, id)
+    if (result == null) return null
 
-    if (rows.length >= 2) {
-      // TODO: output hostmask string
-      throw new Error(`Multiple users (${rows.length}) found for hostmask`)
-    }
+    const userId = result['user_id']
+    const hostmask = new Hostmask(userId)
+    hostmask.id = result['hostmask_id']
+    hostmask.nickname = result['nickname']
+    hostmask.username = result['username']
+    hostmask.hostname = result['hostname']
+    hostmask.timestamp = result['timestamp']
 
-    const row = rows[0]
-    const user = new User()
-    user.id = row['user_id']
-    user.name = row['name']
-    // tslint:disable-next-line triple-equals
-    user.admin = row['admin'] == true
-    user.lastSeen = row['lastseen']
-
-    return user
+    return hostmask
   }
 
-  async set (obj: User | Hostmask): Promise<number> {
-    if (obj instanceof User) {
-      const sql = `
-        INSERT OR REPLACE INTO user
-        VALUES (@id, @name, @admin, @lastSeen)
-      `
-      const result = await this.db.run(sql, sqlify(obj))
-
-      const lastId = result.lastID
-      return lastId
-    } else if (obj instanceof Hostmask) {
-      const sql = `
-        INSERT OR REPLACE INTO hostmask
-        VALUES (@id, @user_id, @nickname, @username, @hostname, @timestamp)
-      `
-      const result = await this.db.run(sql, sqlify(obj))
-      const lastId = result.lastID
-      return lastId
-    } else {
-      throw new Error('UserDatabase.set must be sent a User or Hostmask parameter')
-    }
-  }
-
-  async delete (obj: User | Hostmask): Promise<void> {
-    if (obj instanceof User) {
-      const sql = 'DELETE FROM user WHERE id = ?'
-      return this.db.run(sql, obj.id)
-    } else {
-      const sql = 'DELETE FROM hostmask WHERE id = ?'
-      return this.db.run(sql, obj.id)
-    }
-  }
-}
-
-export default class User {
-  id?: number
-  name?: string
-  admin?: boolean
-  lastSeen?: Date
-
-  static async get (userDb: UserDatabase, id: number): Promise<User | null> {
+  async getUser (id: number): Promise<User | null> {
     const sql = `
-      SELECT * FROM user
+      SELECT * FROM view
       WHERE user_id = ?
     `
     // TODO: consider using this.db.run
-    const result = await userDb.db.get(sql, id)
+    const result = await this.db.get(sql, id)
     if (result == null) return null
 
     const user = new User()
@@ -144,6 +93,70 @@ export default class User {
 
     return user
   }
+
+  /**
+   * Glob-based matching.
+   */
+  async matchHostmask (nickname: string = '*', username: string = '*', hostname: string = '*'): Promise<User[]> {
+    const sql = `
+      SELECT * FROM view
+      WHERE (nickname GLOB ?) AND (username GLOB ?) AND (hostname GLOB ?)
+      GROUP BY user_id
+    `
+    // TODO: consider using this.db.run
+    const rows = await this.db.all(sql, [nickname, username, hostname])
+
+    const results = new Array<User>()
+
+    for (const row of rows) {
+      const user = new User()
+      user.id = row['user_id']
+      user.name = row['name']
+      // tslint:disable-next-line triple-equals
+      user.admin = row['admin'] == true
+      user.lastSeen = row['lastseen']
+      results.push(user)
+    }
+
+    return results
+  }
+
+  async setUser (user: User): Promise<number> {
+    const sql = `
+      INSERT OR REPLACE INTO user
+      VALUES (@id, @name, @admin, @lastSeen)
+    `
+    const result = await this.db.run(sql, sqlify(user))
+    const lastId = result.lastID
+    return lastId
+  }
+
+  async setHostmask (hostmask: Hostmask): Promise<number> {
+    const sql = `
+      INSERT OR REPLACE INTO hostmask
+      VALUES (@id, @userId, @nickname, @username, @hostname, @timestamp)
+    `
+    const result = await this.db.run(sql, sqlify(hostmask))
+    const lastId = result.lastID
+    return lastId
+  }
+
+  async deleteUser (user: User): Promise<void> {
+    const sql = 'DELETE FROM user WHERE id = ?'
+    return this.db.run(sql, user.id)
+  }
+
+  async deleteHostmast (hostmask: Hostmask): Promise<void> {
+    const sql = 'DELETE FROM hostmask WHERE id = ?'
+    return this.db.run(sql, hostmask.id)
+  }
+}
+
+export default class User {
+  id?: number
+  name?: string
+  admin?: boolean
+  lastSeen?: Date
 }
 
 export class ChannelUser extends User {
