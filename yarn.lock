@@ -1879,7 +1879,7 @@ irc-colors@^1.1.0:
 
 irc@dpyro/node-irc#socket-uri:
   version "0.5.2"
-  resolved "https://codeload.github.com/dpyro/node-irc/tar.gz/899d6376fc83a06bcaa8b888d889f12bc45bbb86"
+  resolved "https://codeload.github.com/dpyro/node-irc/tar.gz/f13351afd8f1c6ced2989638ba46ad813b07ca08"
   dependencies:
     irc-colors "^1.1.0"
   optionalDependencies:
