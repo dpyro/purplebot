@@ -72,4 +72,24 @@ describe('user', function () {
     users = await db.matchHostmask('*', username, 'dontmatchthis')
     expect(users).to.be.empty
   })
+
+  it('delete user', async function () {
+    let user = new User()
+    user.name = 'testname'
+
+    const userId = await db.setUser(user)
+    expect(userId).to.be.at.least(0)
+
+    let hostmask = new Hostmask(userId)
+    hostmask.username = username
+    hostmask.hostname = 'testhost'
+
+    const hostmaskId = await db.setHostmask(hostmask)
+    expect(hostmaskId).to.be.at.least(0)
+
+    await db.deleteUser(userId)
+
+    expect(await db.getUser(userId)).to.not.exist
+    expect(await db.getHostmask(hostmaskId)).to.not.exist
+  })
 })

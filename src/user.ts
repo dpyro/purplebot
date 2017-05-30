@@ -14,6 +14,16 @@ function sqlify (obj: object): object {
   return result
 }
 
+function getId (obj: any): number {
+  if (typeof obj === 'number') {
+    return obj
+  } else if (obj.id != null) {
+    return obj.id
+  } else {
+    throw new Error('field id is not defined')
+  }
+}
+
 export class UserDatabase {
   config: FileConfig
   databasePath: string
@@ -37,7 +47,9 @@ export class UserDatabase {
 
       CREATE TABLE IF NOT EXISTS hostmask (
         hostmask_id INTEGER   PRIMARY KEY NOT NULL,
-        user_id     INTEGER   NOT NULL REFERENCES user(user_id) ON UPDATE CASCADE,
+        user_id     INTEGER   NOT NULL REFERENCES user(user_id)
+          ON UPDATE CASCADE
+          ON DELETE CASCADE,
         nickname    TEXT      NOT NULL UNIQUE DEFAULT "*",
         username    TEXT      NOT NULL UNIQUE DEFAULT "*",
         hostname    TEXT      NOT NULL UNIQUE DEFAULT "*",
@@ -141,14 +153,16 @@ export class UserDatabase {
     return lastId
   }
 
-  async deleteUser (user: User): Promise<void> {
-    const sql = 'DELETE FROM user WHERE id = ?'
-    return this.db.run(sql, user.id)
+  async deleteUser (user: User | number): Promise<void> {
+    const id = getId(user)
+    const sql = 'DELETE FROM user WHERE user_id = ?'
+    return this.db.run(sql, id)
   }
 
-  async deleteHostmast (hostmask: Hostmask): Promise<void> {
-    const sql = 'DELETE FROM hostmask WHERE id = ?'
-    return this.db.run(sql, hostmask.id)
+  async deleteHostmask (hostmask: Hostmask | number): Promise<void> {
+    const id = getId(hostmask)
+    const sql = 'DELETE FROM hostmask WHERE hostmask_id = ?'
+    return this.db.run(sql, id)
   }
 }
 
