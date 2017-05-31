@@ -92,4 +92,25 @@ describe('user', function () {
     expect(await db.getUser(userId)).to.not.exist
     expect(await db.getHostmask(hostmaskId)).to.not.exist
   })
+
+  it('admin permission', async function () {
+    let user = new User()
+    user.name = 'testname'
+
+    const userId = await db.setUser(user)
+    expect(userId).to.be.at.least(0)
+
+    user = await db.getUser(userId)
+    expect(user.admin).to.be.false
+
+    let adminUser = new User()
+    adminUser.name = 'testadmin'
+    adminUser.admin = true
+
+    const adminId = await db.setUser(adminUser)
+    expect(adminId).to.be.at.least(0)
+
+    adminUser = await db.getUser(adminId)
+    expect(adminUser.admin).to.be.true
+  })
 })

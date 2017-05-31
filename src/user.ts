@@ -140,6 +140,7 @@ export class UserDatabase {
     `
     const result = await this.db.run(sql, sqlify(user))
     const lastId = result.lastID
+    user.id = lastId
     return lastId
   }
 
@@ -150,18 +151,25 @@ export class UserDatabase {
     `
     const result = await this.db.run(sql, sqlify(hostmask))
     const lastId = result.lastID
+    hostmask.id = lastId
     return lastId
   }
 
   async deleteUser (user: User | number): Promise<void> {
     const id = getId(user)
     const sql = 'DELETE FROM user WHERE user_id = ?'
+    if (typeof user !== 'number') {
+      user.id = undefined
+    }
     return this.db.run(sql, id)
   }
 
   async deleteHostmask (hostmask: Hostmask | number): Promise<void> {
     const id = getId(hostmask)
     const sql = 'DELETE FROM hostmask WHERE hostmask_id = ?'
+    if (typeof hostmask !== 'number') {
+      hostmask.id = undefined
+    }
     return this.db.run(sql, id)
   }
 }
