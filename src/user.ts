@@ -205,8 +205,8 @@ export class Hostmask {
   hostname?: string
   timestamp?: Date
 
-  constructor (userId: number) {
-    this.userId = userId
+  constructor (user: User | number) {
+    this.userId = getId(user)
   }
 
   toString (): string {

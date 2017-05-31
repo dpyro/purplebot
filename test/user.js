@@ -49,7 +49,7 @@ describe('user', function () {
     const id = await db.setUser(user)
     expect(id).to.be.at.least(0)
 
-    let hostmask = new Hostmask(id)
+    let hostmask = new Hostmask(user)
     hostmask.username = username
     hostmask.hostname = 'testhost'
 
@@ -112,5 +112,35 @@ describe('user', function () {
 
     adminUser = await db.getUser(adminId)
     expect(adminUser.admin).to.be.true
+  })
+
+  it('unique constraint on User.name', async function () {
+    const user = new User()
+    user.name = username
+
+    await db.setUser(user)
+    expect(user.id).to.be.at.least(0)
+
+    const duplicateUser = new User()
+    duplicateUser.name = username
+
+    expect(() => db.setUser(duplicateUser)).to.throw
+  })
+
+  it('unique constraint on Hostmask', async function () {
+    const user = new User()
+
+    await db.setUser(user)
+    expect(user.id).to.be.at.least(0)
+
+    const hostmask = new Hostmask(user)
+    hostmask.username = username
+    hostmask.hostname = hostname
+
+    await db.setHostmask(hostmask)
+
+    hostmask.id = undefined
+
+    expect(() => db.setHostmask(hostmask)).to.throw
   })
 })

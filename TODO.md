@@ -42,7 +42,7 @@
 - [ ] Add decorators.
 - [ ] Unified users.
   - [ ] Last nick / aliases
-  - [ ] Hostmask
+  - [x] Hostmask
   - [ ] Plugin custom data
   - [ ] Bot admin permission
   - [.] Last seen
