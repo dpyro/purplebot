@@ -153,11 +153,15 @@ export default class DictPlugin implements Plugin {
 
   private installHooks (): void {
     this.bot.on('message#', (nick, to, text, message) => {
-      return this.handleMessage({nick, to}, text)
+      const user = message.user
+      const host = message.host
+      return this.handleMessage({nick, user, host, to}, text)
     })
 
     this.bot.on('pm', (nick, text, message) => {
-      return this.handleMessage({nick, to: nick}, text)
+      const user = message.user
+      const host = message.host
+      return this.handleMessage({nick, user, host, to: nick}, text)
     })
 
     this.bot.on('command', (context, command, ...args) => {

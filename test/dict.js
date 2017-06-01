@@ -103,7 +103,6 @@ describe('plugin: dict', function () {
         }
       })
 
-      const nick = 'testnick'
       const user = 'testuser'
       const host = 'testhost'
       const message = { nick, user, host }

@@ -61,7 +61,6 @@ describe('plugin: karma', async function () {
         }
       })
 
-      const nick = 'testnick'
       const user = 'testuser'
       const host = 'testhost'
       const message = { nick, user, host }

@@ -24,7 +24,7 @@ function requireDb (
   const originalMethod = descriptor.value
 
   descriptor.value = function (this: KarmaPlugin, ...args: any[]) {
-    if (this.db == null) throw new Error('karma: database unavailable')
+    if (this.db === undefined) throw new Error('karma: database unavailable')
     return originalMethod.apply(this, args)
   }
 
@@ -41,7 +41,7 @@ export default class KarmaPlugin implements Plugin {
   bot: PurpleBot
   config: FileConfig
   databasePath: string /* Path to the Karma database. */
-  db: Database
+  db?: Database
 
   /**
    * Asynchronously loads the database.
@@ -59,7 +59,7 @@ export default class KarmaPlugin implements Plugin {
 
   @requireDb
   async reset (): Promise<void> {
-    return this.db.run('DROP TABLE IF EXISTS karma')
+    return this.db!.run('DROP TABLE IF EXISTS karma')
   }
 
   /**
@@ -68,7 +68,7 @@ export default class KarmaPlugin implements Plugin {
   @requireDb
   async get (name: string): Promise<any> {
     const sql = 'SELECT * FROM view WHERE name = ?'
-    return this.db.get(sql, name)
+    return this.db!.get(sql, name)
   }
 
   /**
@@ -78,13 +78,13 @@ export default class KarmaPlugin implements Plugin {
   async set (name: string, value: number): Promise<void> {
     if (value > 0) {
       const sql = 'UPDATE karma SET increased = ?, decreased = 0 WHERE name = ?'
-      await this.db.run(sql, name, value, name)
+      await this.db!.run(sql, name, value, name)
     } else if (value < 0) {
       const sql = 'UPDATE karma SET increased = 0, decreased = ? WHERE name = ?'
-      await this.db.run(sql, name, value, name)
+      await this.db!.run(sql, name, value, name)
     } else {
       const sql = 'DELETE FROM karma WHERE name = ?'
-      await this.db.run(sql, name, name)
+      await this.db!.run(sql, name, name)
     }
   }
 
@@ -96,20 +96,20 @@ export default class KarmaPlugin implements Plugin {
    */
   @requireDb
   async award (name: string, points: number): Promise<number> {
-    await this.db.exec('BEGIN')
+    await this.db!.exec('BEGIN')
 
     const sqlInsert = 'INSERT OR IGNORE INTO karma (name) VALUES (?1)'
-    await this.db.run(sqlInsert, name)
+    await this.db!.run(sqlInsert, name)
 
     const sqlUpdate = (points >= 0)
       ? 'UPDATE karma SET increased = increased+?2 WHERE name = ?1'
       : 'UPDATE karma SET decreased = decreased+?2 WHERE name = ?1'
-    await this.db.run(sqlUpdate, name, Math.abs(points))
+    await this.db!.run(sqlUpdate, name, Math.abs(points))
 
     const sqlSelect = 'SELECT points FROM view WHERE name = ?1'
-    const result = await this.db.get(sqlSelect, name)
+    const result = await this.db!.get(sqlSelect, name)
 
-    await this.db.exec('END')
+    await this.db!.exec('END')
 
     return result.points
   }
@@ -117,7 +117,7 @@ export default class KarmaPlugin implements Plugin {
   @requireDb
   async top (limit: number = 5): Promise<any[]> {
     const sql = 'SELECT * FROM view ORDER BY points DESC LIMIT ? '
-    const results = await this.db.all(sql, limit)
+    const results = await this.db!.all(sql, limit)
     return results.map((columns, index) => {
       return { index, ...columns }
     })
@@ -201,7 +201,7 @@ export default class KarmaPlugin implements Plugin {
     this.bot.on('message#', (nick, to, text, message) => {
       const user = message.user
       const host = message.host
-      this.handleMessage({nick, user, host, to}, text)
+      return this.handleMessage({nick, user, host, to}, text)
     })
 
     this.bot.on('command', async (context: Context, command: string, ...args: string[]) => {

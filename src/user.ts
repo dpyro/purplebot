@@ -39,6 +39,50 @@ export async function hasAdmin (userDb: UserDatabase, context: Context): Promise
   return user.admin
 }
 
+export class User {
+  id?: number
+  name?: string
+  admin: boolean
+  lastSeen?: Date
+}
+
+export class ChannelUser extends User {
+  mode?: string
+
+  hasPermissionLevel (mode: string): boolean {
+    if (this.mode === undefined) return false
+
+    const testIndex = this.mode.indexOf(mode)
+    if (testIndex === -1) return false
+
+    const index = privileges.indexOf(mode)
+    if (index === -1) return false
+
+    return index <= testIndex
+  }
+}
+
+export class Hostmask {
+  id?: number
+  userId: number
+  nickname?: string
+  username?: string
+  hostname?: string
+  timestamp?: Date
+
+  constructor (user: User | number) {
+    this.userId = getId(user)
+  }
+
+  toString (): string {
+    const nick = (this.nickname !== undefined) ? this.nickname : '*'
+    const user = (this.username !== undefined) ? this.username : '*'
+    const host = (this.hostname !== undefined) ? this.hostname : '*'
+
+    return `${nick}!${user}@${host}`
+  }
+}
+
 // TODO: export decorator-based validation of user permissions
 
 export class UserDatabase {
@@ -67,9 +111,9 @@ export class UserDatabase {
         user_id     INTEGER   NOT NULL REFERENCES user(user_id)
           ON UPDATE CASCADE
           ON DELETE CASCADE,
-        nickname    TEXT      NOT NULL UNIQUE DEFAULT "*",
-        username    TEXT      NOT NULL UNIQUE DEFAULT "*",
-        hostname    TEXT      NOT NULL UNIQUE DEFAULT "*",
+        nickname    TEXT      NOT NULL UNIQUE DEFAULT "",
+        username    TEXT      NOT NULL UNIQUE DEFAULT "",
+        hostname    TEXT      NOT NULL UNIQUE DEFAULT "",
         timestamp   DATETIME  NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
@@ -191,49 +235,5 @@ export class UserDatabase {
       hostmask.id = undefined
     }
     return this.db.run(sql, id)
-  }
-}
-
-export class User {
-  id?: number
-  name?: string
-  admin: boolean
-  lastSeen?: Date
-}
-
-export class ChannelUser extends User {
-  mode?: string
-
-  hasPermissionLevel (mode: string): boolean {
-    if (this.mode == null) return false
-
-    const testIndex = this.mode.indexOf(mode)
-    if (testIndex === -1) return false
-
-    const index = privileges.indexOf(mode)
-    if (index === -1) return false
-
-    return index <= testIndex
-  }
-}
-
-export class Hostmask {
-  id?: number
-  userId: number
-  nickname?: string
-  username?: string
-  hostname?: string
-  timestamp?: Date
-
-  constructor (user: User | number) {
-    this.userId = getId(user)
-  }
-
-  toString (): string {
-    const nick = (this.nickname != null) ? this.nickname : '*'
-    const user = (this.username != null) ? this.username : '*'
-    const host = (this.hostname != null) ? this.hostname : '*'
-
-    return `${nick}!${user}@${host}`
   }
 }

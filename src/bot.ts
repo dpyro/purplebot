@@ -70,7 +70,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
       clientOptions
     )
 
-    this.loadUserDatabase()
+    await this.loadUserDatabase()
     this.loadHooks()
     this.loadCommandHooks()
     this.loadForwards()
@@ -200,20 +200,20 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
       'connect': this.connect.bind(this),
       'disconnect': this.disconnect.bind(this),
       'join': (...args) => {
-        if (args == null || args.length < 1) return
+        if (args.length < 1) return
 
         const channel = args.shift()
         return this.join(channel)
       },
       'part': (...args) => {
-        if (args == null || args.length < 1) return
+        if (args.length < 1) return
 
         const channel = args.shift()
         const message = args.shift()
         return this.part(channel, message)
       },
       'say': (...args) => {
-        if (args == null || args.length < 2) return
+        if (args.length < 2) return
 
         const target = args.shift()
         const message = args.shift()

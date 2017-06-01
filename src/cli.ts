@@ -39,9 +39,7 @@ export default class Cli {
     })
     this.readline.setPrompt('')
 
-    if (this.target != null) {
-      this.attachListeners()
-    }
+    this.attachListeners()
 
     // More events at: https://nodejs.org/api/readline.html#readline_class_interface
     this.readline.on('line', (line) => {
