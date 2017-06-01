@@ -5,12 +5,13 @@ node_js:
   - "6"
 cache: yarn
 
+before_script: ./node_modules/typescript/bin/tsc -V
+
 notifications:
   email: false
   irc:
     channels:
       - "irc.rizon.net#ppdcasual"
     template:
-      - "🤖 %{repository_slug}: %{commit_subject}"
-      - "🏁 %{message} (%{build_url})"
-      - "❤️ Bye DG69!"
+      - "%{commit_subject} → 🏁 ${message}"
+      - "%{repository_slug}: %{build_url}"
