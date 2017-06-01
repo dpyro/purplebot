@@ -1,4 +1,5 @@
-import { FileConfig } from './config'
+import { Context } from './bot'
+import Config, { FileConfig } from './config'
 import Database from './sqlite'
 
 const privileges = ['~', '&', '@', '%', '+', '']
@@ -24,12 +25,28 @@ function getId (obj: any): number {
   }
 }
 
+export async function hasAdmin (userDb: UserDatabase, context: Context): Promise<boolean> {
+  const nickname = context.nick
+  const username = context.user
+  const hostname = context.host
+
+  const users = await userDb.matchUsersHostmask(nickname, username, hostname)
+  if (users.length !== 1) {
+    return false
+  }
+  const user = users[0]
+
+  return user.admin
+}
+
+// TODO: export decorator-based validation of user permissions
+
 export class UserDatabase {
-  config: FileConfig
+  config: Config
   databasePath: string
   db: Database
 
-  async load (config: FileConfig): Promise<void> {
+  async load (config: Config): Promise<void> {
     this.config = config
 
     const sql = `
@@ -61,9 +78,13 @@ export class UserDatabase {
         LEFT NATURAL JOIN hostmask;
     `
 
-    await this.config.ensureDir()
-    this.databasePath = this.config.path('user.db')
-    this.db = await Database.open(this.databasePath)
+    if (this.config instanceof FileConfig) {
+      await this.config.ensureDir()
+      this.databasePath = this.config.path('user.db')
+      this.db = await Database.open(this.databasePath)
+    } else {
+      this.db = await Database.open(':memory:')
+    }
     await this.db.exec(sql)
   }
 
@@ -109,17 +130,16 @@ export class UserDatabase {
   /**
    * Glob-based matching.
    */
-  async matchHostmask (nickname: string = '*', username: string = '*', hostname: string = '*'): Promise<User[]> {
+  async matchUsersHostmask (nickname: string = '*', username: string = '*', hostname: string = '*'): Promise<User[]> {
     const sql = `
       SELECT * FROM view
       WHERE (nickname GLOB ?) AND (username GLOB ?) AND (hostname GLOB ?)
       GROUP BY user_id
     `
-    // TODO: consider using this.db.run
-    const rows = await this.db.all(sql, [nickname, username, hostname])
-
     const results = new Array<User>()
 
+    // TODO: consider using this.db.run
+    const rows = await this.db.all(sql, [nickname, username, hostname])
     for (const row of rows) {
       const user = new User()
       user.id = row['user_id']
@@ -174,10 +194,10 @@ export class UserDatabase {
   }
 }
 
-export default class User {
+export class User {
   id?: number
   name?: string
-  admin?: boolean
+  admin: boolean
   lastSeen?: Date
 }
 

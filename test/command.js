@@ -19,7 +19,11 @@ describe('command', function () {
   })
 
   function emitMessage (text) {
-    expect(bot.client.emit('message', 'someone', channel, text)).is.true
+    const nick = 'testnick'
+    const user = 'testuser'
+    const host = 'testhost'
+    const message = { nick, user, host }
+    expect(bot.client.emit('message', 'someone', channel, text, message)).is.true
   }
 
   async function validateCommandResult (argResults, message) {

@@ -6,8 +6,9 @@
 - [x] logging
 - [ ] karma
   - [x] .karma info
-  - [ ] .karma set
-  - [ ] .karma clear
+  - [x] .karma set
+  - [ ] .karma set admin-only
+  - [.] .karma clear
   - [x] thing++ / ++thing
   - [x] thing-- / --thing
   - [ ] if nick, attach karma to account
@@ -15,6 +16,7 @@
   - [ ] .learn / .dict add
   - [ ] .info / .dict info
   - [ ] .forget / .dict remove
+  - [ ] .forget / .dict remove admin-only
   - [x] thing?
   - [.] save images
 - [.] list

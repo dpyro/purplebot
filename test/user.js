@@ -2,7 +2,7 @@ import 'babel-polyfill'
 import { expect } from 'chai'
 
 import { FileConfig } from '../src/config'
-import User, { Hostmask, UserDatabase } from '../src/user'
+import { Hostmask, User, UserDatabase } from '../src/user'
 
 describe('user', function () {
   const username = 'testuser'
@@ -65,11 +65,11 @@ describe('user', function () {
     expect(hostmask.username).to.equal(username)
     expect(hostmask.hostname).to.equal(hostname)
 
-    let users = await db.matchHostmask()
+    let users = await db.matchUsersHostmask()
     expect(users).to.not.be.empty
     expect(users[0].id).to.equal(id)
 
-    users = await db.matchHostmask('*', username, 'dontmatchthis')
+    users = await db.matchUsersHostmask('*', username, 'dontmatchthis')
     expect(users).to.be.empty
   })
 

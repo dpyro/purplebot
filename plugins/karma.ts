@@ -10,6 +10,7 @@ import Config, { FileConfig } from '../src/config'
 import PurpleBot, { Context } from '../src/bot'
 import { Plugin } from '../src/plugins'
 import Database from '../src/sqlite'
+import { hasAdmin } from '../src/user'
 
 /**
  * https://github.com/arolson101/typescript-decorators
@@ -180,10 +181,14 @@ export default class KarmaPlugin implements Plugin {
     }
   }
 
-  protected async handleSet (context: Context, term: string, value: number): Promise<void> {
-    const result = await this.set(term, value)
+  protected async handleSet (context: Context, term: string, value: number): Promise<boolean> {
+    if (!hasAdmin(this.bot.userDb, context)) {
+      return false
+    }
 
+    const result = await this.set(term, value)
     this.handleUpdate(context, term, value)
+    return true
   }
 
   /**
@@ -194,7 +199,9 @@ export default class KarmaPlugin implements Plugin {
    */
   private installHooks (): void {
     this.bot.on('message#', (nick, to, text, message) => {
-      this.handleMessage({nick, to}, text)
+      const user = message.user
+      const host = message.host
+      this.handleMessage({nick, user, host, to}, text)
     })
 
     this.bot.on('command', async (context: Context, command: string, ...args: string[]) => {

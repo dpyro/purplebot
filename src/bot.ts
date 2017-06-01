@@ -10,9 +10,12 @@ import * as _ from 'lodash'
 import { CommandMap } from './cli'
 import Config, { MemConfig } from './config'
 import loadAll, { Plugin } from './plugins'
+import { UserDatabase } from './user'
 
 export type Context = {
   nick: string,
+  user: string,
+  host: string,
   to: string,
   text?: string,
   message?: any
@@ -29,6 +32,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
   plugins: Plugin[]
   server: string
   socket: boolean
+  userDb: UserDatabase
 
   /**
    * Loads the config and plugins and then connects to the configured server.
@@ -66,6 +70,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
       clientOptions
     )
 
+    this.loadUserDatabase()
     this.loadHooks()
     this.loadCommandHooks()
     this.loadForwards()
@@ -182,6 +187,11 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
     return this.client.chans[channel].users[nick]
   }
 
+  protected async loadUserDatabase (): Promise<void> {
+    this.userDb = new UserDatabase()
+    await this.userDb.load(this.config)
+  }
+
   /**
    * Creates and populates `this.commands`.
    */
@@ -254,7 +264,7 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * @fires command
    */
   private loadHooks (): void {
-    this.on('message', (nick, to, text: string, message) => {
+    this.client.on('message', (nick: string, to: string, text: string, message) => {
       const trimmedText = text.trim()
       if (trimmedText.startsWith('.') && trimmedText.substring(1, 2) !== '.') {
         // TODO: accept quoted arguments
@@ -263,8 +273,10 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
         if (words.length >= 1) {
           const command = words.shift()!.substring(1)
           if (command.length > 0) {
+            const user = message.user
+            const host = message.host
             const args = words
-            const context = { nick, to, text, message }
+            const context = { nick, user, host, to, text, message }
             this.emit('command', context, command, ...args)
           }
         }

@@ -48,7 +48,7 @@ describe('plugin: karma', async function () {
     expect(result).to.not.exist
   })
 
-  async function checkValid (message, term, result) {
+  async function checkValid (text, term, result) {
     return new Promise((resolve, reject) => {
       bot.on('self', (to, text) => {
         try {
@@ -61,7 +61,11 @@ describe('plugin: karma', async function () {
         }
       })
 
-      bot.emit('message#', nick, channel, message)
+      const nick = 'testnick'
+      const user = 'testuser'
+      const host = 'testhost'
+      const message = { nick, user, host }
+      bot.emit('message#', nick, channel, text, message)
     })
   }
 
@@ -71,9 +75,9 @@ describe('plugin: karma', async function () {
     ['test++ ', 'test'],
     ['this test++', 'this test']
   ]
-  for (const [message, term] of increments) {
-    it(`increments: "${message}"`, async function () {
-      await checkValid(message, term, 1)
+  for (const [text, term] of increments) {
+    it(`increments: "${text}"`, async function () {
+      await checkValid(text, term, 1)
     })
   }
 
@@ -91,9 +95,9 @@ describe('plugin: karma', async function () {
     ['test-- ', 'test'],
     ['another test--', 'another test']
   ]
-  for (const [message, term] of decrements) {
-    it(`decrements: "${message}"`, async function () {
-      await checkValid(message, term, -1)
+  for (const [text, term] of decrements) {
+    it(`decrements: "${text}"`, async function () {
+      await checkValid(text, term, -1)
     })
   }
 

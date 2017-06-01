@@ -44,7 +44,11 @@ describe('plugin: web', function () {
   })
 
   function emitUrl (link) {
-    expect(bot.client.emit('message#', 'someone', channel, link)).is.true
+    const nick = 'testnick'
+    const user = 'testuser'
+    const host = 'testhost'
+    const message = { nick, user, host }
+    expect(bot.client.emit('message#', 'someone', channel, link, message)).is.true
   }
 
   async function validateUrlResult (url) {

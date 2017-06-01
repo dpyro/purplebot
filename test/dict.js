@@ -103,7 +103,11 @@ describe('plugin: dict', function () {
         }
       })
 
-      bot.emit('message#', nick, channel, text)
+      const nick = 'testnick'
+      const user = 'testuser'
+      const host = 'testhost'
+      const message = { nick, user, host }
+      bot.emit('message#', nick, channel, text, message)
     })
   }
 
