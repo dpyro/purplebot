@@ -2,7 +2,7 @@ import 'babel-polyfill'
 import { expect } from 'chai'
 import sqlite from 'sqlite3'
 
-import { FileConfig } from '../src/config'
+import { MemConfig } from '../src/config'
 import PurpleBot, { init } from '../src/bot'
 import KarmaPlugin from '../plugins/karma'
 
@@ -13,8 +13,8 @@ describe('plugin: karma', async function () {
   const channel = '#test'
   let bot, plugin, config
 
-  before(async function () {
-    config = await FileConfig.temp()
+  before(function () {
+    config = new MemConfig()
   })
 
   // TODO: use custom test config
@@ -31,11 +31,6 @@ describe('plugin: karma', async function () {
 
   afterEach(async function () {
     await plugin.reset()
-  })
-
-  after(async function () {
-    await config.removeDir()
-    config = null
   })
 
   it('top() [empty]', async function () {

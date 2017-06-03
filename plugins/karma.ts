@@ -39,7 +39,7 @@ export default class KarmaPlugin implements Plugin {
 
   readonly name = 'karma'
   bot: PurpleBot
-  config: FileConfig
+  config: Config
   databasePath: string /* Path to the Karma database. */
   db?: Database
 
@@ -47,11 +47,13 @@ export default class KarmaPlugin implements Plugin {
    * Asynchronously loads the database.
    */
   async load (bot: PurpleBot): Promise<void> {
-    if (!(bot.config instanceof FileConfig)) throw new Error()
-
     this.bot = bot
     this.config = bot.config
-    this.databasePath = this.config.path('karma.db')
+    if (this.config instanceof FileConfig) {
+      this.databasePath = this.config.path('karma.db')
+    } else {
+      this.databasePath = ':memory:'
+    }
 
     await this.loadDatabase()
     this.installHooks()
@@ -272,7 +274,9 @@ export default class KarmaPlugin implements Plugin {
           ON karma.user = user.id;
     `
 
-    await this.config.ensureDir()
+    if (this.config instanceof FileConfig) {
+      await this.config.ensureDir()
+    }
     this.db = await Database.open(this.databasePath)
     await this.db.exec(sql)
   }

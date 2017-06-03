@@ -4,7 +4,7 @@ import sqlite from 'sqlite3'
 import _ from 'lodash'
 
 import PurpleBot, { init } from '../src/bot'
-import { FileConfig } from '../src/config'
+import { MemConfig } from '../src/config'
 import DictPlugin from '../plugins/dict'
 
 sqlite.verbose()
@@ -14,8 +14,8 @@ describe('plugin: dict', function () {
   const nick = 'chameleon'
   const channel = '#test'
 
-  before(async function () {
-    config = await FileConfig.temp()
+  before(function () {
+    config = new MemConfig()
     expect(config).to.exist
   })
 
@@ -29,10 +29,6 @@ describe('plugin: dict', function () {
 
   afterEach(async function () {
     await plugin.reset()
-  })
-
-  after(async function () {
-    config.removeDir()
   })
 
   it('entry() [empty]', async function () {

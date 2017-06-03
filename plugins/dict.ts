@@ -48,7 +48,7 @@ export default class DictPlugin implements Plugin {
 
   readonly name = 'dict'
   bot: PurpleBot
-  config: FileConfig
+  config: Config
   databasePath: string
   db: Database
 
@@ -61,11 +61,14 @@ export default class DictPlugin implements Plugin {
    * @throws Error
    */
   async load (bot: PurpleBot): Promise<void> {
-    if (!(bot.config instanceof FileConfig)) throw new Error()
 
     this.bot = bot
     this.config = bot.config
-    this.databasePath = this.config.path('dict.db')
+    if (this.config instanceof FileConfig) {
+      this.databasePath = this.config.path('dict.db')
+    } else {
+      this.databasePath = ':memory:'
+    }
 
     await this.loadDatabase()
     this.installHooks()
@@ -207,7 +210,9 @@ export default class DictPlugin implements Plugin {
       );
     `
 
-    await this.config.ensureDir()
+    if (this.config instanceof FileConfig) {
+      await this.config.ensureDir()
+    }
     this.db = await Database.open(this.databasePath)
     await this.db.exec(sql)
   }
