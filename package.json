@@ -38,10 +38,11 @@
     "yargs": "^8.0.1"
   },
   "devDependencies": {
+    "@types/chai": "^4.0.0",
     "@types/mocha": "^2.2.41",
     "babel-eslint": "^7.2.3",
     "babel-register": "^6.24.1",
-    "chai": "^3.5.0",
+    "chai": "^4.0.1",
     "eslint": "^3.19.0",
     "fs-extra": "^3.0.1",
     "jsdoc": "^3.4.3",

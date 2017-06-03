@@ -199,9 +199,12 @@ export default class KarmaPlugin implements Plugin {
    */
   private installHooks (): void {
     this.bot.on('message#', (nick, to, text, message) => {
-      const user = message.user
-      const host = message.host
-      return this.handleMessage({nick, user, host, to}, text)
+      const context = new Context()
+      context.nick = nick
+      context.user = message.user
+      context.host = message.host
+      context.to = to
+      return this.handleMessage(context, text)
     })
 
     this.bot.on('command', async (context: Context, command: string, ...args: string[]) => {

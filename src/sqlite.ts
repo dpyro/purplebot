@@ -59,7 +59,7 @@ export default class Database {
     })
   }
 
-  async get (sql: string, ...params: any[]): Promise<any> {
+  async get (sql: string, ...params: any[]): Promise<any | undefined> {
     return new Promise<any>((resolve, reject) => {
       this.db.get(sql, ...params, (err, row) => {
         if (err !== null) {

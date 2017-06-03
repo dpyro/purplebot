@@ -35,57 +35,57 @@ describe('plugin: dict', function () {
     config.removeDir()
   })
 
-  it('value() [empty]', async function () {
-    const result = await plugin.value('term')
+  it('entry() [empty]', async function () {
+    const result = await plugin.entry('term')
     expect(result).to.not.exist
   })
 
-  it('values() [empty]', async function () {
-    const result = await plugin.value('term')
+  it('entries() [empty]', async function () {
+    const result = await plugin.entries('term')
     expect(result).to.be.empty
   })
 
-  it('add(), value()', async function () {
-    const value = {
+  it('add(), entry()', async function () {
+    const entry = {
       key: 'term',
       value: 'test value',
-      user: 'testuser'
+      userName: 'testuser'
     }
 
-    await plugin.add(value.key, value.value, value.user)
+    await plugin.add(entry.key, entry.value, entry.userName)
 
-    const result = await plugin.value('term')
-    expect(result).to.include(value)
+    const result = await plugin.entry('term')
+    expect(result).to.include(entry)
   })
 
-  it('add(), value(user = null)', async function () {
-    const value = {
+  it('add(), entry(user = null)', async function () {
+    const entry = {
       key: 'term',
       value: 'test value',
-      user: null
+      userId: null
     }
 
-    await plugin.add(value.key, value.value, value.user)
+    await plugin.add(entry.key, entry.value, entry.user)
 
-    const result = await plugin.value('term')
-    expect(result).to.include(value)
+    const result = await plugin.entry('term')
+    expect(result).to.include(entry)
   })
 
-  it('add(), value(), remove()', async function () {
-    const value = {
+  it('add(), entry(), remove()', async function () {
+    const entry = {
       key: 'term',
       value: 'test value',
-      user: 'testuser'
+      userName: 'testuser'
     }
 
-    await plugin.add(value.key, value.value, value.user)
+    await plugin.add(entry.key, entry.value, entry.userName)
 
-    const result = await plugin.value('term')
-    expect(result).to.include(value)
+    const result = await plugin.entry('term')
+    expect(result).to.include(entry)
 
-    expect(await plugin.remove(value.key, 1)).to.be.true
+    expect(await plugin.remove(entry.key, 1)).to.be.true
 
-    const resultAfter = await plugin.value('term')
+    const resultAfter = await plugin.entry('term')
     expect(resultAfter).to.not.exist
   })
 

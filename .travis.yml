@@ -13,5 +13,5 @@ notifications:
     channels:
       - "irc.rizon.net#ppdcasual"
     template:
-      - "%{commit_subject} → 🏁 ${message}"
+      - "%{commit_subject} → 🏁 %{message}"
       - "%{repository_slug}: %{build_url}"

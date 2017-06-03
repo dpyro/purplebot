@@ -10,15 +10,25 @@ import * as _ from 'lodash'
 import { CommandMap } from './cli'
 import Config, { MemConfig } from './config'
 import loadAll, { Plugin } from './plugins'
-import { UserDatabase } from './user'
+import { User, UserDatabase } from './user'
 
-export type Context = {
-  nick: string,
-  user: string,
-  host: string,
-  to: string,
-  text?: string,
+export class Context {
+  nick: string
+  user: string
+  host: string
+  to: string
+  text?: string
   message?: any
+
+  async getUser (userDb: UserDatabase): Promise<User | null> {
+    const users = await userDb.matchUsersHostmask(this.nick, this.user, this.host)
+
+    if (users.length < 1 || users.length > 1) {
+      return null
+    }
+
+    return users[0]
+  }
 }
 
 /**

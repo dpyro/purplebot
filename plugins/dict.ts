@@ -10,6 +10,33 @@ import * as _ from 'lodash'
 import Config, { FileConfig } from '../src/config'
 import PurpleBot, { Context } from '../src/bot'
 import { Plugin } from '../src/plugins'
+import { User } from '../src/user'
+
+export class DictEntry {
+  id?: number
+  key: string
+  value: string
+  userId?: number
+  userName?: string
+  timestamp?: Date
+
+  constructor (key: string, value: string) {
+    this.key = key
+    this.value = value
+  }
+
+  static fromRow (row: any): DictEntry {
+    const entry = new DictEntry(row['key'], row['value'])
+    entry.id = row['id']
+    if (row['timestamp'] != null) {
+      entry.timestamp = new Date(row['timestamp'])
+    }
+    entry.userId = row['user_id']
+    entry.userName = row['user_name']
+
+    return entry
+  }
+}
 
 /**
  * Plugin for user-defined terms.
@@ -51,9 +78,32 @@ export default class DictPlugin implements Plugin {
   /**
    * Adds a value for `key`.
    */
-  async add (key: string, value: string, user?: string): Promise<void> {
-    const sql = 'INSERT INTO dict (key, value, user) VALUES (?, ?, ?)'
-    await this.db.run(sql, key, value, user)
+  async add (key: string, value: string, user?: User | string | number | null): Promise<void> {
+    let userId
+    let userName
+    if (user != null) {
+      if (user instanceof User) {
+        userId = user.id
+        userName = user.name
+      } else if (typeof user === 'number') {
+        userId = user
+        const result = await this.bot.userDb.getUser(userId)
+        if (result !== null) {
+          userName = result.name
+        }
+      } else if (typeof user === 'string') {
+        userName = user
+        const result = await this.bot.userDb.getUser(userName)
+        if (result !== null) {
+          userId = result.id
+        }
+      } else {
+        throw new Error()
+      }
+    }
+
+    const sql = 'INSERT INTO dict (key, value, user_id, user_name) VALUES (?, ?, ?, ?)'
+    await this.db.run(sql, key, value, userId, userName)
   }
 
   /**
@@ -64,7 +114,7 @@ export default class DictPlugin implements Plugin {
 
     await this.db.run('BEGIN')
 
-    const results = await this.values(key)
+    const results = await this.entries(key)
     if (valueId > results.length) return false
 
     const id = results[valueId - 1].id
@@ -79,19 +129,25 @@ export default class DictPlugin implements Plugin {
   /**
    * Retrieve a random value for `key`, if it exists.
    */
-  async value (name: string): Promise<any> {
+  async entry (name: string): Promise<DictEntry | null> {
     const sql = 'SELECT * FROM dict WHERE key = ? ORDER BY RANDOM() LIMIT 1'
-    const value = await this.db.get(sql, name)
-    return value
+    const result = await this.db.get(sql, name)
+
+    if (result === undefined) {
+      return null
+    }
+
+    return DictEntry.fromRow(result)
   }
 
   /**
    * Retrieve all values for `key`, if they exist.
    */
-  async values (name: string): Promise<any> {
+  async entries (name: string): Promise<DictEntry[]> {
     const sql = 'SELECT * FROM dict WHERE key = ? ORDER BY timestamp, value'
     const results = await this.db.all(sql, name)
-    return results
+    const entries = results.map(result => DictEntry.fromRow(result))
+    return entries
   }
 
   toString (): string {
@@ -103,7 +159,7 @@ export default class DictPlugin implements Plugin {
     if (result === null) return
 
     const key = result[1]
-    const term = await this.value(key)
+    const term = await this.entry(key)
     if (term == null) return
 
     // TODO: use a specific response
@@ -127,7 +183,9 @@ export default class DictPlugin implements Plugin {
 
     const key = args.slice(0, isIndex).join(' ')
     const value = args.slice(isIndex + 1).join(' ')
-    await this.add(key, value, context.nick)
+
+    const user = await context.getUser(this.bot.userDb)
+    await this.add(key, value, user)
 
     // TODO: use a specific response
     this.bot.emit('dict.respond', context, key, value)
@@ -135,13 +193,16 @@ export default class DictPlugin implements Plugin {
 
   private async loadDatabase (): Promise<void> {
     const sql = `
+      PRAGMA auto_vacuum = FULL;
       PRAGMA busy_timeout = 0;
+      PRAGMA user_version = 1;
 
       CREATE TABLE IF NOT EXISTS dict (
         id          INTEGER PRIMARY KEY,
         key         TEXT    NOT NULL UNIQUE COLLATE NOCASE,
         value       TEXT    NOT NULL UNIQUE,
-        user        TEXT                    COLLATE NOCASE,
+        user_id     INTEGER,
+        user_name   TEXT,
         timestamp   TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
     `
@@ -153,15 +214,22 @@ export default class DictPlugin implements Plugin {
 
   private installHooks (): void {
     this.bot.on('message#', (nick, to, text, message) => {
-      const user = message.user
-      const host = message.host
-      return this.handleMessage({nick, user, host, to}, text)
+      const context = new Context()
+      context.nick = nick
+      context.user = message.user
+      context.host = message.host
+      context.to = to
+
+      return this.handleMessage(context, text)
     })
 
     this.bot.on('pm', (nick, text, message) => {
-      const user = message.user
-      const host = message.host
-      return this.handleMessage({nick, user, host, to: nick}, text)
+      const context = new Context()
+      context.nick = nick
+      context.user = message.user
+      context.host = message.host
+      context.to = nick
+      return this.handleMessage(context, text)
     })
 
     this.bot.on('command', (context, command, ...args) => {

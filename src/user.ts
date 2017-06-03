@@ -152,12 +152,16 @@ export class UserDatabase {
     return hostmask
   }
 
-  async getUser (id: number): Promise<User | null> {
-    const sql = `
-      SELECT * FROM view
-      WHERE user_id = ?
-    `
-    // TODO: consider using this.db.run
+  async getUser (id: number | string): Promise<User | null> {
+    let sql
+    if (typeof id === 'number') {
+      sql = 'SELECT * FROM view WHERE user_id = ?'
+    } else if (typeof id === 'string') {
+      sql = 'SELECT * FROM view WHERE name = ?'
+    } else {
+      throw new Error()
+    }
+
     const result = await this.db.get(sql, id)
     if (result == null) return null
 

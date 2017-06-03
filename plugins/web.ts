@@ -96,9 +96,12 @@ export default class WebPlugin implements Plugin {
       const result = WebPlugin.matcher.exec(text)
       if (result !== null) {
         const link = result[0]
-        const user = message.user
-        const host = message.host
-        await this.handleLink({ nick, user, host, to }, link)
+        const context = new Context()
+        context.nick = nick
+        context.user = message.user
+        context.host = message.host
+        context.to = to
+        await this.handleLink(context, link)
       }
     })
 
