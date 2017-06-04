@@ -12,6 +12,8 @@ sqlite.verbose()
 describe('plugin: dict', function () {
   let config, bot, plugin
   const nick = 'chameleon'
+  const user = 'testuser'
+  const host = 'testhost'
   const channel = '#test'
 
   before(function () {
@@ -71,7 +73,7 @@ describe('plugin: dict', function () {
     const entry = {
       key: 'term',
       value: 'test value',
-      userName: 'testuser'
+      userName: user
     }
 
     await plugin.add(entry.key, entry.value, entry.userName)
@@ -99,8 +101,6 @@ describe('plugin: dict', function () {
         }
       })
 
-      const user = 'testuser'
-      const host = 'testhost'
       const message = { nick, user, host }
       bot.emit('message#', nick, channel, text, message)
     })
@@ -125,4 +125,30 @@ describe('plugin: dict', function () {
       await testResponse(text, key, value)
     })
   }
+
+  it('.learn', async function () {
+    return new Promise(async (resolve, reject) => {
+      const key = 'word'
+      const value = 'definition'
+      const text = `.learn ${key} is ${value}`
+      const message = { nick, user, host }
+
+      const beforeEntry = await plugin.entry(key)
+      expect(beforeEntry).to.not.exist
+
+      bot.on('dict.respond', async (context, key, value) => {
+        try {
+          const afterEntry = await plugin.entry(key)
+          expect(afterEntry).to.exist
+          expect(afterEntry.key).to.equal(key)
+          expect(afterEntry.value).to.equal(value)
+          resolve()
+        } catch (err) {
+          reject(err)
+        }
+      })
+
+      bot.emit('message', nick, channel, text, message)
+    })
+  })
 })

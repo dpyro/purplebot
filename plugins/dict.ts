@@ -187,8 +187,7 @@ export default class DictPlugin implements Plugin {
     const key = args.slice(0, isIndex).join(' ')
     const value = args.slice(isIndex + 1).join(' ')
 
-    const user = await context.getUser(this.bot.userDb)
-    await this.add(key, value, user)
+    await this.add(key, value, context.nick)
 
     // TODO: use a specific response
     this.bot.emit('dict.respond', context, key, value)

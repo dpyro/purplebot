@@ -274,8 +274,9 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
    * @fires command
    */
   private loadHooks (): void {
-    this.client.on('message', (nick: string, to: string, text: string, message) => {
+    this.on('message', (nick: string, to: string, text: string, message) => {
       const trimmedText = text.trim()
+      // TODO: allow omitting . if sent as pm
       if (trimmedText.startsWith('.') && trimmedText.substring(1, 2) !== '.') {
         // TODO: accept quoted arguments
         const words = _.compact(trimmedText.split(' '))
@@ -286,7 +287,14 @@ export default class PurpleBot extends EventEmitter implements CommandMap {
             const user = message.user
             const host = message.host
             const args = words
-            const context = { nick, user, host, to, text, message }
+
+            const context = new Context()
+            context.nick = nick
+            context.user = user
+            context.host = host
+            context.to = to
+            context.text = text
+            context.message = message
             this.emit('command', context, command, ...args)
           }
         }

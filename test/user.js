@@ -1,7 +1,7 @@
 import 'babel-polyfill'
 import { expect } from 'chai'
 
-import { FileConfig } from '../src/config'
+import { MemConfig } from '../src/config'
 import { Hostmask, User, UserDatabase } from '../src/user'
 
 describe('user', function () {
@@ -10,16 +10,12 @@ describe('user', function () {
   let config, db
 
   beforeEach(async function () {
-    config = await FileConfig.temp()
-    expect(config).to.be.instanceof(FileConfig)
+    config = new MemConfig()
+    expect(config).to.be.instanceof(MemConfig)
 
     db = new UserDatabase()
     await db.load(config)
     expect(db).to.be.instanceof(UserDatabase)
-  })
-
-  afterEach(async function () {
-    await config.removeDir()
   })
 
   it('starts empty', async function () {
