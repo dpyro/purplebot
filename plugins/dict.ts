@@ -6,6 +6,7 @@
 import 'babel-polyfill'
 import Database from '../src/sqlite'
 import * as _ from 'lodash'
+Promise = require('bluebird')
 
 import Config, { FileConfig } from '../src/config'
 import PurpleBot, { Context } from '../src/bot'

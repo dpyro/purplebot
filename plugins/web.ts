@@ -6,6 +6,7 @@
 import { JSDOM } from 'jsdom'
 import { extension } from 'mime-types'
 import * as request from 'request'
+Promise = require('bluebird')
 
 import { Plugin } from '../src/plugins'
 import PurpleBot, { Context } from '../src/bot'

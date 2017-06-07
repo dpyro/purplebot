@@ -6,11 +6,13 @@
 import { EventEmitter } from 'events'
 import * as irc from 'irc'
 import * as _ from 'lodash'
+Promise = require('bluebird')
 
 import { CommandMap } from './cli'
 import Config, { MemConfig } from './config'
 import loadAll, { Plugin } from './plugins'
 import { User, UserDatabase } from './user'
+
 
 export class Context {
   nick: string

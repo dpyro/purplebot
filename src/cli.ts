@@ -5,6 +5,7 @@
 
 import * as readline from 'readline'
 import * as _ from 'lodash'
+Promise = require('bluebird')
 
 import PurpleBot from './bot'
 

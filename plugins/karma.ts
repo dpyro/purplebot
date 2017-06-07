@@ -5,6 +5,7 @@
 
 import 'babel-polyfill'
 import * as fs from 'fs-extra'
+Promise = require('bluebird')
 
 import Config, { FileConfig } from '../src/config'
 import PurpleBot, { Context } from '../src/bot'

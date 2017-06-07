@@ -1,4 +1,5 @@
 import * as sqlite from 'sqlite3'
+Promise = require('bluebird')
 
 export default class Database {
   db: sqlite.Database

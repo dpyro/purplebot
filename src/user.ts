@@ -1,3 +1,5 @@
+Promise = require('bluebird')
+
 import { Context } from './bot'
 import Config, { FileConfig } from './config'
 import Database from './sqlite'

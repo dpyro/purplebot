@@ -6,6 +6,7 @@
 import * as fs from 'fs-extra'
 import * as path from 'path'
 import * as _ from 'lodash'
+Promise = require('bluebird')
 
 import Config, { FileConfig } from './config'
 import PurpleBot from './bot'

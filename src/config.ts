@@ -3,6 +3,7 @@ import * as nconf from 'nconf'
 import * as os from 'os'
 import * as path from 'path'
 import * as yargs from 'yargs'
+Promise = require('bluebird')
 
 export default abstract class Config {
   nconf: nconf.Provider

@@ -12,6 +12,7 @@
  */
 
 import * as yargs from 'yargs'
+Promise = require('bluebird')
 
 import { init } from './bot'
 import Cli from './cli'
