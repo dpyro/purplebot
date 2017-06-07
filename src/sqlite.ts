@@ -35,14 +35,13 @@ export default class Database {
 
   async run (sql: string, ...params: any[]): Promise<sqlite.RunResult> {
     return new Promise<sqlite.RunResult>((resolve, reject) => {
-      this.db.run(sql, ...params, function (this: any, err) {
+      this.db.run(sql, ...params, function (this: sqlite.RunResult, err) {
         if (err !== null) {
           reject(err)
         } else {
-          resolve({
-            lastID: this.lastID,
-            changes: this.changes
-          })
+          const lastID = this.lastID
+          const changes = this.changes
+          resolve({lastID, changes} as sqlite.RunResult)
         }
       })
     })
