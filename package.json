@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "clean": "rm -r *.log*",
-    "start": "./node_modules/ts-node/dist/bin.js src/index.ts",
+    "start": "./node_modules/ts-node/dist/bin.js --no-cache src/index.ts",
     "test": "./node_modules/mocha/bin/mocha --compilers ts:ts-node/register,js:babel-register",
     "eslint": "./node_modules/eslint/bin/eslint.js **/*.js",
     "tslint": "./node_modules/tslint/bin/tslint --project tsconfig.json **/*.ts",

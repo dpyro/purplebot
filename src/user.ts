@@ -231,7 +231,7 @@ export class UserDatabase {
     if (typeof user !== 'number') {
       user.id = undefined
     }
-    return this.db.run(sql, id)
+    this.db.run(sql, id)
   }
 
   async deleteHostmask (hostmask: Hostmask | number): Promise<void> {
@@ -240,6 +240,6 @@ export class UserDatabase {
     if (typeof hostmask !== 'number') {
       hostmask.id = undefined
     }
-    return this.db.run(sql, id)
+    this.db.run(sql, id)
   }
 }

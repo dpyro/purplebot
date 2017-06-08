@@ -76,7 +76,7 @@ export default class DictPlugin implements Plugin {
   }
 
   async reset (): Promise<void> {
-    return this.db.run('DROP TABLE IF EXISTS dict')
+    await this.db.run('DROP TABLE IF EXISTS dict')
   }
 
   /**
