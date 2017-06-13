@@ -29,10 +29,6 @@ describe('plugin: dict', function () {
     expect(plugin).to.be.instanceOf(DictPlugin)
   })
 
-  afterEach(async function () {
-    await plugin.reset()
-  })
-
   it('entry() [empty]', async function () {
     const result = await plugin.entry('term')
     expect(result).to.not.exist

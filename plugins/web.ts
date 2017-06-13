@@ -22,7 +22,7 @@ export default class WebPlugin implements Plugin {
 
   readonly name = 'web'
   bot: PurpleBot
-  imageExts: String[] = [
+  imageExts: string[] = [
     'gif',
     'jpg',
     'png',
@@ -57,7 +57,7 @@ export default class WebPlugin implements Plugin {
       throw new Error(`Error fetching ${link} (status code: ${response.statusCode}`)
     }
 
-    const type = response.headers['content-type']
+    let type = response.headers['content-type']
     if (type == null || type === 'text/html') {
       // TODO: handle bad content types
       const dom = new JSDOM(body)
@@ -65,6 +65,9 @@ export default class WebPlugin implements Plugin {
       // TODO: log found link
       this.bot.emit('web.title', context, link, title)
     } else {
+      if (typeof type !== 'string') {
+        type = type[0]
+      }
       const ext = extension(type)
       if (typeof ext !== 'boolean' && this.imageExts.indexOf(ext) !== -1) {
         // TODO: save image or somesuch

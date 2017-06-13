@@ -16,10 +16,10 @@
   "dependencies": {
     "@types/fs-extra": "^3.0.3",
     "@types/irc": "^0.3.32",
-    "@types/lodash": "^4.14.65",
+    "@types/lodash": "^4.14.66",
     "@types/mime-types": "^2.1.0",
     "@types/nconf": "^0.0.34",
-    "@types/node": "^7.0.29",
+    "@types/node": "^7.0.31",
     "@types/request": "^0.0.43",
     "@types/sqlite3": "^3.1.0",
     "babel-cli": "^6.24.1",
@@ -37,7 +37,7 @@
     "ts-node": "^3.0.6",
     "typescript": "^2.3.4",
     "universalify": "dpyro/universalify",
-    "yargs": "^8.0.1"
+    "yargs": "^8.0.2"
   },
   "devDependencies": {
     "@types/chai": "^4.0.0",
@@ -45,7 +45,7 @@
     "babel-eslint": "^7.2.3",
     "babel-register": "^6.24.1",
     "chai": "^4.0.2",
-    "eslint": "^3.19.0",
+    "eslint": "^4.0.0",
     "fs-extra": "^3.0.1",
     "jsdoc": "^3.4.3",
     "jsdoc-strip-async-await": "^0.1.0",

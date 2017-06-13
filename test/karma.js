@@ -29,10 +29,6 @@ describe('plugin: karma', async function () {
     expect(output).to.be.empty
   })
 
-  afterEach(async function () {
-    await plugin.reset()
-  })
-
   it('top() [empty]', async function () {
     const results = await plugin.top()
     expect(results).to.be.empty
