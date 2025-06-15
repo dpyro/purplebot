@@ -33,7 +33,7 @@
     "mime-types": "^2.1.15",
     "nconf": "^0.8.4",
     "request": "^2.81.0",
-    "sqlite3": "^3.1.8",
+    "sqlite3": "^5.0.3",
     "ts-node": "^3.0.6",
     "typescript": "^2.3.4",
     "universalify": "dpyro/universalify",
